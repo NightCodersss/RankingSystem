@@ -1,5 +1,7 @@
+SUBDIRECTORIES=index_connection
+
 all:
-	clang++ -o main main.cpp -std=c++14 -lboost_system
+	$(MAKE) -C index_connection
 
 doc: doc-pdf doc-md
 	git add README.tex
@@ -15,4 +17,4 @@ doc-md:
 	git add README.md
 
 clean:
-	rm -f *.o
+	make --directory=index_connection clean
