@@ -1,7 +1,7 @@
 SUBDIRECTORIES=index_connection
 
 all:
-	$(MAKE) -C index_connection
+	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) ); done
 
 doc: doc-pdf doc-md
 	git add README.tex
@@ -17,4 +17,4 @@ doc-md:
 	git add README.md
 
 clean:
-	make --directory=index_connection clean
+	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) clean ); done
