@@ -1,0 +1,3 @@
+[submodule "UbjsonCpp"]
+	path = UbjsonCpp
+	url = ./UbjsonCpp/
