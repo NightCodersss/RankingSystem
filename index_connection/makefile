@@ -1,18 +1,16 @@
-all:
-	clang++ -o main main.cpp -std=c++14 -lboost_system
+CXX=clang++
+CXXFLAGS=-c -std=c++14
+LDFLAGS=-lboost_system
+OBJECTS=main.o index_connection.o index_server.o
+EXECUTABLE=indexserver
 
-doc: doc-pdf doc-md
-	git add README.tex
-	git commit -m "updated readme"
+all: $(EXECUTABLE)
 
-doc-pdf:
-	pdflatex README.tex	> /dev/null
-	rm README.aux README.log
-	git add README.pdf
+$(EXECUTABLE): $(OBJECTS)
+	$(CXX) $(OBJECTS) -o $(EXECUTABLE) $(LDFLAGS)
 
-doc-md:
-	pandoc -f latex -t markdown README.tex > README.md
-	git add README.md
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@
 
 clean:
-	rm -f *.o
+	rm -f $(OBJECTS)
