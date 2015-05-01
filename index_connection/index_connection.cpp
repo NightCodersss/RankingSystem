@@ -1,15 +1,14 @@
 #include "index_connection.hpp"
 #include <sstream>
-//#include "../UbjsonCpp/include/value.hpp"
-//#include "../UbjsonCpp/include/stream_reader.hpp"
-//#include "../UbjsonCpp/include/stream_writer.hpp"
+#include "../UbjsonCpp/include/value.hpp"
+#include "../UbjsonCpp/include/stream_reader.hpp"
+#include "../UbjsonCpp/include/stream_writer.hpp"
 
 using boost::asio::ip::tcp;
 
 std::string IndexConnection::get_output(std::string input)
 {
-/*
-	using namespace ubjson;
+	using namespace timl::ubjson;
 	Value v;
 	v["input"] = input;	
 	v["output"] = 1;
@@ -19,9 +18,8 @@ std::string IndexConnection::get_output(std::string input)
 	std::stringstream output;
 	StreamWriter<std::stringstream> writer(output);
 	writer.writeValue(v);
-*/
-//	return output.str();
-	return input + '\n' + "Privetiki\n";
+	return output.str();
+//	return input + '\n' + "Privetiki\n";
 }
 
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
