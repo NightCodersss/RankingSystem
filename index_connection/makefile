@@ -1,5 +1,5 @@
-CXX=g++
-CXXFLAGS=-c -std=c++1y
+CXX=g++-5
+CXXFLAGS=-c -std=c++14
 LDFLAGS=-lboost_system
 OBJECTS=main.o index_connection.o index_server.o
 EXECUTABLE=indexserver
