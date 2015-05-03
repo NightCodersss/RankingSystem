@@ -8,7 +8,7 @@ using boost::asio::ip::tcp;
 
 std::string IndexConnection::get_output(std::string input)
 {
-	using namespace timl::ubjson;
+	using namespace ubjson;
 	Value v;
 	v["input"] = input;	
 	v["output"] = 1;
