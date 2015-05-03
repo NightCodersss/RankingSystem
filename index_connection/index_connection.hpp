@@ -15,7 +15,7 @@ public:
 
     static pointer create(boost::asio::io_service& io_service);
 
-    tcp::socket& socket();
+    tcp::socket& get_socket();
 
     void start();
 
@@ -26,8 +26,8 @@ private:
 
     std::string get_output(std::string input);
 
-    tcp::socket socket_;
-    std::string message_;
+    tcp::socket socket;
+    std::string message;
 };
 
 #endif

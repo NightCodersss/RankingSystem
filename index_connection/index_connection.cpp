@@ -27,29 +27,29 @@ IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_ser
     return pointer(new IndexConnection(io_service));
 } 
  
-tcp::socket& IndexConnection::socket()
+tcp::socket& IndexConnection::get_socket()
 {
-    return socket_;
+    return socket;
 }
     
 void IndexConnection::start()
 {
-    message_.resize(100);
+    message.resize(100);
 
-    boost::asio::async_read(socket_, boost::asio::mutable_buffers_1(&message_[0], 5),
-		[_this = shared_from_this()](const boost::system::error_code& error_code, std::size_t bytes_transferred) {
+    boost::asio::async_read(socket, boost::asio::mutable_buffers_1(&message[0], 5),
+		[self = shared_from_this()](const boost::system::error_code& error_code, std::size_t bytes_transferred) {
 			std::cout << "Bytes read: " << bytes_transferred << '\n';
 			for ( int i = 0; i < bytes_transferred; ++i )
-				std::cout << (int)_this->message_[i] << ' ';
+				std::cout << (int)self->message[i] << ' ';
 			std::cout << '\n';
-			_this->message_ = _this->get_output(_this->message_);
-			boost::asio::async_write(_this->socket_, boost::asio::buffer(_this->message_),
-				[_this = _this](const boost::system::error_code& ec, size_t bytes_transferred) {                   
-					_this->handle_write(ec, bytes_transferred);
+			self->message = self->get_output(self->message);
+			boost::asio::async_write(self->socket, boost::asio::buffer(self->message),
+				[=](const boost::system::error_code& ec, size_t bytes_transferred) {                   
+					self->handle_write(ec, bytes_transferred);
 				});
 		});
 
 }
     
-IndexConnection::IndexConnection(boost::asio::io_service& io_service) : socket_(io_service) { }
+IndexConnection::IndexConnection(boost::asio::io_service& io_service) : socket(io_service) { }
 void IndexConnection::handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/) { }
