@@ -18,7 +18,7 @@ private:
     void start_accept();
     void handle_accept(IndexConnection::pointer new_connection, const boost::system::error_code& error);
     
-    tcp::acceptor acceptor_;
+    tcp::acceptor acceptor;
 };
 
 #endif
