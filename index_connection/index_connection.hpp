@@ -11,7 +11,7 @@ using boost::asio::ip::tcp;
 class IndexConnection : public std::enable_shared_from_this<IndexConnection>
 {
 public:
-    typedef std::shared_ptr<IndexConnection> pointer;
+    using pointer = std::shared_ptr<IndexConnection>;
 
     static pointer create(boost::asio::io_service& io_service);
 
