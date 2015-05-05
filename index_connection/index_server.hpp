@@ -7,6 +7,10 @@
 #include <boost/asio.hpp>
 #include "index_connection.hpp"
 
+/**
+ * Index server class
+ */
+
 class IndexServer
 {
 public:
