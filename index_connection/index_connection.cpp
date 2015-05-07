@@ -19,7 +19,6 @@ std::string IndexConnection::get_output(std::string input)
 	StreamWriter<std::stringstream> writer(output);
 	writer.writeValue(v);
 	return output.str();
-//	return input + '\n' + "Privetiki\n";
 }
 
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
