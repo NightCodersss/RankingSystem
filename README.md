@@ -21,8 +21,9 @@
 ---------
 
 Структура выглядит так: (Фронт-энд или другой сервис)
-$\rightarrow{Южный протокол} Ranking System \rightarrow{Северный протокол} IndexServer$
-Где $'\rightarrow'$ обозначет подключение от клиента к серверу.
+$\rightarrow{Southern protocol}$ Ranking System
+$\rightarrow{Northern protocol}$ IndexServer Где $'\rightarrow'$
+обозначет подключение от клиента к серверу.
 
 Протокол
 --------
