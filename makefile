@@ -8,7 +8,7 @@ doc: doc-pdf doc-md
 	git commit -m "updated readme"
 
 doc-pdf:
-	pdflatex README.tex	> /dev/null
+	pdflatex README.tex	#> /dev/null
 	rm README.aux README.log
 	git add README.pdf
 

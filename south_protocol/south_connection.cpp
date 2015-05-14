@@ -1,0 +1,49 @@
+#include "south_connection.hpp"
+#include <sstream>
+#include <thread>
+#include "../UbjsonCpp/include/value.hpp"
+#include "../UbjsonCpp/include/stream_reader.hpp"
+#include "../UbjsonCpp/include/stream_writer.hpp"
+
+using boost::asio::ip::tcp;
+
+std::string SouthConnection::getUBJSONFromQuery(std::string input)
+{
+	using namespace ubjson;
+	Value v;
+	v["query"] = input;
+	
+	std::stringstream output;
+	StreamWriter<std::stringstream> writer(output);
+	writer.writeValue(v);
+	return output.str();
+}
+
+SouthConnection::pointer SouthConnection::create(boost::asio::io_service& io_service)
+{
+    return pointer(new SouthConnection(io_service));
+} 
+ 
+tcp::socket& SouthConnection::getClientSocket()
+{
+    return *client_stream.rdbuf();
+}
+
+void SouthConnection::start()
+{
+	std::thread([self = shared_from_this()]() {
+		std::getline(self->client_stream, self->input, '\n');
+		self->input = self->getUBJSONFromQuery(self->input);
+		self->server_stream << self->input;
+
+		ubjson::StreamReader<SocketStream> reader(self->server_stream);
+
+		auto v = reader.getNextValue();
+		self->client_stream << ubjson::to_ostream(v);
+	}).detach();
+}
+
+SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client_stream(io_service)
+{
+	server_stream.connect(host, port);
+}
