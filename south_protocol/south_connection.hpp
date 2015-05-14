@@ -25,7 +25,7 @@ public:
 
     void start();
 
-private:
+//private:
     SouthConnection(boost::asio::io_service& io_service);
 
     std::string getUBJSONFromQuery(std::string input);

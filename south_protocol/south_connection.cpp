@@ -24,11 +24,6 @@ SouthConnection::pointer SouthConnection::create(boost::asio::io_service& io_ser
     return pointer(new SouthConnection(io_service));
 } 
  
-tcp::socket& SouthConnection::getClientSocket()
-{
-    return *client_stream.rdbuf();
-}
-
 void SouthConnection::start()
 {
 	std::thread([self = shared_from_this()]() {
@@ -43,7 +38,7 @@ void SouthConnection::start()
 	}).detach();
 }
 
-SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client_stream(io_service)
+SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client(io_service)
 {
 	server_stream.connect(host, port);
 }
