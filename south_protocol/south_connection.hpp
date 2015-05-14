@@ -13,6 +13,8 @@ class SouthConnection : public std::enable_shared_from_this<SouthConnection>
 	static constexpr const char* host = "localhost";
 	static constexpr const char* port = "14000";
 
+	friend class SouthServer; // To make client_stream.rdbuf() visible to server
+
 public:
     using pointer = std::shared_ptr<SouthConnection>;
 	using ErrorCode = boost::system::error_code;
@@ -25,7 +27,7 @@ public:
 
     void start();
 
-//private:
+private:
     SouthConnection(boost::asio::io_service& io_service);
 
     std::string getUBJSONFromQuery(std::string input);

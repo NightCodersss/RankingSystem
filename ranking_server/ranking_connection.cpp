@@ -7,7 +7,7 @@
 
 using boost::asio::ip::tcp;
 
-std::string SouthConnection::getUBJSONFromQuery(std::string input)
+std::string RankingConnection::getUBJSONFromQuery(std::string input)
 {
 	using namespace ubjson;
 	Value v;
@@ -19,12 +19,12 @@ std::string SouthConnection::getUBJSONFromQuery(std::string input)
 	return output.str();
 }
 
-SouthConnection::pointer SouthConnection::create(boost::asio::io_service& io_service)
+RankingConnection::pointer SouthConnection::create(boost::asio::io_service& io_service)
 {
-    return pointer(new SouthConnection(io_service));
+    return pointer(new RankingConnection(io_service));
 } 
  
-void SouthConnection::start()
+void RankingConnection::start()
 {
 	std::thread([self = shared_from_this()]() {
 		std::getline(self->client_stream, self->input, '\n');
@@ -41,7 +41,7 @@ void SouthConnection::start()
 	}).detach();
 }
 
-SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client(io_service)
+RankingConnection::RankingConnection(boost::asio::io_service& io_service) : client(io_service)
 {
 	server_stream.connect(host, port);
 }
