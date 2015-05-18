@@ -1,5 +1,5 @@
-#ifndef SOUTHCONNECTION_HPP
-#define SOUTHCONNECTION_HPP
+#ifndef RANKINGCONNECTION_HPP
+#define RANKINGCONNECTION_HPP
 
 #include <string>
 #include <memory>
@@ -8,13 +8,13 @@
 
 using boost::asio::ip::tcp;
 
-class SouthConnection : public std::enable_shared_from_this<SouthConnection>
+class RankingConnection : public std::enable_shared_from_this<RankingConnection>
 {
 	static constexpr const char* host = "localhost";
 	static constexpr const char* port = "14000";
 
 public:
-    using pointer = std::shared_ptr<SouthConnection>;
+    using pointer = std::shared_ptr<RankingConnection>;
 	using ErrorCode = boost::system::error_code;
 	using SocketStream = boost::asio::ip::tcp::iostream;
 
@@ -26,7 +26,7 @@ public:
     void start();
 
 //private:
-    SouthConnection(boost::asio::io_service& io_service);
+    RankingConnection(boost::asio::io_service& io_service);
 
     std::string getUBJSONFromQuery(std::string input);
 

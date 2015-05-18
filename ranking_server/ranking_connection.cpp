@@ -1,4 +1,4 @@
-#include "south_connection.hpp"
+#include "ranking_connection.hpp"
 #include <sstream>
 #include <thread>
 #include "../UbjsonCpp/include/value.hpp"
@@ -19,7 +19,7 @@ std::string RankingConnection::getUBJSONFromQuery(std::string input)
 	return output.str();
 }
 
-RankingConnection::pointer SouthConnection::create(boost::asio::io_service& io_service)
+RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service)
 {
     return pointer(new RankingConnection(io_service));
 } 

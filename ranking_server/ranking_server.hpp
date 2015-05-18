@@ -1,26 +1,26 @@
-#ifndef SOUTHSERVER_HPP
-#define SOUTHSERVER_HPP
+#ifndef RANKINGSERVER_HPP
+#define RANKINGSERVER_HPP
 
 #include <string>
 #include <memory>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "south_connection.hpp"
+#include "ranking_connection.hpp"
 
 /**
- * South protocol server class
+ * Ranking protocol server class
  */
 
-class SouthServer
+class RankingServer
 {
 public:
 
-    SouthServer(boost::asio::io_service& io_service, int port = 15000);
+    RankingServer(boost::asio::io_service& io_service, int port = 15000);
 
 private:
 
     void start_accept();
-    void handle_accept(SouthConnection::pointer new_connection, const boost::system::error_code& error);
+    void handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error);
     
     tcp::acceptor acceptor;
 };

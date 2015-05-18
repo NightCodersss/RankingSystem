@@ -1,13 +1,13 @@
-#include "south_server.hpp"
+#include "ranking_server.hpp"
     
-SouthServer::SouthServer(boost::asio::io_service& io_service, int port) : acceptor(io_service, tcp::endpoint(tcp::v4(), port))
+RankingServer::RankingServer(boost::asio::io_service& io_service, int port) : acceptor(io_service, tcp::endpoint(tcp::v4(), port))
 {
     start_accept();
 }
     
-void SouthServer::start_accept()
+void RankingServer::start_accept()
 {
-    auto new_connection = SouthConnection::create(acceptor.get_io_service());
+    auto new_connection = RankingConnection::create(acceptor.get_io_service());
 
     acceptor.async_accept(*new_connection->client_stream.rdbuf(), 
           [this, new_connection](const boost::system::error_code& error_code) { 
@@ -15,7 +15,7 @@ void SouthServer::start_accept()
           });
 }
     
-void SouthServer::handle_accept(SouthConnection::pointer new_connection, const boost::system::error_code& error)
+void RankingServer::handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error)
 {
     if (!error)
         new_connection->start();

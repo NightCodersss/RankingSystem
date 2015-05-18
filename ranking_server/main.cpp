@@ -2,14 +2,14 @@
 #include <iostream>
 
 #include <boost/asio.hpp>
-#include "south_server.hpp"
+#include "ranking_server.hpp"
 
 int main()
 {
     try
     {
         boost::asio::io_service io_service;
-        SouthServer server(io_service);
+        RankingServer server(io_service);
         io_service.run();
     }
     catch (std::exception& e)
