@@ -7,18 +7,6 @@
 
 using boost::asio::ip::tcp;
 
-std::string RankingConnection::getUBJSONFromQuery(std::string input)
-{
-	using namespace ubjson;
-	Value v;
-	v["query"] = input;
-	
-	std::stringstream output;
-	StreamWriter<std::stringstream> writer(output);
-	writer.writeValue(v);
-	return output.str();
-}
-
 RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service)
 {
     return pointer(new RankingConnection(io_service));
@@ -57,7 +45,6 @@ void RankingConnection::start()
 	}).detach();
 }
 
-RankingConnection::RankingConnection(boost::asio::io_service& io_service) : client(io_service)
+RankingConnection::RankingConnection(boost::asio::io_service& io_service) 
 {
-	server_stream.connect(host, port);
 }

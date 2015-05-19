@@ -9,7 +9,7 @@ void RankingServer::start_accept()
 {
     auto new_connection = RankingConnection::create(acceptor.get_io_service());
 
-    acceptor.async_accept(*new_connection->client_stream.rdbuf(), 
+    acceptor.async_accept(*new_connection->south_stream.rdbuf(), 
           [this, new_connection](const boost::system::error_code& error_code) { 
             handle_accept(new_connection, error_code);
           });
