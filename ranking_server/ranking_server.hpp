@@ -15,10 +15,12 @@ class RankingServer
 {
 public:
 
-    RankingServer(boost::asio::io_service& io_service, int port = 15000);
+    RankingServer(boost::asio::io_service& io_service, std::string config_file);
 
 private:
 
+	ubjson::Value config;
+	
     void start_accept();
     void handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error);
     

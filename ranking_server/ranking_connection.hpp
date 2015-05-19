@@ -21,13 +21,14 @@ public:
 	using ErrorCode = boost::system::error_code;
 	using SocketStream = boost::asio::ip::tcp::iostream;
 
-    static pointer create(boost::asio::io_service& io_service);
+    static pointer create(boost::asio::io_service& io_service, const ubjson::Value& config);
 
     void start();
 
 private:
-    RankingConnection(boost::asio::io_service& io_service);
+    RankingConnection(boost::asio::io_service& io_service, const ubjson::Value& config);
 
+	const ubjson::Value& config;
 	SocketStream south_stream;
 	std::vector<std::future<ubjson::Value>> index_results;
 };
