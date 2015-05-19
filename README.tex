@@ -59,5 +59,25 @@
 
 \section{Человеку, который запускает}
 См. структуру \ref{subsec:generalStructure}
+\subsection{Конфигурация}
+Пример конфига RankingServer'а:
+\begin{verbatim}
+{
+	"texts": [
+		{
+			"servers": [{"host": "localhost", "port": "14000"}],
+			"factor": 1.8,
+			"name": "The first text field",
+			"index_id": "1",
+		},
+		{
+			"servers": [{"host": "", "port": "14000"}],
+			"factor": 0.9,
+			"name": "Useless information",
+			"index_id": "100400ab",
+		},
+	]
+}
+\end{verbatim}
 
 \end{document}

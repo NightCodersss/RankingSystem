@@ -21,8 +21,8 @@
 ---------
 
 Структура выглядит так: (Фронт-энд или другой сервис)
-$\xrightarrow{Южный протокол}$ Ranking System
-$\xrightarrow{Северный протокол}$ IndexServer Где $'\rightarrow'$
+$\xrightarrow{Southern protocol}$ Ranking System
+$\xrightarrow{Northern protocol}$ IndexServer Где $'\rightarrow'$
 обозначет подключение от клиента к серверу.
 
 Протокол
@@ -75,3 +75,25 @@ json (обычном).
 ===========================
 
 См. структуру [subsec:generalStructure]
+
+Конфигурация
+------------
+
+Пример конфига RankingServer’а:
+
+    {
+        "texts": [
+            {
+                "servers": [{"host": "localhost", "port": "14000"}],
+                "factor": 1.8,
+                "name": "The first text field",
+                "index_id": "1",
+            },
+            {
+                "servers": [{"host": "", "port": "14000"}],
+                "factor": 0.9,
+                "name": "Useless information",
+                "index_id": "100400ab",
+            },
+        ]
+    }
