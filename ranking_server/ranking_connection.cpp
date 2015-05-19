@@ -27,17 +27,33 @@ RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io
 void RankingConnection::start()
 {
 	std::thread([self = shared_from_this()]() {
-		std::getline(self->client_stream, self->input, '\n');
-	
-		std::cout << "Read: " << self -> input << '\n';
-
-		self->input = self->getUBJSONFromQuery(self->input);
-		self->server_stream << self->input;
-
-		ubjson::StreamReader<SocketStream> reader(self->server_stream);
-
+		ubjson::StreamReader<SocketStream> reader(self->south_stream);
 		auto v = reader.getNextValue();
-		self->client_stream << ubjson::to_ostream(v);
+		if(v["query"] == ubjson::Value())
+			return;
+		index_results.clear();
+		auto index_server_config = ConfigLoader("index_server").get();
+		for(const auto& text: index_server_config["texts"])
+		{
+			index_results.push_back(std::async([](){
+				int server_index = 0;
+				SocketStream index_stream(text["servers"][server_index]["host"], text["servers"][server_index]["port"]);
+				//Make query for index server
+				ubjson::Value query;
+				query["query"] = v["query"];
+				query["fields"] = {"docname", "url"};
+				query["index_id"] = text["index_id"];
+				//Send query
+				ubjson::StreamWriter<SocketStream> writer(index_stream);
+				writer.writeValue(query);
+				//Read answer
+				ubjson::StreamReader<SocketStream> reader(index_stream);
+				auto res = reader.getNextValue();
+				//Adding necessary information for next processing
+				res["factor"] = text["factor"];
+				return res;
+			}));
+		}
 	}).detach();
 }
 

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
@@ -10,9 +11,6 @@ using boost::asio::ip::tcp;
 
 class RankingConnection : public std::enable_shared_from_this<RankingConnection>
 {
-	static constexpr const char* host = "localhost";
-	static constexpr const char* port = "14000";
-
 public:
     using pointer = std::shared_ptr<RankingConnection>;
 	using ErrorCode = boost::system::error_code;
@@ -20,22 +18,13 @@ public:
 
     static pointer create(boost::asio::io_service& io_service);
 
-    tcp::socket& getClientSocket();
-	void sendToRankingSystem();
-
     void start();
 
-//private:
+private:
     RankingConnection(boost::asio::io_service& io_service);
 
-    std::string getUBJSONFromQuery(std::string input);
-
-    std::string input;
-    
-	tcp::socket client;
-
-	SocketStream client_stream;
-	SocketStream server_stream;
+	SocketStream south_stream;
+	std::vector<std::future<ubjson::Value>> index_results;
 };
 
 #endif
