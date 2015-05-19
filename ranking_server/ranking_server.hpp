@@ -6,6 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include "ranking_connection.hpp"
+#include "../config_loader.hpp"
 
 /**
  * Ranking protocol server class
@@ -19,7 +20,7 @@ public:
 
 private:
 
-	ubjson::Value config;
+	config_type config;
 	
     void start_accept();
     void handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error);

@@ -10,6 +10,7 @@
 #include "../UbjsonCpp/include/value.hpp"
 #include "../UbjsonCpp/include/stream_reader.hpp"
 #include "../UbjsonCpp/include/stream_writer.hpp"
+#include "../config_loader.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -21,14 +22,14 @@ public:
 	using ErrorCode = boost::system::error_code;
 	using SocketStream = boost::asio::ip::tcp::iostream;
 
-    static pointer create(boost::asio::io_service& io_service, const ubjson::Value& config);
+    static pointer create(boost::asio::io_service& io_service, const config_type& config);
 
     void start();
 
 private:
-    RankingConnection(boost::asio::io_service& io_service, const ubjson::Value& config);
+    RankingConnection(boost::asio::io_service& io_service, const config_type& config);
 
-	const ubjson::Value& config;
+	const config_type& config;
 	SocketStream south_stream;
 	std::vector<std::future<ubjson::Value>> index_results;
 };

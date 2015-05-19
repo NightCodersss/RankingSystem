@@ -4,7 +4,7 @@
 #include "../config_loader.hpp"
 using boost::asio::ip::tcp;
 
-RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const ubjson::Value& config)
+RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config)
 {
     return pointer(new RankingConnection(io_service, config));
 } 
@@ -21,7 +21,7 @@ void RankingConnection::start()
 		{
 			self->index_results.push_back(std::async([request, text](){
 				int server_index = 0;
-				SocketStream index_stream(text["servers"][server_index]["host"], text["servers"][server_index]["port"]);
+				SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>(), text["servers"][server_index]["port"].get<std::string>());
 				//Make query for index server
 				ubjson::Value query;
 				query["query"] = request["query"];
@@ -41,6 +41,6 @@ void RankingConnection::start()
 	}).detach();
 }
 
-RankingConnection::RankingConnection(boost::asio::io_service& io_service, const ubjson::Value& config): config(config) 
+RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config): config(config) 
 {
 }

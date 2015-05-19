@@ -2,7 +2,7 @@
 #include "../config_loader.hpp"
     
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
-																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].asInt()))
+																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 {
     start_accept();
 }
