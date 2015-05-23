@@ -5,3 +5,4 @@
  * write it into dynamic library
  * make normal paths in includes (-I)
  * fix ref links in tex
+ * fix root`s makefile
