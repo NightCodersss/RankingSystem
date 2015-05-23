@@ -1,7 +1,7 @@
 #ifndef CONFIG_LOADER_HPP
 #define CONFIG_LOADER_HPP
 
-#include "json/src/json.hpp"
+#include "../json/src/json.hpp"
 #include <string>
 
 using json = nlohmann::json;
