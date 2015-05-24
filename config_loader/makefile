@@ -2,7 +2,7 @@ CXX=g++-5
 CXXFLAGS=-c -std=c++14 -fPIC
 LDFLAGS=-lboost_system -shared
 OBJECTS=config_loader.o
-EXECUTABLE=config_loader.so
+EXECUTABLE=libconfig_loader.so
 
 all: $(EXECUTABLE)
 
@@ -13,4 +13,4 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $< -o $@
 
 clean:
-	rm -f $(OBJECTS)
+	rm -f $(OBJECTS) $(EXECUTABLE)

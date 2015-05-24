@@ -1,2 +1,2 @@
 *.o
-config_loader.so
+libconfig_loader.so
