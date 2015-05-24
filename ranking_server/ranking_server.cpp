@@ -1,9 +1,11 @@
 #include "ranking_server.hpp"
-#include "../config_loader.hpp"
     
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 {
+	std::cout << "Started ranking server\n";
+	std::cout << "Config: \n" << config << '\n';
+
     start_accept();
 }
     

@@ -6,7 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include "ranking_connection.hpp"
-#include "../config_loader.hpp"
+#include <config_loader.hpp>
 
 /**
  * Ranking protocol server class

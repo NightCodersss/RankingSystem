@@ -7,10 +7,8 @@
 #include <future>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "../UbjsonCpp/include/value.hpp"
-#include "../UbjsonCpp/include/stream_reader.hpp"
-#include "../UbjsonCpp/include/stream_writer.hpp"
-#include "../config_loader.hpp"
+#include <value.hpp>
+#include <config_loader.hpp>
 
 using boost::asio::ip::tcp;
 

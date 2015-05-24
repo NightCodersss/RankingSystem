@@ -1,7 +1,9 @@
 #include "ranking_connection.hpp"
 #include <sstream>
 #include <thread>
-#include "../config_loader.hpp"
+#include <stream_reader.hpp>
+#include <stream_writer.hpp>
+
 using boost::asio::ip::tcp;
 
 RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config)
@@ -14,7 +16,10 @@ void RankingConnection::start()
 	std::thread([self = shared_from_this()]() {
 		ubjson::StreamReader<SocketStream> reader(self->south_stream);
 		auto request = reader.getNextValue();
-		if(request["query"] == ubjson::Value())
+
+		std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
+
+		if(request["query"].isNull())
 			return;
 		self->index_results.clear();
 		for(const auto& text: self->config["texts"])
