@@ -1,0 +1,12 @@
+{
+	"ranking_server": {
+		"port": 14000
+	},
+	"texts": [
+		{
+			"servers": [
+				{"host": "localhost", "port": "16000"}
+			]
+		}
+	]
+}
