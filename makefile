@@ -1,4 +1,5 @@
-SUBDIRECTORIES=index_connection
+export PROJECTPATH=/home/asio/rankingsystem/
+SUBDIRECTORIES=index_connection south_protocol ranking_server config_loader
 
 all:
 	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) ); done

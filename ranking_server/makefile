@@ -1,6 +1,6 @@
 CXX=g++-5
-INCLUDEPATH=-I../config_loader/ -I../UbjsonCpp/include/
-LIBRARYPATH=-L../UbjsonCpp/src -L../config_loader
+INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/
+LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader
 CXXFLAGS=-c -std=c++14 $(INCLUDEPATH)
 LDFLAGS=-lboost_system $(LIBRARYPATH) -lUbjsonCpp -lpthread -lconfig_loader
 OBJECTS=main.o ranking_connection.o ranking_server.o
