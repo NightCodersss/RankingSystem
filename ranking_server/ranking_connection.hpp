@@ -29,7 +29,7 @@ private:
 
 	const config_type& config;
 	SocketStream south_stream;
-	std::vector<std::future<ubjson::Value>> index_results;
+	std::vector<std::future<void>> index_results;
 };
 
 #endif
