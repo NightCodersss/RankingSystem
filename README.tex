@@ -69,7 +69,7 @@
 {
 	"query": "what is ...?",
 	"index_id": "aa1234df",
-	"fields": ["docname", "author", "smallpartoftext"],
+	"fields": ["docname", "author", "snippet"],
 }
 \end{verbatim}
 
@@ -99,8 +99,8 @@
 	"texts": [
 		{
 			"servers": [{"host": "localhost", "port": "14000"}],
-			"factor": 1.8,
-			"name": "The first text field",
+			"factor": {"person": 1.8, "article": 1.2},
+			"name": "Title",
 			"index_id": "1",
 		},
 		{
