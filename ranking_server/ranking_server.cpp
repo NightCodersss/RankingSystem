@@ -13,7 +13,7 @@ void RankingServer::start_accept()
 {
     auto new_connection = RankingConnection::create(acceptor.get_io_service(), config);
 
-    acceptor.async_accept(*new_connection->south_stream.rdbuf(), 
+    acceptor.async_accept(*new_connection->south_stream.rdbuf(), // socket of stream
           [this, new_connection](const boost::system::error_code& error_code) { 
             handle_accept(new_connection, error_code);
           });
@@ -22,7 +22,10 @@ void RankingServer::start_accept()
 void RankingServer::handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error)
 {
     if (!error)
+	{
+		std::cout << "New ranking connection\n";
         new_connection->start();
+	}
 
     start_accept();
 }

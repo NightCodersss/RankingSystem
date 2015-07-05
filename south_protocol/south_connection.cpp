@@ -29,6 +29,7 @@ void SouthConnection::start()
 	std::thread([self = shared_from_this()]() {
 		std::getline(self->client_stream, self->input, '\n');
 	
+		std::cout << "From south server: \n";
 		std::cout << "Read: " << self -> input << '\n';
 
 		self->input = self->getUBJSONFromQuery(self->input);
