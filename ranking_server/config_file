@@ -6,7 +6,8 @@
 		{
 			"servers": [
 				{"host": "localhost", "port": "16000"}
-			]
+			],
+			"index_id": "10203040"
 		}
 	]
 }

@@ -37,7 +37,8 @@ void RankingConnection::start()
 				ubjson::Value query;
 				query["query"] = request["query"];
 				query["fields"] = {"docname", "url", "docid"};
-				query["index_id"] = text["index_id"];
+				query["index_id"] = text["index_id"].get<std::string>();
+				
 				//Send query
 				ubjson::StreamWriter<SocketStream> writer(index_stream);
 				writer.writeValue(query);

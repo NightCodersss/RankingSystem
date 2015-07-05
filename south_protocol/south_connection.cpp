@@ -44,5 +44,6 @@ void SouthConnection::start()
 
 SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client(io_service)
 {
+	std::cout << "South server's connection is connecting to ranking\n";
 	server_stream.connect(host, port);
 }
