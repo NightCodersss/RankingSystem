@@ -5,29 +5,26 @@
 #include <memory>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <value.hpp>
 
 using boost::asio::ip::tcp;
 
 class IndexConnection : public std::enable_shared_from_this<IndexConnection>
 {
+	friend class IndexServer;
 public:
     using pointer = std::shared_ptr<IndexConnection>;
+	using SocketStream = boost::asio::ip::tcp::iostream;
 
     static pointer create(boost::asio::io_service& io_service);
-
-    tcp::socket& get_socket();
 
     void start();
 
 private:
     IndexConnection(boost::asio::io_service& io_service);
 
-    void handle_write(const boost::system::error_code& /*error*/, size_t /*bytes_transferred*/);
-
-    std::string get_output(std::string input);
-
-    tcp::socket socket;
-    std::string message;
+    ubjson::Value do_search(ubjson::Value input);
+    SocketStream ranking_stream;
 };
 
 #endif

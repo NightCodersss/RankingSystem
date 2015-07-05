@@ -6,16 +6,16 @@
 
 int main()
 {
-    try
-    {
+//    try
+//    {
         boost::asio::io_service io_service;
-        IndexServer server(io_service);
+        IndexServer server(io_service, 16000);
         io_service.run();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
+//    }
+//    catch (std::exception& e)
+//    {
+//        std::cerr << e.what() << std::endl;
+//    }
 
     return 0;
 }
