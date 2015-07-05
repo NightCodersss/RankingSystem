@@ -1,8 +1,16 @@
 export PROJECTPATH=/home/asio/rankingsystem/
-SUBDIRECTORIES=index_connection south_protocol ranking_server config_loader
+SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server
 
-all:
-	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) ); done
+.PHONY: all $(SUBDIRECTORIES)
+
+all: $(SUBDIRECTORIES)
+
+$(SUBDIRECTORIES):
+	$(MAKE) -C $@
+
+ranking_server: config_loader 
+south_protocol: config_loader 
+index_connection: config_loader 
 
 doc: doc-pdf doc-md
 	git add README.tex
