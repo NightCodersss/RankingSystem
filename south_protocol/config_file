@@ -1,0 +1,7 @@
+{
+	"southserver":
+	{
+		"host": "localhost",
+		"port": "15000"
+	}
+}
