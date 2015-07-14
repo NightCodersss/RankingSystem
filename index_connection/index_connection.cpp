@@ -10,9 +10,38 @@ using boost::asio::ip::tcp;
 ubjson::Value IndexConnection::do_search(ubjson::Value input)
 {
 	ubjson::Value result;
+	int amount = 0;
 
-	result = input;
+	std::vector<ubjson::Value> docs;
 
+	if ( static_cast<std::string>(input["query"]) == "Fairytale" )
+	{
+		auto index_id = static_cast<std::string>(input["index_id"]);
+
+		std::cout << "From index server: \n";
+		std::cout << "Index id: " << index_id << '\n';
+
+		std::ifstream in("index_" + index_id + ".dat");
+		long long doc_id;
+		while ( in >> doc_id )
+		{
+			std::cout << "From index server: \n";
+			std::cout << "Doc id: " << doc_id << '\n';
+		
+			ubjson::Value doc;
+			doc["docid"] = doc_id;
+			doc["docname"] = std::to_string(doc_id);
+			doc["url"] = "google.com";
+
+			docs.push_back(doc);
+			amount += 1;
+		}
+	}
+
+	for ( const auto& d : docs )
+		result["docs"].push_back(d);
+
+	result["amount"] = amount;
 	return result;
 }
 

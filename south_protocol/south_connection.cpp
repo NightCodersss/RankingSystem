@@ -28,6 +28,12 @@ void SouthConnection::start()
 {
 	std::thread([self = shared_from_this()]() {
 		std::getline(self->client_stream, self->input, '\n');
+
+		if ( self->input.back() == '\n' )
+			self->input.pop_back();
+
+		if ( self->input.back() == '\r' )
+			self->input.pop_back();
 	
 		std::cout << "From south server: \n";
 		std::cout << "Read: " << self -> input << '\n';
