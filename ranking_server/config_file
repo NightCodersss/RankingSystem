@@ -9,6 +9,13 @@
 			],
 			"index_id": "1",
 			"factor": 0.7
+		},
+		{
+			"servers": [
+				{"host": "localhost", "port": "16000"}
+			],
+			"index_id": "2",
+			"factor": 0.3
 		}
 	]
 }

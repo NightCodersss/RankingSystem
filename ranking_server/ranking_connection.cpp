@@ -67,7 +67,7 @@ void RankingConnection::start()
 								auto docid = static_cast<long long>(doc["docid"]);
 								if(docs.find(docid) == docs.end())
 								{
-									docs[docid] = res;
+									docs[docid] = doc;
 									docs[docid]["rank"] = 0.0;
 								}
 								static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
