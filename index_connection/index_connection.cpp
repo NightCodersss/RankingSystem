@@ -11,6 +11,7 @@ ubjson::Value IndexConnection::do_search(ubjson::Value input)
 {
 	ubjson::Value result;
 	int amount = 0;
+	int packet_size = 100;
 
 	std::vector<ubjson::Value> docs;
 
@@ -23,7 +24,7 @@ ubjson::Value IndexConnection::do_search(ubjson::Value input)
 
 		std::ifstream in("index_" + index_id + ".dat");
 		long long doc_id;
-		while ( in >> doc_id )
+		while ( amount < packet_size && in >> doc_id )
 		{
 			std::cout << "From index server: \n";
 			std::cout << "Doc id: " << doc_id << '\n';
