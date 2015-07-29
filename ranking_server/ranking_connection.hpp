@@ -10,6 +10,7 @@
 #include <value.hpp>
 #include <config_loader.hpp>
 
+using DocID = long long;
 using boost::asio::ip::tcp;
 
 class RankingConnection : public std::enable_shared_from_this<RankingConnection>

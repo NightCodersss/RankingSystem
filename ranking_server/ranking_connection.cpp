@@ -28,7 +28,7 @@ void RankingConnection::start()
 				return;
 			self->index_results.clear();
 
-			std::map<long long, ubjson::Value> docs; //docid, doc
+			std::map<DocID, ubjson::Value> docs; //docid, doc
 			std::mutex docs_mutex;
 
 			for(const auto& text: self->config["texts"])
@@ -39,38 +39,44 @@ void RankingConnection::start()
 						int server_index = 0;
 						SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>()
 												, text["servers"][server_index]["port"].get<std::string>());
+							
 						//Make query for index server
 						ubjson::Value query;
 						query["query"] = request["query"];
 						query["fields"] = {"docname", "url", "docid"};
 						query["index_id"] = text["index_id"].get<std::string>();
-						
-						//Send query
+						query["packet_size"] = ; //
+							
 						ubjson::StreamWriter<SocketStream> writer(index_stream);
+						ubjson::StreamReader<SocketStream> reader(index_stream);
+							
+						//Send query
 						writer.writeValue(query);
 
-						//Read answer
-						ubjson::StreamReader<SocketStream> reader(index_stream);
-						auto res = reader.getNextValue();
-					
-						//Adding necessary information for next processing
-			
-						res["factor"] = text["factor"].get<double>();
-
-						std::cout << "Res: " << ubjson::to_ostream(res) << '\n';
-						
-						//Async processing
+						while ( true ) // TODO wrap fetching into a stream
 						{
-							std::lock_guard<std::mutex> lock(docs_mutex);
-							for(const auto& doc: res["docs"])
+							//Read answer
+							auto res = reader.getNextValue();
+						
+							//Adding necessary information for next processing
+							res["factor"] = text["factor"].get<double>();
+
+							//std::cout << "Res: " << ubjson::to_ostream(res) << '\n';
+							
+							//Async processing
+							//TODO Lock-free
 							{
-								auto docid = static_cast<long long>(doc["docid"]);
-								if(docs.find(docid) == docs.end())
+								std::lock_guard<std::mutex> lock(docs_mutex);
+								for(const auto& doc: res["docs"])
 								{
-									docs[docid] = doc;
-									docs[docid]["rank"] = 0.0;
+									auto docid = static_cast<DocID>(doc["docid"]);
+									if(docs.find(docid) == docs.end())
+									{
+										docs[docid] = doc;
+										docs[docid]["rank"] = 0.0;
+									}
+									static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
 								}
-								static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
 							}
 						}
 					}
@@ -80,10 +86,7 @@ void RankingConnection::start()
 					}
 				}));
 			}
-			for(auto& res: self->index_results)
-			{
-				res.wait();
-			}
+
 			std::vector<ubjson::Value> docs_vector;
 			for(const auto& doc: docs)
 			{
