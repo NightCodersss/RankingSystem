@@ -23,7 +23,6 @@ public:
 private:
     IndexConnection(boost::asio::io_service& io_service);
 
-    ubjson::Value do_search(ubjson::Value input);
     SocketStream ranking_stream;
 };
 

@@ -22,6 +22,16 @@ public:
 		return all.upper_bound(rank);
 	}
 
+	auto begin()
+	{
+		return all.begin();		
+	}
+
+	auto end()
+	{
+		return all.end();
+	}
+
 	void cutOff()
 	{
 		all.cutOff(top_const);

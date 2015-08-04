@@ -3,6 +3,7 @@
 #include <thread>
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
+#include "sortbyrankgetbyidwithtop.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -28,12 +29,13 @@ void RankingConnection::start()
 				return;
 			self->index_results.clear();
 
-			std::map<DocID, ubjson::Value> docs; //docid, doc
+			std::map<DocID, ubjson::Value>& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
+			SortByRankGetByIdWithTop<DocID, double> docs_top(0.7, 0.3); // TODO set top_const, bottom_const
 			std::mutex docs_mutex;
 
 			for(const auto& text: self->config["texts"])
 			{
-				self->index_results.push_back(std::async(std::launch::async, [request, text, &docs, &docs_mutex](){
+				self->index_results.push_back(std::async(std::launch::async, [request, text, &docs, &docs_mutex, &docs_top](){
 					try
 					{	
 						int server_index = 0;
@@ -45,7 +47,6 @@ void RankingConnection::start()
 						query["query"] = request["query"];
 						query["fields"] = {"docname", "url", "docid"};
 						query["index_id"] = text["index_id"].get<std::string>();
-						query["packet_size"] = ; //
 							
 						ubjson::StreamWriter<SocketStream> writer(index_stream);
 						ubjson::StreamReader<SocketStream> reader(index_stream);
@@ -61,8 +62,9 @@ void RankingConnection::start()
 							//Adding necessary information for next processing
 							res["factor"] = text["factor"].get<double>();
 
-							//std::cout << "Res: " << ubjson::to_ostream(res) << '\n';
-							
+							if ( static_cast<int>(res["amount"]) == 0 )
+								break;
+
 							//Async processing
 							//TODO Lock-free
 							{
@@ -70,12 +72,19 @@ void RankingConnection::start()
 								for(const auto& doc: res["docs"])
 								{
 									auto docid = static_cast<DocID>(doc["docid"]);
+									for ( const auto& doc: docs )
+									{
+										std::cerr << "DocID: " << doc.first << '\n';
+										std::cerr << ubjson::to_ostream(doc.second) << '\n';
+									}
+
 									if(docs.find(docid) == docs.end())
 									{
 										docs[docid] = doc;
-										docs[docid]["rank"] = 0.0;
+//										docs[docid]["rank"] = 0.0;
 									}
-									static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
+//									static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
+									docs_top.increment(docid, static_cast<double>(res["factor"]));
 								}
 							}
 						}
@@ -86,24 +95,13 @@ void RankingConnection::start()
 					}
 				}));
 			}
-
-			std::vector<ubjson::Value> docs_vector;
-			for(const auto& doc: docs)
-			{
-				docs_vector.push_back(doc.second);
-			}
-			std::sort(std::begin(docs_vector), std::end(docs_vector), [](auto&& doc1, auto&& doc2 ) { 
-				return static_cast<double>(doc1["rank"]) > static_cast<double>(doc2["rank"]); 
-			});
 			
 			std::size_t res_size = 0;
 			ubjson::Value answer;
 
-			std::cout << "Docs vector size: " << docs_vector.size() << "\n";
-
-			for(const auto& doc: docs_vector)
+			for(const auto& doc: docs_top)
 			{
-				answer["docs"].push_back(doc);
+				answer["docs"].push_back(docs[doc.first]);
 				++res_size;
 				if(!request["amount"].isNull() && res_size >= static_cast<int>(request["amount"])) //TODO: add sup limit
 					break;

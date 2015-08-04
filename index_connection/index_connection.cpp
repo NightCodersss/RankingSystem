@@ -7,45 +7,6 @@
 
 using boost::asio::ip::tcp;
 
-ubjson::Value IndexConnection::do_search(ubjson::Value input)
-{
-	ubjson::Value result;
-	int amount = 0;
-	int packet_size = 100;
-
-	std::vector<ubjson::Value> docs;
-
-	if ( static_cast<std::string>(input["query"]) == "Fairytale" )
-	{
-		auto index_id = static_cast<std::string>(input["index_id"]);
-
-		std::cout << "From index server: \n";
-		std::cout << "Index id: " << index_id << '\n';
-
-		std::ifstream in("index_" + index_id + ".dat");
-		long long doc_id;
-		while ( amount < packet_size && in >> doc_id )
-		{
-			std::cout << "From index server: \n";
-			std::cout << "Doc id: " << doc_id << '\n';
-		
-			ubjson::Value doc;
-			doc["docid"] = doc_id;
-			doc["docname"] = std::to_string(doc_id);
-			doc["url"] = "google.com";
-
-			docs.push_back(doc);
-			amount += 1;
-		}
-	}
-
-	for ( const auto& d : docs )
-		result["docs"].push_back(d);
-
-	result["amount"] = amount;
-	return result;
-}
-
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
 {
     return pointer(new IndexConnection(io_service));
@@ -62,13 +23,59 @@ void IndexConnection::start()
 
 		if(request["query"].isNull())
 			return;
+	
+		int packet_size = 100;
+		if ( static_cast<std::string>(request["query"]) == "Fairytale" )
+		{
+			ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
+			
+			auto index_id = static_cast<std::string>(request["index_id"]);
+			std::ifstream in("index_" + index_id + ".dat");
+			
+			std::cout << "From index server: \n";
+			std::cout << "Index id: " << index_id << '\n';
+				
+			std::vector<ubjson::Value> docs;
 
-		auto answer = self -> do_search(request);
+			long long doc_id;
+			
+			bool read_file = false;
+			while ( !read_file )
+			{
+				ubjson::Value result;
+				int amount = 0;
 
-		//answer is formed
-		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
-		writer.writeValue(answer);
+				while ( amount < packet_size )
+				{
+					if ( in >> doc_id )
+					{
+						std::cout << "From index server: \n";
+						std::cout << "Doc id: " << doc_id << '\n';
 
+						ubjson::Value doc;
+						doc["docid"] = doc_id;
+						doc["docname"] = std::to_string(doc_id);
+						doc["url"] = "google.com";
+
+						docs.push_back(doc);
+						amount += 1;
+					}
+					else
+					{
+						read_file = true;
+						break;
+					}
+				}
+
+				for ( const auto& d : docs )
+					result["docs"].push_back(d);
+
+				result["amount"] = amount;
+			
+				//answer is formed
+				writer.writeValue(result);
+			}
+		}
 	}).detach();
 }
     

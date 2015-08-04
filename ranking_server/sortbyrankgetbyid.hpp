@@ -2,6 +2,7 @@
 #define _SORTBYRANKGETBYID_HPP_
 
 #include <map>
+#include <set>
 
 template <typename ID, typename Rank>
 class SortByRankGetById
@@ -12,12 +13,22 @@ public:
 	{
 		rank_and_id.erase({rank_by_id[key], key});
 		rank_by_id[key] += value;
-		rank_and_id.insert({rank_by_id[key], key)};		
+		rank_and_id.insert({rank_by_id[key], key});
 	}
 
 	std::pair<ID, Rank> upper_bound(Rank rank)
 	{
 		return *rank_and_id.upper_bound({rank, 0});
+	}
+
+	auto begin()
+	{
+		return rank_by_id.begin();	
+	}
+
+	auto end()
+	{
+		return rank_by_id.end();
 	}
 
 	void cutOff(Rank rank)
