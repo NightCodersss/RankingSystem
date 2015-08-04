@@ -48,6 +48,21 @@ public:
 		bottom_const = bottom_;
 	}	
 
+	auto topBegin()
+	{
+		return top.begin();
+	}
+
+	auto topEnd()
+	{
+		return top.end();
+	}
+
+	auto topSize()
+	{
+		return top.size();
+	}
+
 private:
 	SortByRankGetById<ID, Rank> top;
 	SortByRankGetById<ID, Rank> all;

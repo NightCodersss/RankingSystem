@@ -30,7 +30,7 @@ void RankingConnection::start()
 			self->index_results.clear();
 
 			std::map<DocID, ubjson::Value>& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
-			SortByRankGetByIdWithTop<DocID, double> docs_top(0.7, 0.3); // TODO set top_const, bottom_const
+			SortByRankGetByIdWithTop<DocID, double> docs_top(0.8, 0.2); // TODO set top_const, bottom_const
 			std::mutex docs_mutex;
 
 			for(const auto& text: self->config["texts"])
@@ -95,6 +95,47 @@ void RankingConnection::start()
 					}
 				}));
 			}
+
+			double C3 = 1.0;
+
+			do 
+			{
+				std::this_thread::yield();
+	
+				//TODO add check of amount
+				//TODO change top_const if docs_top.topSize() >= n
+	
+				if ( docs_top.topSize() == 0 )
+					continue;
+
+				if ( docs_top.topSize() >= request["amount"] )
+				{
+					auto last_in_top = docs_top.topEnd();
+					--last_in_top;
+					auto new_top_const = last_in_top -> second;
+					docs_top.setTopConst(new_top_const);
+					docs_top.setBottomConst(new_top_const - Mdr);
+				}
+				double max_diff = 0;
+
+				auto end = docs_top.topEnd();
+				--end;
+				auto lastAndOne = docs_top.upper_bound(*end);
+
+				for ( auto it = docs_top.begin(); it != lastAndOne; )
+				{
+					double cur = it -> second;
+					++it;
+					double next = it -> second;
+					
+					if ( max_diff < cur - next )
+						max_diff = cur - next;
+				}
+
+				if ( max_diff > C3 * Mdr ) // won't swap
+					break;
+
+			} while ( true );
 			
 			std::size_t res_size = 0;
 			ubjson::Value answer;
