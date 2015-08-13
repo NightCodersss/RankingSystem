@@ -29,24 +29,32 @@ void RankingConnection::start()
 				return;
 			self->index_results.clear();
 
-			std::map<DocID, ubjson::Value>& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
-			SortByRankGetByIdWithTop<DocID, double> docs_top(0.8, 0.2); // TODO set top_const, bottom_const
-			std::mutex docs_mutex;
+			//TODO memory leak
+			auto& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
+			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(0.8, 0.2); // TODO set top_const, bottom_const
+			auto& docs_mutex = *new std::mutex;
+			auto& mdr_mutex = *new std::mutex;
+			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
+
+			auto& Mdr = *new double(0.); //TODO memory leak
+			auto& c = *new std::map<TextID, double>();
 
 			for(const auto& text: self->config["texts"])
 			{
-				self->index_results.push_back(std::async(std::launch::async, [request, text, &docs, &docs_mutex, &docs_top](){
+				self->index_results.push_back(std::async(std::launch::async, [&, request, text](){
 					try
 					{	
 						int server_index = 0;
 						SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>()
 												, text["servers"][server_index]["port"].get<std::string>());
 							
+						TextID text_id = text["index_id"].get<TextID>();
+
 						//Make query for index server
 						ubjson::Value query;
 						query["query"] = request["query"];
 						query["fields"] = {"docname", "url", "docid"};
-						query["index_id"] = text["index_id"].get<std::string>();
+						query["index_id"] = text_id;
 							
 						ubjson::StreamWriter<SocketStream> writer(index_stream);
 						ubjson::StreamReader<SocketStream> reader(index_stream);
@@ -59,19 +67,30 @@ void RankingConnection::start()
 							//Read answer
 							auto res = reader.getNextValue();
 						
-							//Adding necessary information for next processing
-							res["factor"] = text["factor"].get<double>();
-
 							if ( static_cast<int>(res["amount"]) == 0 )
 								break;
+
+							//Adding necessary information for next processing
+							res["factor"] = text["factor"].get<double>();
 
 							//Async processing
 							//TODO Lock-free
 							{
 								std::lock_guard<std::mutex> lock(docs_mutex);
 								for(const auto& doc: res["docs"])
-								{
+								{									
 									auto docid = static_cast<DocID>(doc["docid"]);
+						
+									{
+										std::lock_guard<std::mutex> lock(mdr_mutex);
+										Mdr -= c[text_id];
+										c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
+										Mdr += c[text_id];
+									}
+
+									if (is_end)
+										break;
+
 									for ( const auto& doc: docs )
 									{
 										std::cerr << "DocID: " << doc.first << '\n';
@@ -81,12 +100,12 @@ void RankingConnection::start()
 									if(docs.find(docid) == docs.end())
 									{
 										docs[docid] = doc;
-//										docs[docid]["rank"] = 0.0;
 									}
-//									static_cast<double&>(docs[docid]["rank"]) += static_cast<double>(res["factor"]);
 									docs_top.increment(docid, static_cast<double>(res["factor"]));
 								}
 							}
+							if (is_end)
+								break;
 						}
 					}
 					catch ( std::exception& e )
@@ -101,6 +120,11 @@ void RankingConnection::start()
 			do 
 			{
 				std::this_thread::yield();
+				double tmpMdr;
+				{
+					std::lock_guard<std::mutex> lock(mdr_mutex);
+					tmpMdr = Mdr;
+				}
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
@@ -108,7 +132,7 @@ void RankingConnection::start()
 				if ( docs_top.topSize() == 0 )
 					continue;
 
-				if ( docs_top.topSize() >= request["amount"] )
+				if ( docs_top.topSize() >= static_cast<int>(request["amount"]) )
 				{
 					auto last_in_top = docs_top.topEnd();
 					--last_in_top;
@@ -120,7 +144,7 @@ void RankingConnection::start()
 
 				auto end = docs_top.topEnd();
 				--end;
-				auto lastAndOne = docs_top.upper_bound(*end);
+				auto lastAndOne = docs_top.upper_bound(end -> second);
 
 				for ( auto it = docs_top.begin(); it != lastAndOne; )
 				{
@@ -133,9 +157,9 @@ void RankingConnection::start()
 				}
 
 				if ( max_diff > C3 * Mdr ) // won't swap
-					break;
+					is_end = true;
 
-			} while ( true );
+			} while ( !is_end );
 			
 			std::size_t res_size = 0;
 			ubjson::Value answer;

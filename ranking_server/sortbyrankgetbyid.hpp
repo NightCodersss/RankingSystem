@@ -16,19 +16,24 @@ public:
 		rank_and_id.insert({rank_by_id[key], key});
 	}
 
-	std::pair<ID, Rank> upper_bound(Rank rank)
+	auto upper_bound(Rank rank) const
 	{
-		return *rank_and_id.upper_bound({rank, 0});
+		return rank_and_id.upper_bound({rank, 0});
 	}
 
-	auto begin()
+	auto begin() const
 	{
-		return rank_by_id.begin();	
+		return rank_and_id.begin();	
 	}
 
-	auto end()
+	auto end() const
 	{
-		return rank_by_id.end();
+		return rank_and_id.end();
+	}
+
+	auto size() const
+	{
+		return rank_by_id.size();
 	}
 
 	void cutOff(Rank rank)

@@ -17,17 +17,17 @@ public:
 		cutOff();
 	}
 
-	std::pair<ID, Rank> upper_bound(Rank rank)
+	auto upper_bound(Rank rank) const
 	{
 		return all.upper_bound(rank);
 	}
 
-	auto begin()
+	auto begin() const
 	{
 		return all.begin();		
 	}
 
-	auto end()
+	auto end() const
 	{
 		return all.end();
 	}
@@ -48,19 +48,24 @@ public:
 		bottom_const = bottom_;
 	}	
 
-	auto topBegin()
+	auto topBegin() const
 	{
 		return top.begin();
 	}
 
-	auto topEnd()
+	auto topEnd() const
 	{
 		return top.end();
 	}
 
-	auto topSize()
+	auto topSize() const
 	{
 		return top.size();
+	}
+
+	auto size() const
+	{
+		return all.size();
 	}
 
 private:
