@@ -53,57 +53,21 @@ void IndexConnection::start()
 				DocID doc_id;
 				double correspondence;
 
-				std::cerr << "Pizdoh\n";
-				if ( in >> word )
+				if ( in >> word >> doc_id >> correspondence )
 				{
-					std::cerr << "Word: " << word << '\n';
-					if ( in >> doc_id )
+					if (word == static_cast<std::string>(request["query"]))
 					{
-						std::cerr << "DocID: " << doc_id << '\n';
-						if ( in >> correspondence )
-						{
-							std::cerr << "Correspondence: " << correspondence << '\n';
-							if (word == static_cast<std::string>(request["query"]))
-							{
-								std::cerr << "Ne pizdoh\n";
-								std::cout << "From index server: \n";
-								std::cout << "Doc id: " << doc_id << '\n';
+						std::cout << "From index server: \n";
+						std::cout << "Doc id: " << doc_id << '\n';
 
-								ubjson::Value doc;
-				std::cerr << "Pizdoh\n";
-								doc["docid"] = doc_id;
-				std::cerr << "Ne pizdoh\n";
-				std::cerr << "Pizdoh\n";
-								doc["correspondence"] = correspondence;
-				std::cerr << "Ne pizdoh\n";
-				std::cerr << "Pizdoh\n";
-								doc["docname"] = std::to_string(doc_id);
-				std::cerr << "Ne pizdoh\n";
-				std::cerr << "Pizdoh\n";
-								doc["url"] = "google.com/" + std::to_string(doc_id);
-				std::cerr << "Ne pizdoh\n";
+						ubjson::Value doc;
+						doc["docid"] = doc_id;
+						doc["correspondence"] = correspondence;
+						doc["docname"] = std::to_string(doc_id);
+						doc["url"] = "google.com/" + std::to_string(doc_id);
 
-				std::cerr << "Pizdoh\n";
-								docs.push_back(doc);
-				std::cerr << "Ne pizdoh\n";
-								amount += 1;
-							}
-							else
-							{
-								read_file = true;
-								break;
-							}
-						}
-						else
-						{
-							read_file = true;
-							break;
-						}
-					}
-					else
-					{
-						read_file = true;
-						break;
+						docs.push_back(doc);
+						amount += 1;
 					}
 				}
 				else
