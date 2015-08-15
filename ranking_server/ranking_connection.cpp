@@ -67,7 +67,7 @@ void RankingConnection::start()
 							//Read answer
 							auto res = reader.getNextValue();
 						
-							if ( static_cast<int>(res["amount"]) == 0 )
+							if ( res["amount"].asInt() == 0 )
 								break;
 
 							//Adding necessary information for next processing
@@ -79,8 +79,8 @@ void RankingConnection::start()
 								std::lock_guard<std::mutex> lock(docs_mutex);
 								for(const auto& doc: res["docs"])
 								{									
-									auto docid = static_cast<DocID>(doc["docid"]);
-						
+									auto docid = static_cast<const DocID&>(doc["docid"]);
+							
 									{
 										std::lock_guard<std::mutex> lock(mdr_mutex);
 										Mdr -= c[text_id];
@@ -132,7 +132,7 @@ void RankingConnection::start()
 				if ( docs_top.topSize() == 0 )
 					continue;
 
-				if ( docs_top.topSize() >= static_cast<int>(request["amount"]) )
+				if ( docs_top.topSize() >= request["amount"].asInt() )
 				{
 					auto last_in_top = docs_top.topEnd();
 					--last_in_top;
@@ -168,13 +168,18 @@ void RankingConnection::start()
 			{
 				answer["docs"].push_back(docs[doc.first]);
 				++res_size;
-				if(!request["amount"].isNull() && res_size >= static_cast<int>(request["amount"])) //TODO: add sup limit
+				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
 					break;
 			}
 			answer["amount"] = static_cast<long long>(res_size);
 			//answer is formed
+
+			std::cerr << "Sending formed answer: \n";
+
 			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
 			writer.writeValue(answer);
+			
+			std::cerr << "Sent formed answer: \n";
 		}
 		catch( std::exception& e )
 		{

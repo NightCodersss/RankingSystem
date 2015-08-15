@@ -6,6 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <value.hpp>
+#include <defines.hpp>
 
 using boost::asio::ip::tcp;
 
