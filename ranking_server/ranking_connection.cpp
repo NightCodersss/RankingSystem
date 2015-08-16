@@ -67,14 +67,21 @@ void RankingConnection::start()
 							//Read answer
 							auto res = reader.getNextValue();
 						
-							if ( res["amount"].asInt() == 0 )
+							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
+							{
+								std::cerr << "Amount is zero. Changing c to 0.\n"; 
+								Mdr -= c[text_id];
+								c[text_id] = 0;
+								Mdr += c[text_id];
+								std::cerr << "Thread is going to finish\n";
 								break;
+							}
 
-							//Adding necessary information for next processing
+							// Adding necessary information for next processing
 							res["factor"] = text["factor"].get<double>();
 
 							//Async processing
-							//TODO Lock-free
+							// TODO Lock-free
 							{
 								std::lock_guard<std::mutex> lock(docs_mutex);
 								for(const auto& doc: res["docs"])
@@ -89,7 +96,10 @@ void RankingConnection::start()
 									}
 
 									if (is_end)
+									{
+										std::cerr << "Thread is going to finish\n";
 										break;
+									}
 
 									for ( const auto& doc: docs )
 									{
@@ -105,7 +115,10 @@ void RankingConnection::start()
 								}
 							}
 							if (is_end)
+							{
+								std::cerr << "Thread is going to finish\n";
 								break;
+							}
 						}
 					}
 					catch ( std::exception& e )
@@ -115,10 +128,11 @@ void RankingConnection::start()
 				}));
 			}
 
-			double C3 = 1.0;
+			double C3 = 0;
 
 			do 
 			{
+				//std::cerr << "OLOLO TROLOLO\n";
 				std::this_thread::yield();
 				double tmpMdr;
 				{
@@ -146,6 +160,8 @@ void RankingConnection::start()
 				--end;
 				auto lastAndOne = docs_top.upper_bound(end -> second);
 
+				std::cerr << "Distance: " << std::distance(docs_top.begin(), lastAndOne) << '\n';
+				std::cerr << "All size: " << docs_top.size() << '\n';
 				for ( auto it = docs_top.begin(); it != lastAndOne; )
 				{
 					double cur = it -> second;
@@ -157,13 +173,17 @@ void RankingConnection::start()
 				}
 
 				if ( max_diff > C3 * Mdr ) // won't swap
+				{
+					std::cerr << "Set is_end = true\n";
 					is_end = true;
+				}
 
 			} while ( !is_end );
 			
 			std::size_t res_size = 0;
 			ubjson::Value answer;
 
+			std::cerr << "Forming answer\n";
 			for(const auto& doc: docs_top)
 			{
 				answer["docs"].push_back(docs[doc.first]);

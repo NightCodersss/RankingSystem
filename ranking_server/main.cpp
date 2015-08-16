@@ -4,8 +4,12 @@
 #include <boost/asio.hpp>
 #include "ranking_server.hpp"
 
+#include "test.hpp"
+
 int main(int argc, char** argv)
 {
+	runTests();
+
     try
     {
 		if(argc == 1)

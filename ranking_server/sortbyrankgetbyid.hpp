@@ -18,7 +18,7 @@ public:
 
 	auto upper_bound(Rank rank) const
 	{
-		return rank_and_id.upper_bound({rank, 0});
+		return rank_and_id.upper_bound({rank, std::numeric_limits<ID>::max()});
 	}
 
 	auto begin() const

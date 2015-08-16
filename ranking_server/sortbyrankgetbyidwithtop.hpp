@@ -14,7 +14,7 @@ public:
 	{
 		all.increment(key, value);
 		top.increment(key, value);
-		cutOff();
+//		cutOff();
 	}
 
 	auto upper_bound(Rank rank) const
@@ -34,8 +34,8 @@ public:
 
 	void cutOff()
 	{
-		all.cutOff(top_const);
-		top.cutOff(bottom_const);
+		all.cutOff(bottom_const);
+		top.cutOff(top_const);
 	}
 
 	void setTopConst(Rank top_)
