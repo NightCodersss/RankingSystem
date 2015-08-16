@@ -66,6 +66,7 @@ void RankingConnection::start()
 						{
 							//Read answer
 							auto res = reader.getNextValue();
+							std::cerr << "Came another doc from index server: " << ubjson::to_ostream(res) << '\n';
 						
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
@@ -89,7 +90,7 @@ void RankingConnection::start()
 									auto docid = static_cast<const DocID&>(doc["docid"]);
 							
 									{
-										std::lock_guard<std::mutex> lock(mdr_mutex);
+//										std::lock_guard<std::mutex> lock(mdr_mutex);
 										Mdr -= c[text_id];
 										c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
 										Mdr += c[text_id];
@@ -112,6 +113,7 @@ void RankingConnection::start()
 										docs[docid] = doc;
 									}
 									docs_top.increment(docid, static_cast<double>(res["factor"]));
+									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 								}
 							}
 							if (is_end)
@@ -136,7 +138,8 @@ void RankingConnection::start()
 				std::this_thread::yield();
 				double tmpMdr;
 				{
-					std::lock_guard<std::mutex> lock(mdr_mutex);
+//					std::lock_guard<std::mutex> lock(mdr_mutex);
+					std::lock_guard<std::mutex> lock(docs_mutex);
 					tmpMdr = Mdr;
 				}
 	
@@ -150,7 +153,7 @@ void RankingConnection::start()
 				{
 					auto last_in_top = docs_top.topEnd();
 					--last_in_top;
-					auto new_top_const = last_in_top -> second;
+					auto new_top_const = last_in_top -> first;
 					docs_top.setTopConst(new_top_const);
 					docs_top.setBottomConst(new_top_const - Mdr);
 				}
@@ -158,15 +161,15 @@ void RankingConnection::start()
 
 				auto end = docs_top.topEnd();
 				--end;
-				auto lastAndOne = docs_top.upper_bound(end -> second);
+				auto lastAndOne = docs_top.upper_bound(end -> first);
 
 				std::cerr << "Distance: " << std::distance(docs_top.begin(), lastAndOne) << '\n';
 				std::cerr << "All size: " << docs_top.size() << '\n';
 				for ( auto it = docs_top.begin(); it != lastAndOne; )
 				{
-					double cur = it -> second;
+					double cur = it -> first;					
 					++it;
-					double next = it -> second;
+					double next = it -> first;
 					
 					if ( max_diff < cur - next )
 						max_diff = cur - next;
@@ -186,11 +189,13 @@ void RankingConnection::start()
 			std::cerr << "Forming answer\n";
 			for(const auto& doc: docs_top)
 			{
-				answer["docs"].push_back(docs[doc.first]);
+				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
+				answer["docs"].push_back(docs[doc.second]);
 				++res_size;
 				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
 					break;
 			}
+			std::cerr << "Answer of ranking server: " << ubjson::to_ostream(answer) << '\n';
 			answer["amount"] = static_cast<long long>(res_size);
 			//answer is formed
 

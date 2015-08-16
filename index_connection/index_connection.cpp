@@ -20,8 +20,8 @@ void IndexConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->ranking_stream);
 		auto request = reader.getNextValue();
 
-		std::cout << "From index server: \n";
-		std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
+//		std::cout << "From index server: \n";
+//		std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
 
 		if(request["query"].isNull())
 			return;
@@ -33,17 +33,17 @@ void IndexConnection::start()
 		auto index_id = static_cast<std::string>(request["index_id"]);
 		std::ifstream in("index_" + index_id + ".txt");
 
-		std::cout << "From index server: \n";
-		std::cout << "Index id: " << index_id << '\n';
+//		std::cout << "From index server: \n";
+//		std::cout << "Index id: " << index_id << '\n';
 
 		std::vector<ubjson::Value> docs;
 
 
-		std::cerr << "Pizdoh before loop\n";
+//		std::cerr << "Pizdoh before loop\n";
 		bool read_file = false;
 		while ( !read_file )
 		{
-			std::cerr << "Ne pizdoh in loop\n";
+//			std::cerr << "Ne pizdoh in loop\n";
 			ubjson::Value result;
 			int amount = 0;
 
@@ -57,8 +57,8 @@ void IndexConnection::start()
 				{
 					if (word == static_cast<std::string>(request["query"]))
 					{
-						std::cout << "From index server: \n";
-						std::cout << "Doc id: " << doc_id << '\n';
+//						std::cout << "From index server: \n";
+//						std::cout << "Doc id: " << doc_id << '\n';
 
 						ubjson::Value doc;
 						doc["docid"] = doc_id;
