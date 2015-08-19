@@ -130,7 +130,7 @@ void RankingConnection::start()
 				}));
 			}
 
-			double C3 = 0;
+			double C3 = 1.;
 
 			do 
 			{
