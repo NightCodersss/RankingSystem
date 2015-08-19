@@ -36,8 +36,6 @@ void IndexConnection::start()
 //		std::cout << "From index server: \n";
 //		std::cout << "Index id: " << index_id << '\n';
 
-		std::vector<ubjson::Value> docs;
-
 
 //		std::cerr << "Pizdoh before loop\n";
 		bool read_file = false;
@@ -46,6 +44,7 @@ void IndexConnection::start()
 //			std::cerr << "Ne pizdoh in loop\n";
 			ubjson::Value result;
 			int amount = 0;
+			std::vector<ubjson::Value> docs;
 
 			while ( amount < packet_size )
 			{
