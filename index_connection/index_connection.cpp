@@ -31,7 +31,7 @@ void IndexConnection::start()
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 
 		auto index_id = static_cast<std::string>(request["index_id"]);
-		std::ifstream in("index_" + index_id + ".txt");
+		std::ifstream in("index_" + index_id + ".dat");
 
 //		std::cout << "From index server: \n";
 //		std::cout << "Index id: " << index_id << '\n';

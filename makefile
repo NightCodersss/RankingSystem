@@ -1,5 +1,5 @@
 export PROJECTPATH=/home/asio/rankingsystem/
-SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server generatingserver
+SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server
 
 .PHONY: all $(SUBDIRECTORIES)
 
@@ -8,7 +8,6 @@ all: $(SUBDIRECTORIES)
 $(SUBDIRECTORIES):
 	$(MAKE) -C $@
 
-generatingserver: config_loader
 ranking_server: config_loader 
 south_protocol: config_loader 
 index_connection: config_loader 

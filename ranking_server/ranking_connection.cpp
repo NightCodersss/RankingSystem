@@ -189,8 +189,9 @@ void RankingConnection::start()
 			std::cerr << "Forming answer\n";
 			for(const auto& doc: docs_top)
 			{
-				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
-				std::cerr << "Doc rank: " << doc.first << '\n';
+//				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
+//				std::cerr << "Doc rank: " << doc.first << '\n';
+				docs[doc.second]["rank"] = doc.first;
 				answer["docs"].push_back(docs[doc.second]);
 				++res_size;
 				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
