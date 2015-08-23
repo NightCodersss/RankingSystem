@@ -36,7 +36,12 @@ void RankingConnection::start()
 			auto& mdr_mutex = *new std::mutex;
 			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
 
-			auto& Mdr = *new double(0.); //TODO memory leak
+			//Sum of 𝛎's
+			auto& Mdr = *new double(std::accumulate(std::begin(self->config["texts"]), std::end(self->config["texts"]), 0.0, 
+			[] (double acc, json text)
+			{
+				return acc += text["factor"].get<double>();
+			})); 
 			auto& c = *new std::map<TextID, double>();
 
 			for(const auto& text: self->config["texts"])
@@ -130,8 +135,6 @@ void RankingConnection::start()
 				}));
 			}
 
-			for ( auto& fut : self -> index_results )
-				fut.wait();
 
 			double C3 = 10000.;
 
@@ -149,36 +152,39 @@ void RankingConnection::start()
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
-				if ( docs_top.topSize() == 0 )
-					continue;
-
-				if ( docs_top.topSize() >= request["amount"].asInt() )
-				{
-					auto last_in_top = docs_top.topEnd();
-					--last_in_top;
-					auto new_top_const = last_in_top -> first;
-					docs_top.setTopConst(new_top_const);
-					docs_top.setBottomConst(new_top_const - Mdr);
-				}
 				double max_diff = 0;
-
-				auto end = docs_top.topEnd();
-				--end;
-				auto lastAndOne = docs_top.upper_bound(end -> first);
-
-				std::cerr << "Distance: " << std::distance(docs_top.begin(), lastAndOne) << '\n';
-				std::cerr << "All size: " << docs_top.size() << '\n';
-				for ( auto it = docs_top.begin(); it != lastAndOne; )
+				if ( docs_top.topSize() != 0 )
 				{
-					double cur = it -> first;					
-					++it;
-					double next = it -> first;
-					
-					if ( max_diff < cur - next )
-						max_diff = cur - next;
+					std::lock_guard<std::mutex> lock(docs_mutex);
+					if ( docs_top.topSize() >= request["amount"].asInt() )
+					{
+						auto last_in_top = docs_top.topEnd();
+						--last_in_top;
+						auto new_top_const = last_in_top -> first;
+						docs_top.setTopConst(new_top_const);
+						docs_top.setBottomConst(new_top_const - tmpMdr);
+						// TODO check cutoff
+					}
+
+					auto end = docs_top.topEnd();
+					--end;
+					auto lastAndOne = docs_top.upper_bound(end -> first);
+
+					std::cerr << "Distance: " << std::distance(docs_top.begin(), lastAndOne) << '\n';
+					std::cerr << "All size: " << docs_top.size() << '\n';
+					for ( auto it = docs_top.begin(); it != lastAndOne; )
+					{
+						double cur = it -> first;					
+						++it;
+						double next = it -> first;
+
+						if ( max_diff < cur - next )
+							max_diff = cur - next;
+					}
 				}
 
-				if ( max_diff > C3 * Mdr ) // won't swap
+				std::cerr << "Max_diff: " << max_diff << "\nMdr: " << tmpMdr << "\n";
+				if ( max_diff >= C3 * tmpMdr ) // won't swap
 				{
 					std::cerr << "Set is_end = true\n";
 					is_end = true;
