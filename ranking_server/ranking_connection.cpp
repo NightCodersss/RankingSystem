@@ -31,7 +31,7 @@ void RankingConnection::start()
 
 			//TODO memory leak
 			auto& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
-			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(0.8, 0.2); // TODO set top_const, bottom_const
+			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(10000, 0); // TODO set top_const, bottom_const
 			auto& docs_mutex = *new std::mutex;
 			auto& mdr_mutex = *new std::mutex;
 			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
@@ -104,8 +104,8 @@ void RankingConnection::start()
 
 									for ( const auto& doc: docs )
 									{
-										std::cerr << "DocID: " << doc.first << '\n';
-										std::cerr << ubjson::to_ostream(doc.second) << '\n';
+							//			std::cerr << "DocID: " << doc.first << '\n';
+//										std::cerr << ubjson::to_ostream(doc.second) << '\n';
 									}
 
 									if(docs.find(docid) == docs.end())
@@ -113,7 +113,7 @@ void RankingConnection::start()
 										docs[docid] = doc;
 									}
 									docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
-									std::cerr << "Top size: " << docs_top.topSize() << '\n';
+//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 								}
 							}
 							if (is_end)
@@ -130,7 +130,10 @@ void RankingConnection::start()
 				}));
 			}
 
-			double C3 = 1.;
+			for ( auto& fut : self -> index_results )
+				fut.wait();
+
+			double C3 = 10000.;
 
 			do 
 			{
