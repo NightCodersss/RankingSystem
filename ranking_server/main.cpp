@@ -10,6 +10,9 @@ int main(int argc, char** argv)
 {
 	runTests();
 
+	freopen("log.log", "w", stderr);
+	std::cerr << "Log begin\n";
+
     try
     {
 		if(argc == 1)

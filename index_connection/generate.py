@@ -1,11 +1,11 @@
 import subprocess
 from random import gauss, uniform
 
-def generate_lambda(r, K): # d is id of document (number)
+def generate_lambda(K): # d is id of document (number)
 	n = len(cs)
-	lambdas = [max(0.1, gauss(0.5, K)) for i in range(n)]
-	s = reduce(lambda acc, (c, l): acc + c * l, zip(cs, lambdas), 0)
-	return map(lambda l: l * r/s, lambdas)
+	lambdas = [min(1., max(0, gauss(0.5, K))) for i in range(n)]
+	r = reduce(lambda acc, (c, l): acc + c * l, zip(cs, lambdas), 0)
+	return (lambdas, r)
 
 def generate_file(number_of_docs, K):
 
@@ -15,8 +15,7 @@ def generate_file(number_of_docs, K):
 	checkfile = open('checkfile', 'w')
 
 	for d in range(number_of_docs):
-		r = uniform(0, 100)
-		lambdas = generate_lambda(r, K)
+		(lambdas, r) = generate_lambda(K)
 		map(lambda (f, l): f.write("Fairytale {} {}\n".format(d, l)), zip(files, lambdas))
 		checkfile.write("{} {}\n".format(d, r))
 	
@@ -29,4 +28,4 @@ def read_cs(filename):
 
 cs = read_cs("generating_config")
 
-generate_file(100, 3)
+generate_file(10000, 0.4)

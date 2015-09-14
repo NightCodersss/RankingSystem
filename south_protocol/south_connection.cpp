@@ -12,6 +12,7 @@ std::string SouthConnection::getUBJSONFromQuery(std::string input)
 	using namespace ubjson;
 	Value v;
 	v["query"] = input;
+	v["amount"] = 10;
 	
 	std::stringstream output;
 	StreamWriter<std::stringstream> writer(output);

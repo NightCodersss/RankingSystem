@@ -36,6 +36,8 @@ void RankingConnection::start()
 			auto& mdr_mutex = *new std::mutex;
 			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
 
+			int& download_counter = *new int(0);
+	
 			//Sum of 𝛎's
 			auto& Mdr = *new double(std::accumulate(std::begin(self->config["texts"]), std::end(self->config["texts"]), 0.0, 
 			[] (double acc, json text)
@@ -43,6 +45,12 @@ void RankingConnection::start()
 				return acc += text["factor"].get<double>();
 			})); 
 			auto& c = *new std::map<TextID, double>();
+
+			for ( const auto& text: self->config["texts"] )
+			{
+				auto text_id = text["index_id"].get<TextID>();
+				c[text_id] = 1.;
+			}
 
 			for(const auto& text: self->config["texts"])
 			{
@@ -76,9 +84,9 @@ void RankingConnection::start()
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
 								std::cerr << "Amount is zero. Changing c to 0.\n"; 
-								Mdr -= c[text_id];
+								Mdr -= c[text_id] * text["factor"].get<double>();
 								c[text_id] = 0;
-								Mdr += c[text_id];
+								Mdr += c[text_id] * text["factor"].get<double>();
 								std::cerr << "Thread is going to finish\n";
 								break;
 							}
@@ -89,16 +97,20 @@ void RankingConnection::start()
 							//Async processing
 							// TODO Lock-free
 							{
+								std::cerr << "Entering lock\n";
 								std::lock_guard<std::mutex> lock(docs_mutex);
 								for(const auto& doc: res["docs"])
 								{									
 									auto docid = static_cast<const DocID&>(doc["docid"]);
-							
+									download_counter += 1;
 									{
 //										std::lock_guard<std::mutex> lock(mdr_mutex);
-										Mdr -= c[text_id];
+										std::cerr << "Mdr updaing\n";
+										Mdr -= c[text_id] * text["factor"].get<double>();
+										std::cerr << "Cold: " << c[text_id] << "\n";
 										c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
-										Mdr += c[text_id];
+										std::cerr << "Cnew: " << c[text_id] << "\n";
+										Mdr += c[text_id] * text["factor"].get<double>();
 									}
 
 									if (is_end)
@@ -120,6 +132,7 @@ void RankingConnection::start()
 									docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
 //									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 								}
+								std::cerr << "Leaving lock\n";
 							}
 							if (is_end)
 							{
@@ -135,8 +148,13 @@ void RankingConnection::start()
 				}));
 			}
 
+//			for ( auto& fut : self->index_results )
+//			{
+//				fut.wait();
+//			}
 
-			double C3 = 10000.;
+
+			double C3 = 1.;
 
 			do 
 			{
@@ -145,7 +163,9 @@ void RankingConnection::start()
 				double tmpMdr;
 				{
 //					std::lock_guard<std::mutex> lock(mdr_mutex);
+					std::cerr << "Entering mdr lock\n";
 					std::lock_guard<std::mutex> lock(docs_mutex);
+					std::cerr << "Leaving mdr lock\n";
 					tmpMdr = Mdr;
 				}
 	
@@ -211,6 +231,7 @@ void RankingConnection::start()
 			//answer is formed
 
 			std::cerr << "Sending formed answer: \n";
+			std::cerr << "Downloaded documents: " << download_counter << '\n';
 
 			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
 			writer.writeValue(answer);
