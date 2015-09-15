@@ -38,6 +38,7 @@ public:
 
 	void cutOff(Rank rank)
 	{
+		//std::cout << "Running cutoff\n" << std::flush;
 		for ( auto it = rank_and_id.upper_bound({rank, 0}); it != std::end(rank_and_id); )
 		{
 			rank_by_id.erase(it -> second);

@@ -14,7 +14,7 @@ public:
 	{
 		all.increment(key, value);
 		top.increment(key, value);
-//		cutOff();
+		cutOff();
 	}
 
 	auto upper_bound(Rank rank) const
@@ -22,12 +22,12 @@ public:
 		return all.upper_bound(rank);
 	}
 
-	auto begin() const
+	auto allBegin() const
 	{
 		return all.begin();		
 	}
 
-	auto end() const
+	auto allEnd() const
 	{
 		return all.end();
 	}
@@ -48,12 +48,12 @@ public:
 		bottom_const = bottom_;
 	}	
 
-	auto topBegin() const
+	auto begin() const
 	{
 		return top.begin();
 	}
 
-	auto topEnd() const
+	auto end() const
 	{
 		return top.end();
 	}

@@ -31,7 +31,7 @@ void RankingConnection::start()
 
 			//TODO memory leak
 			auto& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
-			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(10000, 0); // TODO set top_const, bottom_const
+			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(0, 0); // TODO set top_const, bottom_const
 			auto& docs_mutex = *new std::mutex;
 			auto& mdr_mutex = *new std::mutex;
 			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
@@ -168,43 +168,58 @@ void RankingConnection::start()
 					std::cerr << "Leaving mdr lock\n";
 					tmpMdr = Mdr;
 				}
+
+				std::cerr << "Mdr " << tmpMdr << '\n';
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
-				double max_diff = 0;
-				if ( docs_top.topSize() != 0 )
+				double min_diff = 0;
+				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
+				if ( docs_top.topSize() >= 2 )
 				{
 					std::lock_guard<std::mutex> lock(docs_mutex);
 					if ( docs_top.topSize() >= request["amount"].asInt() )
 					{
-						auto last_in_top = docs_top.topEnd();
-						--last_in_top;
+						auto last_in_top = docs_top.end();
+
+						for (int i = 0; i < docs_top.topSize() - request["amount"].asInt() + 1; ++i)
+							--last_in_top;
+
 						auto new_top_const = last_in_top -> first;
 						docs_top.setTopConst(new_top_const);
 						docs_top.setBottomConst(new_top_const - tmpMdr);
 						// TODO check cutoff
+						docs_top.cutOff();
 					}
 
-					auto end = docs_top.topEnd();
+					auto end = docs_top.end(); // End of top
 					--end;
 					auto lastAndOne = docs_top.upper_bound(end -> first);
 
-					std::cerr << "Distance: " << std::distance(docs_top.begin(), lastAndOne) << '\n';
+					std::cerr << "Distance: " << std::distance(docs_top.allBegin(), lastAndOne) << '\n';
 					std::cerr << "All size: " << docs_top.size() << '\n';
-					for ( auto it = docs_top.begin(); it != lastAndOne; )
+					
+					auto it2 = lastAndOne;
+					it2--;
+					min_diff = 1e100;
+
+					for ( auto it = docs_top.allBegin(); it != it2; )
 					{
 						double cur = it -> first;					
 						++it;
 						double next = it -> first;
+						
+						std::cerr << "DIFF: " << cur - next << '\n';
+						std::cerr << "CUR: " << cur << '\n';
 
-						if ( max_diff < cur - next )
-							max_diff = cur - next;
+						if ( min_diff > cur - next )
+							min_diff = cur - next;
 					}
 				}
 
-				std::cerr << "Max_diff: " << max_diff << "\nMdr: " << tmpMdr << "\n";
-				if ( max_diff >= C3 * tmpMdr ) // won't swap
+				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
+				if ( min_diff >= C3 * tmpMdr ) // won't swap
 				{
 					std::cerr << "Set is_end = true\n";
 					is_end = true;
