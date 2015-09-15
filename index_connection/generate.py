@@ -31,7 +31,7 @@ def read_cs(filename):
 cs = read_cs("generating_config")
 
 def gen_rank(d):
-	eps = 0.1
-	return d**(-1-eps)
+	#return d**(-1.2)
+	return d**-0.5
 
 generate_file(10000, gen_rank)

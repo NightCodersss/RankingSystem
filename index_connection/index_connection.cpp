@@ -26,7 +26,7 @@ void IndexConnection::start()
 		if(request["query"].isNull())
 			return;
 
-		int packet_size = 200;
+		int packet_size = 1;
 
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 

@@ -201,7 +201,7 @@ void RankingConnection::start()
 					std::cerr << "All size: " << docs_top.size() << '\n';
 					
 					auto it2 = lastAndOne;
-					it2--;
+					//it2--;
 					min_diff = 1e100;
 
 					for ( auto it = docs_top.allBegin(); it != it2; )
@@ -219,7 +219,7 @@ void RankingConnection::start()
 				}
 
 				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
-				if ( min_diff >= C3 * tmpMdr ) // won't swap
+				if ( min_diff >= C3 * tmpMdr && (docs_top.topSize() >= request["amount"].asInt() || tmpMdr == 0)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
 					is_end = true;
