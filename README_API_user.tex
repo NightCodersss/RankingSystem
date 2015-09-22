@@ -1,0 +1,61 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\begin{document}
+
+\section{Система ранжирования}
+\section{Программистам-пользователям API}
+Для начала следует прчитать документацию README\_deployer и README\_tuner.
+
+\subsection{Протокол}
+В связи с тем, что Ubjson парсится на лету, не все поля обязательны. 
+В силу гибкости протокола незначительное изменение или значительное добавление не должно требовать больших трудов.
+Что такое южный и северный легко понять отсюда \ref{subsec:generalStructure}.
+
+\subsubsection{Южный}
+Запрос.
+
+Необходимо передавать строчку query, которая хранит в себе запрос.
+Поле $amount$ не обязательно.
+\begin{verbatim}
+{
+	"query": "what is ...?"
+	"amount": "1000000"
+}
+\end{verbatim}
+
+Ответ.
+
+\begin{verbatim}
+{
+	"docs": [ {...}, {...}, ],
+	"amount": 12243,
+}
+\end{verbatim}
+
+
+Планируется добавить параметры, каким образом представлять информацию о документе обратно.
+
+Заглушка работает так: слушает некоторый порт, по приходу данных, до переноса строки ($\backslash n$), приходящие данные пакует в ubjson и отправляет системе ранжирования. По приходу данных от системы ранжирования (то есть системы поиска)(в ubjson) заглушка "их отвечает" в json (обычном).
+
+\subsubsection{Северный}
+Запрос.
+
+Такой же, как "южный", но с параметром - какой индекс использовать (по какому тексту), то есть:
+\begin{verbatim}
+{
+	"query": "what is ...?",
+	"index_id": "aa1234df",
+	"fields": ["docname", "author", "snippet"],
+}
+\end{verbatim}
+
+Ответ.
+
+Такой же, как у южного. 
+\end{document}

@@ -1,0 +1,34 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\begin{document}
+
+\section{Система ранжирования}
+\section{Человеку, который запускает}
+
+\subsection{Зависимости}
+\begin{itemize}
+    \item C++14
+    \item UbjsonCpp  - библиотека для работы протокола (repo: https://github.com/NightCodersss/UbjsonCpp)
+    \item cppunit - библиотека для unit-тестирования (используется в Ubjson)
+	\item json - библиотека для чтения конфига (repo: https://github.com/nlohmann/json)
+\end{itemize}
+
+\subsection{Сборка}
+\begin{verbatim}
+cd PROJECT_ROOT
+make
+make test
+\end{verbatim}
+
+\subsection{Архитектура}
+\label{subsec:generalStructure}
+Структура выглядит так:
+(Фронт-энд или другой сервис) $\xrightarrow{Southern protocol}$ Ranking System $\xrightarrow{Northern protocol}$ IndexServer
+Где $'\rightarrow'$ обозначет подключение от клиента к серверу. Порты равертывания, порты подключений и адреса серверов указываются в config_file.
+\end{document}
