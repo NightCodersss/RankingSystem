@@ -1,0 +1,40 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+\usepackage{indentfirst}
+\usepackage{misccorr}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\begin{document}
+
+\section{Система ранжирования}
+
+\section{Настройщику}
+Во-первых, следует прочитать документацию README\_deployer.
+
+\section{Конфигурация}
+Очень важно соблюдать типы занчений: строки должны быть в кавычках, числа без. Это не проверяется и приводит к повисанию (бага библиотеки работы с json).
+
+Конфигурация лежит в папке сервера в файле config\_file.
+
+Пример конфига RankingServer'а:
+\begin{verbatim}
+{
+	"texts": [
+		{
+			"servers": [{"host": "localhost", "port": "14000"}],
+			"factor": {"person": 1.8, "article": 1.2},
+			"name": "Title",
+			"index_id": "1",
+		},
+		{
+			"servers": [{"host": "", "port": "14000"}],
+			"factor": 0.9,
+			"name": "Useless information",
+			"index_id": "100400ab",
+		},
+	]
+}
+\end{verbatim}
+\end{document}
