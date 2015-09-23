@@ -16,7 +16,7 @@ def generate_file(number_of_docs, r):
 	checkfile = open('checkfile', 'w')
 
 	for d in range(number_of_docs):		
-		lambdas = generate_lambda(cs, r(d+1))
+		lambdas = generate_lambda(cs, r(d+1)) # monotonal 
 #		(lambdas, r) = generate_lambda(K)
 		map(lambda (f, l): f.write("Fairytale {} {}\n".format(d, l)), zip(files, lambdas))
 		checkfile.write("{} {}\n".format(d, r(d+1)))
@@ -31,7 +31,7 @@ def read_cs(filename):
 cs = read_cs("generating_config")
 
 def gen_rank(d):
-	#return d**(-1.2)
-	return d**-0.5
+	return d**(-1.2)
+#	return d**-0.5
 
 generate_file(10000, gen_rank)
