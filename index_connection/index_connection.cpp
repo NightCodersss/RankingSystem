@@ -29,6 +29,8 @@ void IndexConnection::start()
 		// TODO: move to config
 		int packet_size = 1;
 
+		double normalizing_constant = 1e-4; // Cut off this kludge
+
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 
 		auto index_id = static_cast<std::string>(request["index_id"]);
@@ -55,14 +57,16 @@ void IndexConnection::start()
 
 				if ( in >> word >> doc_id >> correspondence )
 				{
+					std::cerr << "Word " << word << " read\n";
 					if (word == static_cast<std::string>(request["query"]))
 					{
+						std::cerr << "Word " << word << " accepted\n";
 //						std::cout << "From index server: \n";
 //						std::cout << "Doc id: " << doc_id << '\n';
 
 						ubjson::Value doc;
 						doc["docid"] = doc_id;
-						doc["correspondence"] = correspondence;
+						doc["correspondence"] = correspondence * normalizing_constant;
 						doc["docname"] = std::to_string(doc_id);
 						doc["url"] = "google.com/" + std::to_string(doc_id);
 

@@ -8,8 +8,10 @@
 				{"host": "localhost", "port": "16000"}
 			],
 			"index_id": "0",
-			"factor": 0.6
-		},
+			"factor": 1.0
+		}],
+	"olo":
+	[
 		{
 			"servers": [
 				{"host": "localhost", "port": "16000"}
