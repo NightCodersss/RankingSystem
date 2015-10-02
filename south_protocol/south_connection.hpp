@@ -8,6 +8,8 @@
 
 using boost::asio::ip::tcp;
 
+// TODO break connection with server if connection with client has broken
+
 class SouthConnection : public std::enable_shared_from_this<SouthConnection>
 {
 	static constexpr const char* host = "localhost";

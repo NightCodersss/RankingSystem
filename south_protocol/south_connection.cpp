@@ -38,6 +38,8 @@ void SouthConnection::start()
 	
 		std::cout << "From south server: \n";
 		std::cout << "Read: " << self -> input << '\n';
+		std::cerr << "From south server: \n";
+		std::cerr << "Read: " << self -> input << '\n';
 
 		self->input = self->getUBJSONFromQuery(self->input);
 		self->server_stream << self->input;

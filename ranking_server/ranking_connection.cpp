@@ -78,8 +78,10 @@ void RankingConnection::start()
 						while ( true ) // TODO wrap fetching into a stream
 						{
 							//Read answer
+							std::cerr << "Waiting for another document\n";
 							auto res = reader.getNextValue();
-							std::cerr << "Came another doc from index server: " << ubjson::to_ostream(res) << '\n';
+							std::cerr << "Came another doc from index server: ";
+							std::cerr << ubjson::to_ostream(res) << '\n';
 						
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
@@ -99,38 +101,54 @@ void RankingConnection::start()
 							{
 								std::cerr << "Entering lock\n";
 								std::lock_guard<std::mutex> lock(docs_mutex);
-								for(const auto& doc: res["docs"])
-								{									
-									auto docid = static_cast<const DocID&>(doc["docid"]);
-									download_counter += 1;
+								try
+								{
+									for(const auto& doc: res["docs"])
 									{
-//										std::lock_guard<std::mutex> lock(mdr_mutex);
-										std::cerr << "Mdr updaing\n";
-										Mdr -= c[text_id] * text["factor"].get<double>();
-										std::cerr << "Cold: " << c[text_id] << "\n";
-										c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
-										std::cerr << "Cnew: " << c[text_id] << "\n";
-										Mdr += c[text_id] * text["factor"].get<double>();
-									}
+										DocID docid = "default-doc-id";
+										try
+										{
+											docid = static_cast<const DocID&>(doc["docid"]);
+										}
+										catch (std::exception& e)
+										{
+											std::cerr << "!!!!!" << docid << '\n';
+										}
+										download_counter += 1;
+										{
+	//										std::lock_guard<std::mutex> lock(mdr_mutex);
+											std::cerr << "Mdr updaing\n";
+											Mdr -= c[text_id] * text["factor"].get<double>();
+											std::cerr << "Cold: " << c[text_id] << "\n";
+											c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
+											std::cerr << "Cnew: " << c[text_id] << "\n";
+											Mdr += c[text_id] * text["factor"].get<double>();
+										}
 
-									if (is_end)
-									{
-										std::cerr << "Thread is going to finish\n";
-										break;
-									}
+										if (is_end)
+										{
+											std::cerr << "Thread is going to finish\n";
+											break;
+										}
 
-									for ( const auto& doc: docs )
-									{
-							//			std::cerr << "DocID: " << doc.first << '\n';
-//										std::cerr << ubjson::to_ostream(doc.second) << '\n';
+											if(docs.find(docid) == docs.end())
+											{
+												docs[docid] = doc;
+											}
+										try
+										{
+											docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
+										}
+										catch (std::exception& e)
+										{
+											std::cerr << "!!!!Found problem in increment: " << e.what() << '\n';
+										}
+	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 									}
-
-									if(docs.find(docid) == docs.end())
-									{
-										docs[docid] = doc;
-									}
-									docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
-//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
+								}
+								catch (std::exception& e)
+								{
+									std::cerr << "!!!! Problem in for: " << e.what() << '\n';
 								}
 								std::cerr << "Leaving lock\n";
 							}
@@ -163,19 +181,19 @@ void RankingConnection::start()
 				double tmpMdr;
 				{
 //					std::lock_guard<std::mutex> lock(mdr_mutex);
-					std::cerr << "Entering mdr lock\n";
+//					std::cerr << "Entering mdr lock\n";
 					std::lock_guard<std::mutex> lock(docs_mutex);
-					std::cerr << "Leaving mdr lock\n";
+//					std::cerr << "Leaving mdr lock\n";
 					tmpMdr = Mdr;
 				}
 
-				std::cerr << "Mdr " << tmpMdr << '\n';
+//				std::cerr << "Mdr " << tmpMdr << '\n';
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
 				double min_diff = 0;
-				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
+//				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
 				if ( docs_top.topSize() >= 2 )
 				{
 					std::lock_guard<std::mutex> lock(docs_mutex);
@@ -197,8 +215,8 @@ void RankingConnection::start()
 					--end;
 					auto lastAndOne = docs_top.upper_bound(end -> first);
 
-					std::cerr << "Distance: " << std::distance(docs_top.allBegin(), lastAndOne) << '\n';
-					std::cerr << "All size: " << docs_top.size() << '\n';
+//					std::cerr << "Distance: " << std::distance(docs_top.allBegin(), lastAndOne) << '\n';
+//					std::cerr << "All size: " << docs_top.size() << '\n';
 					
 					auto it2 = lastAndOne;
 					//it2--;
@@ -210,15 +228,15 @@ void RankingConnection::start()
 						++it;
 						double next = it -> first;
 						
-						std::cerr << "DIFF: " << cur - next << '\n';
-						std::cerr << "CUR: " << cur << '\n';
+//						std::cerr << "DIFF: " << cur - next << '\n';
+//						std::cerr << "CUR: " << cur << '\n';
 
 						if ( min_diff > cur - next )
 							min_diff = cur - next;
 					}
 				}
 
-				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
+//				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
 				if ( min_diff >= C3 * tmpMdr && (docs_top.topSize() >= request["amount"].asInt() || tmpMdr == 0)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";

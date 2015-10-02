@@ -7,7 +7,7 @@
 #include <defines.hpp>
 
 using boost::asio::ip::tcp;
-using DocID = long long;
+using DocID = std::string;
 
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
 {
@@ -20,8 +20,8 @@ void IndexConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->ranking_stream);
 		auto request = reader.getNextValue();
 
-//		std::cout << "From index server: \n";
-//		std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
+		std::cerr << "Read json: " << ubjson::to_ostream(request) << '\n';
+		std::cout << "Index: Read json: " << ubjson::to_ostream(request) << '\n';
 
 		if(request["query"].isNull())
 			return;
@@ -36,39 +36,46 @@ void IndexConnection::start()
 		auto index_id = static_cast<std::string>(request["index_id"]);
 		std::ifstream in("index_" + index_id + ".dat");
 
-		std::cout << "From index server: \n";
-		std::cout << "Index id: " << index_id << '\n';
+		std::cerr << "Index id: " << index_id << '\n';
 
+		std::cerr << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
+		std::cerr << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
 
-//		std::cerr << "Pizdoh before loop\n";
+		std::cerr << "Before loop\n";
 		bool read_file = false;
 		while ( !read_file )
 		{
-//			std::cerr << "Ne pizdoh in loop\n";
+			std::cerr << "In loop. Index is ok.\n";
 			ubjson::Value result;
 			int amount = 0;
 			std::vector<ubjson::Value> docs;
 
 			while ( amount < packet_size )
 			{
+				std::cerr << "Decided to get more words: got " << amount << " of " << packet_size << "\n";
 				std::string word;
 				DocID doc_id;
 				double correspondence;
 
 				if ( in >> word >> doc_id >> correspondence )
-				{
+				{				
 					std::cerr << "Word " << word << " read\n";
+
+					std::cerr << "DOCID " << doc_id << " read\n";
+					std::cerr << "Correspondence " << correspondence << " read\n";
 					if (word == static_cast<std::string>(request["query"]))
 					{
 						std::cerr << "Word " << word << " accepted\n";
 //						std::cout << "From index server: \n";
-//						std::cout << "Doc id: " << doc_id << '\n';
+						std::cerr << "Doc id: " << doc_id << '\n';
 
 						ubjson::Value doc;
 						doc["docid"] = doc_id;
 						doc["correspondence"] = correspondence * normalizing_constant;
-						doc["docname"] = std::to_string(doc_id);
-						doc["url"] = "google.com/" + std::to_string(doc_id);
+//						doc["docname"] = std::to_string(doc_id);
+						doc["docname"] = doc_id;
+//						doc["url"] = "google.com/" + std::to_string(doc_id);
+						doc["url"] = "google.com/" + doc_id;
 
 						docs.push_back(doc);
 						amount += 1;
@@ -85,9 +92,12 @@ void IndexConnection::start()
 				result["docs"].push_back(d);
 
 			result["amount"] = amount;
+			std::cerr << "Amount: " << result["amount"].asInt() << '\n';
 
 			//answer is formed
+			std::cerr << "Writing output to ranking server\n";
 			writer.writeValue(result);
+			std::cerr << "Wrote output to ranking server\n";
 		}
 	}).detach();
 }

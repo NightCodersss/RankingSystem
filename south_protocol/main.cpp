@@ -6,6 +6,9 @@
 
 int main()
 {
+	freopen("log.log", "w", stderr);
+	std::cerr << "Log begin\n";
+
     try
     {
         boost::asio::io_service io_service;
