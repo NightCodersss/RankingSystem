@@ -7,7 +7,7 @@
 #include <defines.hpp>
 
 using boost::asio::ip::tcp;
-using DocID = std::string;
+using DocID = long long;
 
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
 {
@@ -29,7 +29,8 @@ void IndexConnection::start()
 		// TODO: move to config
 		int packet_size = 1;
 
-		double normalizing_constant = 1e-4; // Cut off this kludge
+//		double normalizing_constant = 1e-4; // Cut off this kludge
+		double normalizing_constant = 1; 
 
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 
@@ -72,10 +73,8 @@ void IndexConnection::start()
 						ubjson::Value doc;
 						doc["docid"] = doc_id;
 						doc["correspondence"] = correspondence * normalizing_constant;
-//						doc["docname"] = std::to_string(doc_id);
-						doc["docname"] = doc_id;
-//						doc["url"] = "google.com/" + std::to_string(doc_id);
-						doc["url"] = "google.com/" + doc_id;
+						doc["docname"] = std::to_string(doc_id);
+						doc["url"] = "google.com/" + std::to_string(doc_id);
 
 						docs.push_back(doc);
 						amount += 1;

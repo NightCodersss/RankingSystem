@@ -11,7 +11,7 @@
 #include <config_loader.hpp>
 
 using boost::asio::ip::tcp;
-using DocID = std::string;
+using DocID = long long;
 using TextID = std::string;
 
 class RankingConnection : public std::enable_shared_from_this<RankingConnection>

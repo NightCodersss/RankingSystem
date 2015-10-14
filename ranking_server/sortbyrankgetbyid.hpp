@@ -5,20 +5,6 @@
 #include <set>
 #include <string>
 
-namespace std
-{
-	template <> 
-	class numeric_limits<std::string>
-	{
-	public:
-		static std::string max()
-		{
-			static const std::string max_string = std::string(1000, 255);
-			return max_string;
-		}
-	};
-}
-
 template <typename ID, typename Rank>
 class SortByRankGetById
 {

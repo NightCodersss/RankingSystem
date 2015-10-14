@@ -105,15 +105,7 @@ void RankingConnection::start()
 								{
 									for(const auto& doc: res["docs"])
 									{
-										DocID docid = "default-doc-id";
-										try
-										{
-											docid = static_cast<const DocID&>(doc["docid"]);
-										}
-										catch (std::exception& e)
-										{
-											std::cerr << "!!!!!" << docid << '\n';
-										}
+										DocID docid = static_cast<const DocID&>(doc["docid"]);
 										download_counter += 1;
 										{
 	//										std::lock_guard<std::mutex> lock(mdr_mutex);
@@ -131,18 +123,11 @@ void RankingConnection::start()
 											break;
 										}
 
-											if(docs.find(docid) == docs.end())
-											{
-												docs[docid] = doc;
-											}
-										try
+										if(docs.find(docid) == docs.end())
 										{
-											docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
+											docs[docid] = doc;
 										}
-										catch (std::exception& e)
-										{
-											std::cerr << "!!!!Found problem in increment: " << e.what() << '\n';
-										}
+										docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
 	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 									}
 								}
@@ -172,11 +157,11 @@ void RankingConnection::start()
 //			}
 
 
-			double C3 = 1.;
+//			double C3 = 1.;
+			double C3 = 0.06;
 
 			do 
 			{
-				//std::cerr << "OLOLO TROLOLO\n";
 				std::this_thread::yield();
 				double tmpMdr;
 				{
@@ -187,13 +172,13 @@ void RankingConnection::start()
 					tmpMdr = Mdr;
 				}
 
-//				std::cerr << "Mdr " << tmpMdr << '\n';
+				std::cerr << "Mdr " << tmpMdr << '\n';
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
 				double min_diff = 0;
-//				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
+				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
 				if ( docs_top.topSize() >= 2 )
 				{
 					std::lock_guard<std::mutex> lock(docs_mutex);
@@ -221,7 +206,10 @@ void RankingConnection::start()
 					auto it2 = lastAndOne;
 					//it2--;
 					min_diff = 1e100;
-
+					std::cerr << "Minndiff searching\n";
+				
+					const double eps = 1e-4;
+				
 					for ( auto it = docs_top.allBegin(); it != it2; )
 					{
 						double cur = it -> first;					
@@ -231,13 +219,19 @@ void RankingConnection::start()
 //						std::cerr << "DIFF: " << cur - next << '\n';
 //						std::cerr << "CUR: " << cur << '\n';
 
-						if ( min_diff > cur - next )
+						if ( cur > next + eps && min_diff > cur - next )
+						{
 							min_diff = cur - next;
+							std::cerr << "Updated mindiff " << cur << ' ' << next << ' ' << cur - next << '\n';
+						}
 					}
 				}
 
-//				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
-				if ( min_diff >= C3 * tmpMdr && (docs_top.topSize() >= request["amount"].asInt() || tmpMdr == 0)) // won't swap we have got all documents we want and we can
+				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
+				std::cerr << "Is diff larger that C3 * Mdr: " << std::boolalpha << (min_diff >= C3 * tmpMdr) << '\n';
+				std::cerr << "Is mdr 0: " << std::boolalpha << (tmpMdr == 0) << '\n';
+				const double eps = 1e-10;
+				if ( min_diff >= C3 * tmpMdr && (docs_top.topSize() >= request["amount"].asInt() || fabs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
 					is_end = true;
