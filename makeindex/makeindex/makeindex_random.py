@@ -12,7 +12,7 @@ def generate_file(number_of_docs, r):
 
 	n = len(cs)
 
-	files = [open('index_{}.dat'.format(i), 'w') for i in range(n)]
+	files = [open('index.{}.index'.format(i), 'w') for i in range(n)]
 	checkfile = open('checkfile', 'w')
 
 	for d in range(number_of_docs):		
@@ -28,7 +28,7 @@ def generate_file(number_of_docs, r):
 def read_cs(filename):
 	return map(float, open(filename, 'r').readline().split(' '))
 
-cs = read_cs("generating_config")
+cs = read_cs("makeindex_random.config")
 
 def gen_rank(d):
 	return d**(-1.2)
