@@ -4,7 +4,6 @@
 #include "../UbjsonCpp/include/value.hpp"
 #include "../UbjsonCpp/include/stream_reader.hpp"
 #include "../UbjsonCpp/include/stream_writer.hpp"
-#include <defines.hpp>
 
 using boost::asio::ip::tcp;
 using DocID = long long;
