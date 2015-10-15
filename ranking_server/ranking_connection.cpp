@@ -3,6 +3,7 @@
 #include <thread>
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
+#include <bitset>
 #include "sortbyrankgetbyidwithtop.hpp"
 
 using boost::asio::ip::tcp;
@@ -13,6 +14,25 @@ RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io
 } 
 
 //TODO check the validity of config
+
+const int TextCount = 10;
+
+struct Doc
+{
+	ubjson::Value doc;
+	std::bitset<TextCount> got;
+	double mdr = 1;
+	void update(json const& config, auto const& c) // TODO cut this shit out
+	{
+		int text_index = 0;
+		mdr = 0;
+		for ( const auto& text: config["texts"] )
+		{
+			auto text_id = text["index_id"].get<TextID>();
+			mdr += c.at(text_id) * !got[text_index];
+		}
+	}
+};
  
 void RankingConnection::start()
 {
@@ -30,7 +50,7 @@ void RankingConnection::start()
 			self->index_results.clear();
 
 			//TODO memory leak
-			auto& docs = *new std::map<DocID, ubjson::Value>(); //docid, doc
+			auto& docs = *new std::map<DocID, Doc>(); //docid, doc
 			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(0, 0); // TODO set top_const, bottom_const
 			auto& docs_mutex = *new std::mutex;
 			auto& mdr_mutex = *new std::mutex;
@@ -52,9 +72,10 @@ void RankingConnection::start()
 				c[text_id] = 1.;
 			}
 
+			int text_index = 0;
 			for(const auto& text: self->config["texts"])
 			{
-				self->index_results.push_back(std::async(std::launch::async, [&, request, text](){
+				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){
 					try
 					{	
 						int server_index = 0;
@@ -80,7 +101,7 @@ void RankingConnection::start()
 							//Read answer
 							std::cerr << "Waiting for another document\n";
 							auto res = reader.getNextValue();
-							std::cerr << "Came another doc from index server: ";
+							std::cerr << "Came another doc from index server " << text_id << text_index << ": ";
 							std::cerr << ubjson::to_ostream(res) << '\n';
 						
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
@@ -125,8 +146,9 @@ void RankingConnection::start()
 
 										if(docs.find(docid) == docs.end())
 										{
-											docs[docid] = doc;
+											docs[docid].doc = doc;
 										}
+										docs[docid].got[text_index] = 1;
 										docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
 	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 									}
@@ -149,16 +171,13 @@ void RankingConnection::start()
 						std::cerr << "!!!!!! " << e.what() << '\n';
 					}
 				}));
+				text_index++;
 			}
 
-//			for ( auto& fut : self->index_results )
-//			{
-//				fut.wait();
-//			}
 
 
-//			double C3 = 1.;
-			double C3 = 0.06;
+			double C3 = 1.;
+			double max_swap_prob = 0.7;
 
 			do 
 			{
@@ -177,7 +196,7 @@ void RankingConnection::start()
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
-				double min_diff = 0;
+				double swap_prob = 0;
 				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
 				if ( docs_top.topSize() >= 2 )
 				{
@@ -192,7 +211,6 @@ void RankingConnection::start()
 						auto new_top_const = last_in_top -> first;
 						docs_top.setTopConst(new_top_const);
 						docs_top.setBottomConst(new_top_const - tmpMdr);
-						// TODO check cutoff
 						docs_top.cutOff();
 					}
 
@@ -204,34 +222,45 @@ void RankingConnection::start()
 //					std::cerr << "All size: " << docs_top.size() << '\n';
 					
 					auto it2 = lastAndOne;
-					//it2--;
-					min_diff = 1e100;
-					std::cerr << "Minndiff searching\n";
+					swap_prob = 0;
 				
-					const double eps = 1e-4;
+					const double eps = 1e-6;
 				
 					for ( auto it = docs_top.allBegin(); it != it2; )
 					{
-						double cur = it -> first;					
-						++it;
-						double next = it -> first;
+						docs[it -> second].update(self->config, c);
+						double x1 = it -> first;					
+						double dx1 = docs[it -> second].mdr;
 						
-//						std::cerr << "DIFF: " << cur - next << '\n';
-//						std::cerr << "CUR: " << cur << '\n';
+						++it;
+						
+						docs[it -> second].update(self->config, c);
+						double x2 = it -> first;
+						double dx2 = docs[it -> second].mdr;
+						
+						double M = std::min(x1 + dx1, x2 + dx2);
+						double m = std::max(x1, x2);
 
-						if ( cur > next + eps && min_diff > cur - next )
-						{
-							min_diff = cur - next;
-							std::cerr << "Updated mindiff " << cur << ' ' << next << ' ' << cur - next << '\n';
-						}
+						double this_swap_prob;
+
+						if(std::abs(dx1) > eps && std::abs(dx2) > eps)
+							this_swap_prob = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
+						else if (std::abs(dx1) < eps)
+							this_swap_prob = 0;
+						else 
+							this_swap_prob = (x1 + dx1 - x2) / dx1;
+
+						if (this_swap_prob < 0)
+							this_swap_prob = 0;
+
+						swap_prob += this_swap_prob;
 					}
 				}
 
-				std::cerr << "Min_diff: " << min_diff << "\nMdr: " << tmpMdr << "\n";
-				std::cerr << "Is diff larger that C3 * Mdr: " << std::boolalpha << (min_diff >= C3 * tmpMdr) << '\n';
-				std::cerr << "Is mdr 0: " << std::boolalpha << (tmpMdr == 0) << '\n';
+				std::cerr << "Swap probability: " << swap_prob << '\n';
+
 				const double eps = 1e-10;
-				if ( min_diff >= C3 * tmpMdr && (docs_top.topSize() >= request["amount"].asInt() || fabs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
+				if ( swap_prob < max_swap_prob && (docs_top.topSize() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
 					is_end = true;
@@ -247,8 +276,8 @@ void RankingConnection::start()
 			{
 //				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
 //				std::cerr << "Doc rank: " << doc.first << '\n';
-				docs[doc.second]["rank"] = doc.first;
-				answer["docs"].push_back(docs[doc.second]);
+				docs[doc.second].doc["rank"] = doc.first;
+				answer["docs"].push_back(docs[doc.second].doc);
 				++res_size;
 				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
 					break;

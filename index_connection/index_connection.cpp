@@ -29,8 +29,8 @@ void IndexConnection::start()
 		// TODO: move to config
 		int packet_size = 1;
 
-//		double normalizing_constant = 1e-4; // Cut off this kludge
-		double normalizing_constant = 1; 
+		double normalizing_constant = 1e-4; // Cut off this kludge
+//		double normalizing_constant = 1; 
 
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 

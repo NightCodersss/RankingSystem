@@ -18,7 +18,7 @@ def generate_file(number_of_docs, r):
 	for d in range(number_of_docs):		
 		lambdas = generate_lambda(cs, r(d+1)) # monotonal 
 #		(lambdas, r) = generate_lambda(K)
-		map(lambda (f, l): f.write("Fairytale {} {}\n".format(d, l)), zip(files, lambdas))
+		map(lambda (f, l): f.write("Fairytale {} {}\n".format(d, 10000 * l)), zip(files, lambdas))
 		checkfile.write("{} {}\n".format(d, r(d+1)))
 	
 	checkfile.close()
