@@ -1,0 +1,8 @@
+*.index
+*.dat
+*.datbackup
+*.log
+*.txt
+idfile
+idfilecheck
+checkfile
