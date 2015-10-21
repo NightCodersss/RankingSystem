@@ -42,6 +42,8 @@ private:
  
 	struct RankingSystemData
 	{
+		RankingSystemData() = default;
+		RankingSystemData(config_type const& config);
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
 		std::mutex docs_mutex;
@@ -52,10 +54,11 @@ private:
 		std::map<TextID, double> c;
 	};
 
-	RankingSystemData data;
+
     RankingConnection(boost::asio::io_service& io_service, const config_type& config);
 
 	const config_type& config;
+	RankingSystemData data; // NOTE: defined here but not locally in main lambda becuse it need to be on the heap
 	SocketStream south_stream;
 	std::vector<std::future<void>> index_results;
 };

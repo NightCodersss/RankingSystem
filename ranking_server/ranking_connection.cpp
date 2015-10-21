@@ -15,6 +15,20 @@ RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io
 
 //TODO check the validity of config
 
+RankingConnection::RankingSystemData::RankingSystemData(config_type const& config)
+{
+	//Sum of 𝛎's
+	Mdr = 0.;
+
+	for ( const auto& text: config["texts"] )
+	{
+		auto text_id = text["index_id"].get<TextID>();
+		c[text_id] = 1.;
+		Mdr += text["factor"].get<double>();
+	}
+
+}
+
 void RankingConnection::Doc::update(json const& config, auto const& c)
 {
 	int text_index = 0;
@@ -43,19 +57,6 @@ void RankingConnection::start()
 			self->index_results.clear();
 
 	
-			//Sum of 𝛎's
-			self->data.Mdr = std::accumulate(std::begin(self->config["texts"]), std::end(self->config["texts"]), 0.0, 
-			[] (double acc, json text)
-			{
-				return acc += text["factor"].get<double>();
-			}); 
-
-			for ( const auto& text: self->config["texts"] )
-			{
-				auto text_id = text["index_id"].get<TextID>();
-				self->data.c[text_id] = 1.;
-			}
-
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
 			{
@@ -285,6 +286,6 @@ void RankingConnection::start()
 	}).detach();
 }
 
-RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config): config(config) 
+RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config): config(config), data(config)
 {
 }
