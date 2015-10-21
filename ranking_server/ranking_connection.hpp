@@ -16,6 +16,8 @@ using boost::asio::ip::tcp;
 using DocID = long long;
 using TextID = std::string;
 
+using TextIndex = int;
+		
 class RankingConnection : public std::enable_shared_from_this<RankingConnection>
 {
 	friend class RankingServer;
@@ -34,8 +36,11 @@ private:
 	{
 		static const int TextCount = 10;
 
+		Doc(const ubjson::Value& d);
+		Doc() = default;
+
 		ubjson::Value doc;
-		std::bitset<TextCount> got;
+		std::bitset<TextCount> got = { };
 		double mdr = 1;
 		void update(json const& config, auto const& c); // TODO cut this shit out
 	};
@@ -44,6 +49,10 @@ private:
 	{
 		RankingSystemData() = default;
 		RankingSystemData(config_type const& config);
+
+		void update_C(TextID text_id, double factor, double new_val); 
+		void insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta);
+
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
 		std::mutex docs_mutex;

@@ -28,6 +28,30 @@ RankingConnection::RankingSystemData::RankingSystemData(config_type const& confi
 	}
 
 }
+void RankingConnection::RankingSystemData::update_C(TextID text_id, double factor, double new_val)
+{
+	Mdr -= c[text_id] * factor;
+	c[text_id] = new_val;
+	Mdr += c[text_id] * factor;
+}
+		
+void RankingConnection::RankingSystemData::insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta)
+{
+	if(docs.find(docid) == docs.end())
+	{
+		docs[docid] = doc;
+	}
+	if (!docs[docid].got[text_index])
+	{
+		docs[docid].got[text_index] = 1;
+		docs_top.increment(docid, delta);
+	}
+}
+
+RankingConnection::Doc::Doc(const ubjson::Value& d) : doc(d)
+{
+
+}
 
 void RankingConnection::Doc::update(json const& config, auto const& c)
 {
@@ -92,9 +116,7 @@ void RankingConnection::start()
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
 								std::cerr << "Amount is zero. Changing c to 0.\n"; 
-								self->data.Mdr -= self->data.c[text_id] * text["factor"].get<double>();
-								self->data.c[text_id] = 0;
-								self->data.Mdr += self->data.c[text_id] * text["factor"].get<double>();
+								self->data.update_C(text_id, text["factor"].get<double>(), 0);
 								std::cerr << "Thread is going to finish\n";
 								break;
 							}
@@ -116,11 +138,9 @@ void RankingConnection::start()
 										{
 	//										std::lock_guard<std::mutex> lock(mdr_mutex);
 											std::cerr << "Mdr updaing\n";
-											self->data.Mdr -= self->data.c[text_id] * text["factor"].get<double>();
-											std::cerr << "Cold: " << self->data.c[text_id] << "\n";
-											self->data.c[text_id] = std::min(self->data.c[text_id], static_cast<double>(doc["correspondence"]));
-											std::cerr << "Cnew: " << self->data.c[text_id] << "\n";
-											self->data.Mdr += self->data.c[text_id] * text["factor"].get<double>();
+											self->data.update_C(text_id
+											                  , text["factor"].get<double>()
+															  , std::min(self->data.c[text_id], static_cast<double>(doc["correspondence"])));
 										}
 
 										if (self->data.is_end)
@@ -129,12 +149,7 @@ void RankingConnection::start()
 											break;
 										}
 
-										if(self->data.docs.find(docid) == self->data.docs.end())
-										{
-											self->data.docs[docid].doc = doc;
-										}
-										self->data.docs[docid].got[text_index] = 1;
-										self->data.docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
+										self->data.insertText(docid, text_index, Doc(doc), static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
 	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 									}
 								}
