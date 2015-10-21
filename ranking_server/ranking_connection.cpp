@@ -122,7 +122,7 @@ void RankingConnection::start()
 							}
 
 							// Adding necessary information for next processing
-							res["factor"] = text["factor"].get<double>();
+							double text_factor = text["factor"].get<double>();
 
 							//Async processing
 							// TODO Lock-free
@@ -134,13 +134,12 @@ void RankingConnection::start()
 									for(const auto& doc: res["docs"])
 									{
 										DocID docid = static_cast<const DocID&>(doc["docid"]);
+										double correspondence = static_cast<double>(doc["correspondence"]);
 										self->data.download_counter += 1;
 										{
 	//										std::lock_guard<std::mutex> lock(mdr_mutex);
-											std::cerr << "Mdr updaing\n";
-											self->data.update_C(text_id
-											                  , text["factor"].get<double>()
-															  , std::min(self->data.c[text_id], static_cast<double>(doc["correspondence"])));
+											std::cerr << "Mdr updating\n";
+											self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], correspondence));
 										}
 
 										if (self->data.is_end)
@@ -149,8 +148,7 @@ void RankingConnection::start()
 											break;
 										}
 
-										self->data.insertText(docid, text_index, Doc(doc), static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
-	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
+										self->data.insertText(docid, text_index, Doc(doc), text_factor * correspondence);
 									}
 								}
 								catch (std::exception& e)
@@ -173,8 +171,6 @@ void RankingConnection::start()
 				}));
 				text_index++;
 			}
-
-
 
 			double C3 = 1.;
 			double max_swap_prob = 0.7;
