@@ -32,9 +32,11 @@ void IndexConnection::start()
 //		double normalizing_constant = 1; 
 
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
-
+		
+		
+		std::string current_index_path = "/home/asio/rankingsystem/current_index/";		
 		auto index_id = static_cast<std::string>(request["index_id"]);
-		std::ifstream in("index_" + index_id + ".dat");
+		std::ifstream in(current_index_path + "index." + index_id + ".index");
 
 		std::cerr << "Index id: " << index_id << '\n';
 

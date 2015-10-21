@@ -4,39 +4,32 @@
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
 #include <bitset>
-#include "sortbyrankgetbyidwithtop.hpp"
 
 using boost::asio::ip::tcp;
 
 RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config)
 {
+	std::cerr << "Connection creating\n";
     return pointer(new RankingConnection(io_service, config));
 } 
 
 //TODO check the validity of config
 
-const int TextCount = 10;
-
-struct Doc
+void RankingConnection::Doc::update(json const& config, auto const& c)
 {
-	ubjson::Value doc;
-	std::bitset<TextCount> got;
-	double mdr = 1;
-	void update(json const& config, auto const& c) // TODO cut this shit out
+	int text_index = 0;
+	mdr = 0;
+	for ( const auto& text: config["texts"] )
 	{
-		int text_index = 0;
-		mdr = 0;
-		for ( const auto& text: config["texts"] )
-		{
-			auto text_id = text["index_id"].get<TextID>();
-			mdr += c.at(text_id) * !got[text_index];
-		}
+		auto text_id = text["index_id"].get<TextID>();
+		mdr += c.at(text_id) * !got[text_index];
 	}
-};
- 
+}
+
 void RankingConnection::start()
 {
 	std::thread([self = shared_from_this()]() {
+		std::cerr << "Thread of connection has been started\n";
 		try
 		{
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
@@ -49,27 +42,18 @@ void RankingConnection::start()
 				return;
 			self->index_results.clear();
 
-			//TODO memory leak
-			auto& docs = *new std::map<DocID, Doc>(); //docid, doc
-			auto& docs_top = *new SortByRankGetByIdWithTop<DocID, double>(0, 0); // TODO set top_const, bottom_const
-			auto& docs_mutex = *new std::mutex;
-			auto& mdr_mutex = *new std::mutex;
-			bool& is_end = *new bool(false); //NOTE: maybe use std::atomic_flag
-
-			int& download_counter = *new int(0);
 	
 			//Sum of 𝛎's
-			auto& Mdr = *new double(std::accumulate(std::begin(self->config["texts"]), std::end(self->config["texts"]), 0.0, 
+			self->data.Mdr = std::accumulate(std::begin(self->config["texts"]), std::end(self->config["texts"]), 0.0, 
 			[] (double acc, json text)
 			{
 				return acc += text["factor"].get<double>();
-			})); 
-			auto& c = *new std::map<TextID, double>();
+			}); 
 
 			for ( const auto& text: self->config["texts"] )
 			{
 				auto text_id = text["index_id"].get<TextID>();
-				c[text_id] = 1.;
+				self->data.c[text_id] = 1.;
 			}
 
 			int text_index = 0;
@@ -107,9 +91,9 @@ void RankingConnection::start()
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
 								std::cerr << "Amount is zero. Changing c to 0.\n"; 
-								Mdr -= c[text_id] * text["factor"].get<double>();
-								c[text_id] = 0;
-								Mdr += c[text_id] * text["factor"].get<double>();
+								self->data.Mdr -= self->data.c[text_id] * text["factor"].get<double>();
+								self->data.c[text_id] = 0;
+								self->data.Mdr += self->data.c[text_id] * text["factor"].get<double>();
 								std::cerr << "Thread is going to finish\n";
 								break;
 							}
@@ -121,35 +105,35 @@ void RankingConnection::start()
 							// TODO Lock-free
 							{
 								std::cerr << "Entering lock\n";
-								std::lock_guard<std::mutex> lock(docs_mutex);
+								std::lock_guard<std::mutex> lock(self->data.docs_mutex);
 								try
 								{
 									for(const auto& doc: res["docs"])
 									{
 										DocID docid = static_cast<const DocID&>(doc["docid"]);
-										download_counter += 1;
+										self->data.download_counter += 1;
 										{
 	//										std::lock_guard<std::mutex> lock(mdr_mutex);
 											std::cerr << "Mdr updaing\n";
-											Mdr -= c[text_id] * text["factor"].get<double>();
-											std::cerr << "Cold: " << c[text_id] << "\n";
-											c[text_id] = std::min(c[text_id], static_cast<double>(doc["correspondence"]));
-											std::cerr << "Cnew: " << c[text_id] << "\n";
-											Mdr += c[text_id] * text["factor"].get<double>();
+											self->data.Mdr -= self->data.c[text_id] * text["factor"].get<double>();
+											std::cerr << "Cold: " << self->data.c[text_id] << "\n";
+											self->data.c[text_id] = std::min(self->data.c[text_id], static_cast<double>(doc["correspondence"]));
+											std::cerr << "Cnew: " << self->data.c[text_id] << "\n";
+											self->data.Mdr += self->data.c[text_id] * text["factor"].get<double>();
 										}
 
-										if (is_end)
+										if (self->data.is_end)
 										{
 											std::cerr << "Thread is going to finish\n";
 											break;
 										}
 
-										if(docs.find(docid) == docs.end())
+										if(self->data.docs.find(docid) == self->data.docs.end())
 										{
-											docs[docid].doc = doc;
+											self->data.docs[docid].doc = doc;
 										}
-										docs[docid].got[text_index] = 1;
-										docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
+										self->data.docs[docid].got[text_index] = 1;
+										self->data.docs_top.increment(docid, static_cast<double>(res["factor"]) * static_cast<double>(doc["correspondence"]));
 	//									std::cerr << "Top size: " << docs_top.topSize() << '\n';
 									}
 								}
@@ -159,7 +143,7 @@ void RankingConnection::start()
 								}
 								std::cerr << "Leaving lock\n";
 							}
-							if (is_end)
+							if (self->data.is_end)
 							{
 								std::cerr << "Thread is going to finish\n";
 								break;
@@ -186,9 +170,9 @@ void RankingConnection::start()
 				{
 //					std::lock_guard<std::mutex> lock(mdr_mutex);
 //					std::cerr << "Entering mdr lock\n";
-					std::lock_guard<std::mutex> lock(docs_mutex);
+					std::lock_guard<std::mutex> lock(self->data.docs_mutex);
 //					std::cerr << "Leaving mdr lock\n";
-					tmpMdr = Mdr;
+					tmpMdr = self->data.Mdr;
 				}
 
 				std::cerr << "Mdr " << tmpMdr << '\n';
@@ -197,26 +181,26 @@ void RankingConnection::start()
 				//TODO change top_const if docs_top.topSize() >= n
 	
 				double swap_prob = 0;
-				std::cerr << "docs_top: " << docs_top.topSize() << "\n";
-				if ( docs_top.topSize() >= 2 )
+				std::cerr << "docs_top: " << self->data.docs_top.topSize() << "\n";
+				if ( self->data.docs_top.topSize() >= 2 )
 				{
-					std::lock_guard<std::mutex> lock(docs_mutex);
-					if ( docs_top.topSize() >= request["amount"].asInt() )
+					std::lock_guard<std::mutex> lock(self->data.docs_mutex);
+					if ( self->data.docs_top.topSize() >= request["amount"].asInt() )
 					{
-						auto last_in_top = docs_top.end();
+						auto last_in_top = self->data.docs_top.end();
 
-						for (int i = 0; i < docs_top.topSize() - request["amount"].asInt() + 1; ++i)
+						for (int i = 0; i < self->data.docs_top.topSize() - request["amount"].asInt() + 1; ++i)
 							--last_in_top;
 
 						auto new_top_const = last_in_top -> first;
-						docs_top.setTopConst(new_top_const);
-						docs_top.setBottomConst(new_top_const - tmpMdr);
-						docs_top.cutOff();
+						self->data.docs_top.setTopConst(new_top_const);
+						self->data.docs_top.setBottomConst(new_top_const - tmpMdr);
+						self->data.docs_top.cutOff();
 					}
 
-					auto end = docs_top.end(); // End of top
+					auto end = self->data.docs_top.end(); // End of top
 					--end;
-					auto lastAndOne = docs_top.upper_bound(end -> first);
+					auto lastAndOne = self->data.docs_top.upper_bound(end -> first);
 
 //					std::cerr << "Distance: " << std::distance(docs_top.allBegin(), lastAndOne) << '\n';
 //					std::cerr << "All size: " << docs_top.size() << '\n';
@@ -226,17 +210,17 @@ void RankingConnection::start()
 				
 					const double eps = 1e-6;
 				
-					for ( auto it = docs_top.allBegin(); it != it2; )
+					for ( auto it = self->data.docs_top.allBegin(); it != it2; )
 					{
-						docs[it -> second].update(self->config, c);
+						self->data.docs[it -> second].update(self->config, self->data.c);
 						double x1 = it -> first;					
-						double dx1 = docs[it -> second].mdr;
+						double dx1 = self->data.docs[it -> second].mdr;
 						
 						++it;
 						
-						docs[it -> second].update(self->config, c);
+						self->data.docs[it -> second].update(self->config, self->data.c);
 						double x2 = it -> first;
-						double dx2 = docs[it -> second].mdr;
+						double dx2 = self->data.docs[it -> second].mdr;
 						
 						double M = std::min(x1 + dx1, x2 + dx2);
 						double m = std::max(x1, x2);
@@ -260,24 +244,24 @@ void RankingConnection::start()
 				std::cerr << "Swap probability: " << swap_prob << '\n';
 
 				const double eps = 1e-10;
-				if ( swap_prob < max_swap_prob && (docs_top.topSize() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
+				if ( swap_prob < max_swap_prob && (self->data.docs_top.topSize() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
-					is_end = true;
+					self->data.is_end = true;
 				}
 
-			} while ( !is_end );
+			} while ( !self->data.is_end );
 			
 			std::size_t res_size = 0;
 			ubjson::Value answer;
 
 			std::cerr << "Forming answer\n";
-			for(const auto& doc: docs_top)
+			for(const auto& doc: self->data.docs_top)
 			{
 //				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
 //				std::cerr << "Doc rank: " << doc.first << '\n';
-				docs[doc.second].doc["rank"] = doc.first;
-				answer["docs"].push_back(docs[doc.second].doc);
+				self->data.docs[doc.second].doc["rank"] = doc.first;
+				answer["docs"].push_back(self->data.docs[doc.second].doc);
 				++res_size;
 				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
 					break;
@@ -287,7 +271,7 @@ void RankingConnection::start()
 			//answer is formed
 
 			std::cerr << "Sending formed answer: \n";
-			std::cerr << "Downloaded documents: " << download_counter << '\n';
+			std::cerr << "Downloaded documents: " << self->data.download_counter << '\n';
 
 			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
 			writer.writeValue(answer);
