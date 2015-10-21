@@ -52,6 +52,7 @@ private:
 
 		void update_C(TextID text_id, double factor, double new_val); 
 		void insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta);
+		ubjson::Value formAnswer(long long amount);
 
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const

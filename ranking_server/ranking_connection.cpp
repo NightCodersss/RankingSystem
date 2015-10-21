@@ -48,10 +48,25 @@ void RankingConnection::RankingSystemData::insertText(DocID docid, TextIndex tex
 	}
 }
 
-RankingConnection::Doc::Doc(const ubjson::Value& d) : doc(d)
+ubjson::Value RankingConnection::RankingSystemData::formAnswer(long long amount)
 {
+	ubjson::Value answer;
 
+	long long res_size = 0;
+
+	for(const auto& doc: docs_top)
+	{
+		docs[doc.second].doc["rank"] = doc.first;
+		answer["docs"].push_back(docs[doc.second].doc);
+		++res_size;
+		if (amount != -1 && res_size >= amount)//TODO: add sup limit
+ 			break;
+	}
+	answer["amount"] = res_size;
+	return answer;
 }
+
+RankingConnection::Doc::Doc(const ubjson::Value& d) : doc(d) { }
 
 void RankingConnection::Doc::update(json const& config, auto const& c)
 {
@@ -268,18 +283,9 @@ void RankingConnection::start()
 			ubjson::Value answer;
 
 			std::cerr << "Forming answer\n";
-			for(const auto& doc: self->data.docs_top)
-			{
-//				std::cerr << "Doc: " << ubjson::to_ostream(docs[doc.second]) << '\n'; 
-//				std::cerr << "Doc rank: " << doc.first << '\n';
-				self->data.docs[doc.second].doc["rank"] = doc.first;
-				answer["docs"].push_back(self->data.docs[doc.second].doc);
-				++res_size;
-				if( !request["amount"].isNull() && res_size >= request["amount"].asInt() ) //TODO: add sup limit
-					break;
-			}
+			
+			answer = self->data.formAnswer(request["amount"].isNull() ? -1 : request["amount"].asInt());
 			std::cerr << "Answer of ranking server: " << ubjson::to_ostream(answer) << '\n';
-			answer["amount"] = static_cast<long long>(res_size);
 			//answer is formed
 
 			std::cerr << "Sending formed answer: \n";
