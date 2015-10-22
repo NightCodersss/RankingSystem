@@ -66,6 +66,25 @@ ubjson::Value RankingConnection::RankingSystemData::formAnswer(long long amount)
 	return answer;
 }
 
+void RankingConnection::RankingSystemData::updateRankingConsts(long long amount, double tmpMdr)
+{
+	std::lock_guard<std::mutex> lock(docs_mutex);
+	if (docs_top.topSize() >= amount)
+	{
+		auto last_in_top = docs_top.end();
+
+		for (int i = 0; i < docs_top.topSize() - amount + 1; ++i)
+		{			
+			--last_in_top;
+		}
+
+		auto new_top_const = last_in_top -> first;
+		docs_top.setTopConst(new_top_const);
+		docs_top.setBottomConst(new_top_const - tmpMdr);
+		docs_top.cutOff();
+	}
+}
+
 RankingConnection::Doc::Doc(const ubjson::Value& d) : doc(d) { }
 
 void RankingConnection::Doc::update(json const& config, auto const& c)
@@ -211,19 +230,7 @@ void RankingConnection::start()
 				std::cerr << "docs_top: " << self->data.docs_top.topSize() << "\n";
 				if ( self->data.docs_top.topSize() >= 2 )
 				{
-					std::lock_guard<std::mutex> lock(self->data.docs_mutex);
-					if ( self->data.docs_top.topSize() >= request["amount"].asInt() )
-					{
-						auto last_in_top = self->data.docs_top.end();
-
-						for (int i = 0; i < self->data.docs_top.topSize() - request["amount"].asInt() + 1; ++i)
-							--last_in_top;
-
-						auto new_top_const = last_in_top -> first;
-						self->data.docs_top.setTopConst(new_top_const);
-						self->data.docs_top.setBottomConst(new_top_const - tmpMdr);
-						self->data.docs_top.cutOff();
-					}
+					self->data.updateRankingConsts(request["amount"].asInt(), tmpMdr);
 
 					auto end = self->data.docs_top.end(); // End of top
 					--end;
