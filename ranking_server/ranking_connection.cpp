@@ -85,6 +85,54 @@ void RankingConnection::RankingSystemData::updateRankingConsts(long long amount,
 	}
 }
 
+double RankingConnection::RankingSystemData::computeSwapProbability(config_type const& config)
+{
+	auto end = docs_top.end(); // End of docs_top.top
+	--end; //Last of docs_top.top
+	auto lastAndOne = docs_top.upper_bound(end -> first); // prev elem to (last in top) in docs_top.all // TODO: change method name to all_upper_bound
+
+	double swap_prob = 0;
+
+	const double eps = 1e-6;
+
+	auto it = docs_top.allBegin();
+	for ( ; it != lastAndOne; ++it ) // *it is (rank_of_doc, doc_id)
+	{
+		docs[it -> second].update(config, c);
+	}
+	docs[it -> second].update(config, c);
+
+	for (it = docs_top.allBegin(); it != lastAndOne; ) // *it is (rank_of_doc, doc_id)
+	{
+		double x1 = it -> first;					
+		double dx1 = docs[it -> second].mdr;
+
+		++it;
+
+		double x2 = it -> first;
+		double dx2 = docs[it -> second].mdr;
+
+		double M = std::min(x1 + dx1, x2 + dx2);
+		double m = std::max(x1, x2);
+
+		double this_swap_prob;
+
+		if(std::abs(dx1) > eps && std::abs(dx2) > eps)
+			this_swap_prob = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
+		else if (std::abs(dx1) < eps)
+			this_swap_prob = 0;
+		else 
+			this_swap_prob = (x1 + dx1 - x2) / dx1;
+
+		if (this_swap_prob < 0)
+			this_swap_prob = 0;
+
+		swap_prob += this_swap_prob;
+	}
+
+	return swap_prob;
+}
+
 RankingConnection::Doc::Doc(const ubjson::Value& d) : doc(d) { }
 
 void RankingConnection::Doc::update(json const& config, auto const& c)
@@ -231,48 +279,7 @@ void RankingConnection::start()
 				if ( self->data.docs_top.topSize() >= 2 )
 				{
 					self->data.updateRankingConsts(request["amount"].asInt(), tmpMdr);
-
-					auto end = self->data.docs_top.end(); // End of top
-					--end;
-					auto lastAndOne = self->data.docs_top.upper_bound(end -> first);
-
-//					std::cerr << "Distance: " << std::distance(docs_top.allBegin(), lastAndOne) << '\n';
-//					std::cerr << "All size: " << docs_top.size() << '\n';
-					
-					auto it2 = lastAndOne;
-					swap_prob = 0;
-				
-					const double eps = 1e-6;
-				
-					for ( auto it = self->data.docs_top.allBegin(); it != it2; )
-					{
-						self->data.docs[it -> second].update(self->config, self->data.c);
-						double x1 = it -> first;					
-						double dx1 = self->data.docs[it -> second].mdr;
-						
-						++it;
-						
-						self->data.docs[it -> second].update(self->config, self->data.c);
-						double x2 = it -> first;
-						double dx2 = self->data.docs[it -> second].mdr;
-						
-						double M = std::min(x1 + dx1, x2 + dx2);
-						double m = std::max(x1, x2);
-
-						double this_swap_prob;
-
-						if(std::abs(dx1) > eps && std::abs(dx2) > eps)
-							this_swap_prob = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
-						else if (std::abs(dx1) < eps)
-							this_swap_prob = 0;
-						else 
-							this_swap_prob = (x1 + dx1 - x2) / dx1;
-
-						if (this_swap_prob < 0)
-							this_swap_prob = 0;
-
-						swap_prob += this_swap_prob;
-					}
+					swap_prob = self->data.computeSwapProbability(self->config);
 				}
 
 				std::cerr << "Swap probability: " << swap_prob << '\n';

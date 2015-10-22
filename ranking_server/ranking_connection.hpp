@@ -54,6 +54,7 @@ private:
 		void insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta);
 		ubjson::Value formAnswer(long long amount);
 		void updateRankingConsts(long long amount, double tmpMdr);
+		double computeSwapProbability(config_type const& config);
 
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
