@@ -3,7 +3,7 @@ INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ 
 LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader
 CXXFLAGS=-c -g -std=c++14 $(INCLUDEPATH)
 LDFLAGS=-lboost_system $(LIBRARYPATH) -lUbjsonCpp -lpthread -lconfig_loader
-OBJECTS=main.o ranking_connection.o ranking_server.o
+OBJECTS=main.o ranking_connection.o ranking_server.o ranking_struct.o doc.o
 EXECUTABLE=rankingserver
 
 all: $(EXECUTABLE)

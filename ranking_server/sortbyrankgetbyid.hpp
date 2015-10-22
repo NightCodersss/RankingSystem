@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <limits>
 
 template <typename ID, typename Rank>
 class SortByRankGetById
