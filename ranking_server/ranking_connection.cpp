@@ -67,7 +67,7 @@ ubjson::Value RankingConnection::RankingSystemData::formAnswer(long long amount)
 	return answer;
 }
 
-void RankingConnection::RankingSystemData::updateRankingConsts(long long amount, double tmpMdr)
+void RankingConnection::RankingSystemData::updateRankingConsts(long long amount, double Mdr_copy)
 {
 	std::lock_guard<std::mutex> lock(docs_mutex);
 	if (docs_top.top_size() >= amount)
@@ -81,7 +81,7 @@ void RankingConnection::RankingSystemData::updateRankingConsts(long long amount,
 
 		auto new_top_const = last_in_top -> first;
 		docs_top.setTopConst(new_top_const);
-		docs_top.setBottomConst(new_top_const - tmpMdr);
+		docs_top.setBottomConst(new_top_const - Mdr_copy);
 		docs_top.cutOff();
 	}
 }
@@ -110,6 +110,8 @@ double RankingConnection::RankingSystemData::calculatePairSwapProbability(double
 
 double RankingConnection::RankingSystemData::computeSwapProbability(config_type const& config)
 {
+	std::lock_guard<std::mutex> lock(docs_mutex);
+
 	// TODO: refactor 3 lines: make it simpler
 	auto end = docs_top.top_end(); // End of docs_top.top
 	--end; //Last of docs_top.top
@@ -220,31 +222,24 @@ void RankingConnection::start()
 							{
 								std::cerr << "Entering lock\n";
 								std::lock_guard<std::mutex> lock(self->data.docs_mutex);
-								try
+								for(const auto& doc: res["docs"])
 								{
-									for(const auto& doc: res["docs"])
+									DocID docid = static_cast<const DocID&>(doc["docid"]);
+									double correspondence = static_cast<double>(doc["correspondence"]);
+									self->data.download_counter += 1;
 									{
-										DocID docid = static_cast<const DocID&>(doc["docid"]);
-										double correspondence = static_cast<double>(doc["correspondence"]);
-										self->data.download_counter += 1;
-										{
-	//										std::lock_guard<std::mutex> lock(mdr_mutex);
-											std::cerr << "Mdr updating\n";
-											self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], correspondence));
-										}
-
-										if (self->data.is_end)
-										{
-											std::cerr << "Thread is going to finish\n";
-											break;
-										}
-
-										self->data.insertText(docid, text_index, Doc(doc), text_factor * correspondence);
+										//										std::lock_guard<std::mutex> lock(mdr_mutex);
+										std::cerr << "Mdr updating\n";
+										self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], correspondence));
 									}
-								}
-								catch (std::exception& e)
-								{
-									std::cerr << "!!!! Problem in for: " << e.what() << '\n';
+
+									if (self->data.is_end)
+									{
+										std::cerr << "Thread is going to finish\n";
+										break;
+									}
+
+									self->data.insertText(docid, text_index, Doc(doc), text_factor * correspondence);
 								}
 								std::cerr << "Leaving lock\n";
 							}
@@ -269,16 +264,16 @@ void RankingConnection::start()
 			do 
 			{
 				std::this_thread::yield();
-				double tmpMdr;
+				double Mdr_copy;
 				{
 //					std::lock_guard<std::mutex> lock(mdr_mutex);
 //					std::cerr << "Entering mdr lock\n";
 					std::lock_guard<std::mutex> lock(self->data.docs_mutex);
 //					std::cerr << "Leaving mdr lock\n";
-					tmpMdr = self->data.Mdr;
+					Mdr_copy = self->data.Mdr;
 				}
 
-				std::cerr << "Mdr " << tmpMdr << '\n';
+				std::cerr << "Mdr " << Mdr_copy << '\n';
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
@@ -287,14 +282,14 @@ void RankingConnection::start()
 				std::cerr << "docs_top: " << self->data.docs_top.top_size() << "\n";
 				if ( self->data.docs_top.top_size() >= 2 )
 				{
-					self->data.updateRankingConsts(request["amount"].asInt(), tmpMdr);
+					self->data.updateRankingConsts(request["amount"].asInt(), Mdr_copy);
 					swap_prob = self->data.computeSwapProbability(self->config);
 				}
 
 				std::cerr << "Swap probability: " << swap_prob << '\n';
 
 				const double eps = 1e-10;
-				if ( swap_prob < max_swap_prob && (self->data.docs_top.top_size() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
+				if ( swap_prob < max_swap_prob && (self->data.docs_top.top_size() >= request["amount"].asInt() || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
 					self->data.is_end = true;
