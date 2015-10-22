@@ -54,8 +54,9 @@ ubjson::Value RankingConnection::RankingSystemData::formAnswer(long long amount)
 
 	long long res_size = 0;
 
-	for(const auto& doc: docs_top)
+	for(auto doc_it = docs_top.top_begin(); doc_it != docs_top.top_end(); ++doc_it)
 	{
+		const auto& doc = *doc_it;
 		docs[doc.second].doc["rank"] = doc.first;
 		answer["docs"].push_back(docs[doc.second].doc);
 		++res_size;
@@ -69,11 +70,11 @@ ubjson::Value RankingConnection::RankingSystemData::formAnswer(long long amount)
 void RankingConnection::RankingSystemData::updateRankingConsts(long long amount, double tmpMdr)
 {
 	std::lock_guard<std::mutex> lock(docs_mutex);
-	if (docs_top.topSize() >= amount)
+	if (docs_top.top_size() >= amount)
 	{
-		auto last_in_top = docs_top.end();
+		auto last_in_top = docs_top.top_end();
 
-		for (int i = 0; i < docs_top.topSize() - amount + 1; ++i)
+		for (int i = 0; i < docs_top.top_size() - amount + 1; ++i)
 		{			
 			--last_in_top;
 		}
@@ -87,22 +88,22 @@ void RankingConnection::RankingSystemData::updateRankingConsts(long long amount,
 
 double RankingConnection::RankingSystemData::computeSwapProbability(config_type const& config)
 {
-	auto end = docs_top.end(); // End of docs_top.top
+	auto end = docs_top.top_end(); // End of docs_top.top
 	--end; //Last of docs_top.top
-	auto lastAndOne = docs_top.upper_bound(end -> first); // prev elem to (last in top) in docs_top.all // TODO: change method name to all_upper_bound
+	auto lastAndOne = docs_top.all_upper_bound(end -> first); // prev elem to (last in top) in docs_top.all // TODO: change method name to all_upper_bound
 
 	double swap_prob = 0;
 
 	const double eps = 1e-6;
 
-	auto it = docs_top.allBegin();
+	auto it = docs_top.all_begin();
 	for ( ; it != lastAndOne; ++it ) // *it is (rank_of_doc, doc_id)
 	{
 		docs[it -> second].update(config, c);
 	}
 	docs[it -> second].update(config, c);
 
-	for (it = docs_top.allBegin(); it != lastAndOne; ) // *it is (rank_of_doc, doc_id)
+	for (it = docs_top.all_begin(); it != lastAndOne; ) // *it is (rank_of_doc, doc_id)
 	{
 		double x1 = it -> first;					
 		double dx1 = docs[it -> second].mdr;
@@ -275,8 +276,8 @@ void RankingConnection::start()
 				//TODO change top_const if docs_top.topSize() >= n
 	
 				double swap_prob = 0;
-				std::cerr << "docs_top: " << self->data.docs_top.topSize() << "\n";
-				if ( self->data.docs_top.topSize() >= 2 )
+				std::cerr << "docs_top: " << self->data.docs_top.top_size() << "\n";
+				if ( self->data.docs_top.top_size() >= 2 )
 				{
 					self->data.updateRankingConsts(request["amount"].asInt(), tmpMdr);
 					swap_prob = self->data.computeSwapProbability(self->config);
@@ -285,7 +286,7 @@ void RankingConnection::start()
 				std::cerr << "Swap probability: " << swap_prob << '\n';
 
 				const double eps = 1e-10;
-				if ( swap_prob < max_swap_prob && (self->data.docs_top.topSize() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
+				if ( swap_prob < max_swap_prob && (self->data.docs_top.top_size() >= request["amount"].asInt() || std::abs(tmpMdr) < eps)) // won't swap we have got all documents we want and we can
 				{
 					std::cerr << "Set is_end = true\n";
 					self->data.is_end = true;

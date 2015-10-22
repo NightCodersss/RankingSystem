@@ -17,17 +17,17 @@ public:
 		cutOff();
 	}
 
-	auto upper_bound(Rank rank) const
+	auto all_upper_bound(Rank rank) const
 	{
 		return all.upper_bound(rank);
 	}
 
-	auto allBegin() const
+	auto all_begin() const
 	{
 		return all.begin();		
 	}
 
-	auto allEnd() const
+	auto all_end() const
 	{
 		return all.end();
 	}
@@ -48,22 +48,22 @@ public:
 		bottom_const = bottom_;
 	}	
 
-	auto begin() const
+	auto top_begin() const
 	{
 		return top.begin();
 	}
 
-	auto end() const
+	auto top_end() const
 	{
 		return top.end();
 	}
 
-	auto topSize() const
+	auto top_size() const
 	{
 		return top.size();
 	}
 
-	auto size() const
+	auto all_size() const
 	{
 		return all.size();
 	}
