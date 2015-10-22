@@ -60,7 +60,6 @@ private:
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
 		std::mutex docs_mutex;
-		std::mutex mdr_mutex; // is not used
 		bool is_end = false; // NOTE: maybe use std::atomic_flag
 		int download_counter = 0;
 		double Mdr;

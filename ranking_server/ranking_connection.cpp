@@ -228,7 +228,6 @@ void RankingConnection::start()
 									double correspondence = static_cast<double>(doc["correspondence"]);
 									self->data.download_counter += 1;
 									{
-										//										std::lock_guard<std::mutex> lock(mdr_mutex);
 										std::cerr << "Mdr updating\n";
 										self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], correspondence));
 									}
@@ -264,12 +263,11 @@ void RankingConnection::start()
 			do 
 			{
 				std::this_thread::yield();
+
 				double Mdr_copy;
+
 				{
-//					std::lock_guard<std::mutex> lock(mdr_mutex);
-//					std::cerr << "Entering mdr lock\n";
 					std::lock_guard<std::mutex> lock(self->data.docs_mutex);
-//					std::cerr << "Leaving mdr lock\n";
 					Mdr_copy = self->data.Mdr;
 				}
 
@@ -278,8 +276,9 @@ void RankingConnection::start()
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
-				double swap_prob = 0;
 				std::cerr << "docs_top: " << self->data.docs_top.top_size() << "\n";
+
+				double swap_prob = 0;
 				if ( self->data.docs_top.top_size() >= 2 )
 				{
 					self->data.updateRankingConsts(request["amount"].asInt(), Mdr_copy);
