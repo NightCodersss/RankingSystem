@@ -55,6 +55,7 @@ private:
 		ubjson::Value formAnswer(long long amount);
 		void updateRankingConsts(long long amount, double tmpMdr);
 		double computeSwapProbability(config_type const& config);
+		double calculatePairSwapProbability(double x1, double dx1, double x2, double dx2);
 
 		std::map<DocID, Doc> docs; // docid, doc
 		SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const

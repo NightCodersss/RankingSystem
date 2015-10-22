@@ -86,16 +86,38 @@ void RankingConnection::RankingSystemData::updateRankingConsts(long long amount,
 	}
 }
 
-double RankingConnection::RankingSystemData::computeSwapProbability(config_type const& config)
+double RankingConnection::RankingSystemData::calculatePairSwapProbability(double x1, double dx1, double x2, double dx2)
 {
-	auto end = docs_top.top_end(); // End of docs_top.top
-	--end; //Last of docs_top.top
-	auto lastAndOne = docs_top.all_upper_bound(end -> first); // prev elem to (last in top) in docs_top.all // TODO: change method name to all_upper_bound
+	double p;
 
-	double swap_prob = 0;
+	double M = std::min(x1 + dx1, x2 + dx2);
+	double m = std::max(x1, x2);
 
 	const double eps = 1e-6;
 
+	if(std::abs(dx1) > eps && std::abs(dx2) > eps)
+		p = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
+	else if (std::abs(dx1) < eps)
+		p = 0;
+	else 
+		p = (x1 + dx1 - x2) / dx1;
+
+	if (p < 0)
+		p = 0;
+		
+	return p;
+}
+
+double RankingConnection::RankingSystemData::computeSwapProbability(config_type const& config)
+{
+	// TODO: refactor 3 lines: make it simpler
+	auto end = docs_top.top_end(); // End of docs_top.top
+	--end; //Last of docs_top.top
+	auto lastAndOne = docs_top.all_upper_bound(end -> first); // prev elem to (last in top) in docs_top.all 
+
+	double swap_prob = 0;
+
+	// TODO: refactor: 
 	auto it = docs_top.all_begin();
 	for ( ; it != lastAndOne; ++it ) // *it is (rank_of_doc, doc_id)
 	{
@@ -103,32 +125,18 @@ double RankingConnection::RankingSystemData::computeSwapProbability(config_type 
 	}
 	docs[it -> second].update(config, c);
 
-	for (it = docs_top.all_begin(); it != lastAndOne; ) // *it is (rank_of_doc, doc_id)
+	for (it = docs_top.all_begin(); it != lastAndOne; ++it) // *it is (rank_of_doc, doc_id)
 	{
 		double x1 = it -> first;					
 		double dx1 = docs[it -> second].mdr;
 
-		++it;
+		auto next = it;
+		++next; 
 
-		double x2 = it -> first;
-		double dx2 = docs[it -> second].mdr;
+		double x2 = next -> first;
+		double dx2 = docs[next -> second].mdr;
 
-		double M = std::min(x1 + dx1, x2 + dx2);
-		double m = std::max(x1, x2);
-
-		double this_swap_prob;
-
-		if(std::abs(dx1) > eps && std::abs(dx2) > eps)
-			this_swap_prob = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
-		else if (std::abs(dx1) < eps)
-			this_swap_prob = 0;
-		else 
-			this_swap_prob = (x1 + dx1 - x2) / dx1;
-
-		if (this_swap_prob < 0)
-			this_swap_prob = 0;
-
-		swap_prob += this_swap_prob;
+		swap_prob += calculatePairSwapProbability(x1, dx1, x2, dx2);
 	}
 
 	return swap_prob;
