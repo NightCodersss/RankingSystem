@@ -10,7 +10,7 @@
  * check the validity of config
 
  * Doxygen comments
- * Logging
+ * Logging                             +
  * Refactor 
  * Highload tests
  * Block output
