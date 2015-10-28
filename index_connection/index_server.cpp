@@ -1,8 +1,13 @@
 #include "index_server.hpp"
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
     
 IndexServer::IndexServer(boost::asio::io_service& io_service, int port) : acceptor(io_service, tcp::endpoint(tcp::v4(), port))
 {
-	std::cout << "Started index server on port: " << port << '\n';
+	BOOST_LOG_TRIVIAL(info) << "Started index server on port: " << port << '\n';
     start_accept();
 }
     
@@ -20,9 +25,11 @@ void IndexServer::handle_accept(IndexConnection::pointer new_connection, const b
 {
     if (!error)
 	{
-		std::cout << "New index connection\n";
+		BOOST_LOG_TRIVIAL(info) << "New index connection\n";
         new_connection->start();
 	}
+	else
+		BOOST_LOG_TRIVIAL(error) << "!!!!! Error at accepting";
 
     start_accept();
 }

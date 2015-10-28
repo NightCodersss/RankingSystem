@@ -1,12 +1,16 @@
 #include "ranking_server.hpp"
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
     
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 {
 	std::cout << "Started ranking server\n";
 	std::cout << "Config: \n" << config << '\n';
-	std::cerr << "Started ranking server\n";
-	std::cerr << "Config: \n" << config << '\n';
+	BOOST_LOG_TRIVIAL(info) << "Started ranking server\n";
+	BOOST_LOG_TRIVIAL(trace) << "Config: \n" << config << '\n';
 
     start_accept();
 }
@@ -26,11 +30,11 @@ void RankingServer::handle_accept(RankingConnection::pointer new_connection, con
     if (!error)
 	{
 		std::cout << "New ranking connection\n";
-		std::cerr << "New ranking connection\n";
+		BOOST_LOG_TRIVIAL(trace) << "New ranking connection\n";
         new_connection->start();
 	}
 	else
-		std::cerr << "!!!!! error caught at handle_accept\n";
+		BOOST_LOG_TRIVIAL(error) << "!!!!! error caught at handle_accept\n";
 
     start_accept();
 }

@@ -5,6 +5,11 @@
 #include "../UbjsonCpp/include/stream_reader.hpp"
 #include "../UbjsonCpp/include/stream_writer.hpp"
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+
 using boost::asio::ip::tcp;
 using DocID = long long;
 
@@ -19,7 +24,8 @@ void IndexConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->ranking_stream);
 		auto request = reader.getNextValue();
 
-		std::cerr << "Read json: " << ubjson::to_ostream(request) << '\n';
+		// BOOST_LOG_TRIVIAL(trace) << "Read json: " << ubjson::to_ostream(request) << '\n';
+		BOOST_LOG_TRIVIAL(trace) << "Read json.";
 		std::cout << "Index: Read json: " << ubjson::to_ostream(request) << '\n';
 
 		if(request["query"].isNull())
@@ -38,38 +44,38 @@ void IndexConnection::start()
 		auto index_id = static_cast<std::string>(request["index_id"]);
 		std::ifstream in(current_index_path + "index." + index_id + ".index");
 
-		std::cerr << "Index id: " << index_id << '\n';
+		BOOST_LOG_TRIVIAL(trace) << "Index id: " << index_id << '\n';
 
-		std::cerr << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
-		std::cerr << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
+		BOOST_LOG_TRIVIAL(trace) << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
+		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
 
-		std::cerr << "Before loop\n";
+		BOOST_LOG_TRIVIAL(trace) << "Before loop\n";
 		bool read_file = false;
 		while ( !read_file )
 		{
-			std::cerr << "In loop. Index is ok.\n";
+			BOOST_LOG_TRIVIAL(trace) << "In loop. Index is ok.\n";
 			ubjson::Value result;
 			int amount = 0;
 			std::vector<ubjson::Value> docs;
 
 			while ( amount < packet_size )
 			{
-				std::cerr << "Decided to get more words: got " << amount << " of " << packet_size << "\n";
+				BOOST_LOG_TRIVIAL(trace) << "Decided to get more words: got " << amount << " of " << packet_size << "\n";
 				std::string word;
 				DocID doc_id;
 				double correspondence;
 
 				if ( in >> word >> doc_id >> correspondence )
 				{				
-					std::cerr << "Word " << word << " read\n";
+					BOOST_LOG_TRIVIAL(trace) << "Word " << word << " read\n";
 
-					std::cerr << "DOCID " << doc_id << " read\n";
-					std::cerr << "Correspondence " << correspondence << " read\n";
+					BOOST_LOG_TRIVIAL(trace) << "DOCID " << doc_id << " read\n";
+					BOOST_LOG_TRIVIAL(trace) << "Correspondence " << correspondence << " read\n";
 					if (word == static_cast<std::string>(request["query"]))
 					{
-						std::cerr << "Word " << word << " accepted\n";
+						BOOST_LOG_TRIVIAL(trace) << "Word " << word << " accepted\n";
 //						std::cout << "From index server: \n";
-						std::cerr << "Doc id: " << doc_id << '\n';
+						BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << '\n';
 
 						ubjson::Value doc;
 						doc["docid"] = doc_id;
@@ -92,12 +98,12 @@ void IndexConnection::start()
 				result["docs"].push_back(d);
 
 			result["amount"] = amount;
-			std::cerr << "Amount: " << result["amount"].asInt() << '\n';
+			BOOST_LOG_TRIVIAL(trace) << "Amount: " << result["amount"].asInt() << '\n';
 
 			//answer is formed
-			std::cerr << "Writing output to ranking server\n";
+			BOOST_LOG_TRIVIAL(trace) << "Writing output to ranking server\n";
 			writer.writeValue(result);
-			std::cerr << "Wrote output to ranking server\n";
+			BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
 		}
 	}).detach();
 }
