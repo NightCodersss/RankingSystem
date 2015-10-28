@@ -8,3 +8,9 @@
  * fix ref links in tex
  * fix root`s makefile                 +
  * check the validity of config
+
+ * Doxygen comments
+ * Logging
+ * Refactor 
+ * Highload tests
+ * Block output
