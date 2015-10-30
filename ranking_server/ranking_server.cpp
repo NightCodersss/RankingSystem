@@ -7,8 +7,8 @@
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 {
-	std::cout << "Started ranking server\n";
-	std::cout << "Config: \n" << config << '\n';
+//	std::cout << "Started ranking server\n";
+//	std::cout << "Config: \n" << config << '\n';
 	BOOST_LOG_TRIVIAL(info) << "Started ranking server\n";
 	BOOST_LOG_TRIVIAL(trace) << "Config: \n" << config << '\n';
 
@@ -29,7 +29,7 @@ void RankingServer::handle_accept(RankingConnection::pointer new_connection, con
 {
     if (!error)
 	{
-		std::cout << "New ranking connection\n";
+//		std::cout << "New ranking connection\n";
 		BOOST_LOG_TRIVIAL(trace) << "New ranking connection\n";
         new_connection->start();
 	}

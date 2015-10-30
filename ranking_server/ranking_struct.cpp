@@ -23,6 +23,10 @@ void RankingStruct::update_C(TextID text_id, double factor, double new_val)
 		
 void RankingStruct::insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta)
 {
+	/**
+	* It inserts text of one document to datastruct. 
+	* Used at getting documetns from index_server.
+	*/
 	if(docs.find(docid) == docs.end())
 	{
 		docs[docid] = doc;

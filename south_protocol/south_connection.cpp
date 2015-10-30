@@ -41,8 +41,8 @@ void SouthConnection::start()
 		if ( self->input.back() == '\r' )
 			self->input.pop_back();
 	
-		std::cout << "From south server: \n";
-		std::cout << "Read: " << self -> input << '\n';
+		//std::cout << "From south server: \n";
+		//std::cout << "Read: " << self -> input << '\n';
 		BOOST_LOG_TRIVIAL(trace) << "From south server: \n";
 		BOOST_LOG_TRIVIAL(trace) << "Read: " << self -> input << '\n';
 
@@ -58,7 +58,7 @@ void SouthConnection::start()
 
 SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client(io_service)
 {
-	std::cout << "South server's connection is connecting to ranking\n";
+	//std::cout << "South server's connection is connecting to ranking\n";
 	BOOST_LOG_TRIVIAL(trace) << "South server's connection is connecting to ranking\n";
 	server_stream.connect(host, port);
 }

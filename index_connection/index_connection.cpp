@@ -26,7 +26,7 @@ void IndexConnection::start()
 
 		// BOOST_LOG_TRIVIAL(trace) << "Read json: " << ubjson::to_ostream(request) << '\n';
 		BOOST_LOG_TRIVIAL(trace) << "Read json.";
-		std::cout << "Index: Read json: " << ubjson::to_ostream(request) << '\n';
+	//	std::cout << "Index: Read json: " << ubjson::to_ostream(request) << '\n';
 
 		if(request["query"].isNull())
 			return;

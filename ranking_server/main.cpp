@@ -13,13 +13,14 @@
 
 int main(int argc, char** argv)
 {
-	runTests();
 
 	boost::log::add_file_log(
 		boost::log::keywords::file_name = "./log.log",
 		boost::log::keywords::auto_flush = true
 		);
 	BOOST_LOG_TRIVIAL(trace) << "Log begin";
+
+	runTests();
 
     try
     {

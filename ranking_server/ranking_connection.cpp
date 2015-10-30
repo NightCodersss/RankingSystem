@@ -28,8 +28,8 @@ void RankingConnection::start()
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
 			auto request = reader.getNextValue();
 
-			std::cout << "From ranking server: \n";
-			std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
+//			std::cout << "From ranking server: \n";
+//			std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
 
 			if(request["query"].isNull())
 				return;
@@ -178,6 +178,7 @@ void RankingConnection::start()
 		catch( std::exception& e )
 		{
 			std::cout << "!!!!!! " << e.what() << '\n';
+			BOOST_LOG_TRIVIAL(error) << "!!!!!! " << e.what();
 		}
 	}).detach();
 }

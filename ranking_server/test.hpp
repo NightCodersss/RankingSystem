@@ -2,12 +2,18 @@
 #define _TEST_HPP_
 
 #include <iostream>
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+
 #include "sortbyrankgetbyidwithtop.hpp"
 
 
 void testSortByRankGetById()
 {
-	std::cout << "Testing SortByRankGetById structure\n";
+	BOOST_LOG_TRIVIAL(info) << "Testing SortByRankGetById structure\n";
 
 	SortByRankGetById<int, int> s{}; // ID, rank
 	s.increment(228, 3);
@@ -31,12 +37,12 @@ void testSortByRankGetById()
 	s.cutOff(102);
 	assert(s.size() == 0);
 
-	std::cout << "It seems to be ok\n";
+	BOOST_LOG_TRIVIAL(info) << "It seems to be ok\n";
 }
 
 void testSortByRankGetByIdWithTop()
 {
-	std::cout << "Testing SortByRankGetByIdWithTop structure\n";
+	BOOST_LOG_TRIVIAL(info) << "Testing SortByRankGetByIdWithTop structure\n";
 
 	SortByRankGetByIdWithTop<int, int> s{10000, -10};
 
@@ -67,10 +73,10 @@ void testSortByRankGetByIdWithTop()
 	assert(s.top_size() == 1);
 	assert(s.all_size() == 2);
 
-	std::cout << "It seems to be ok\n";
+	BOOST_LOG_TRIVIAL(info) << "It seems to be ok\n";
 }
 
-void runTests()
+void runTests() // TODO: Why these function are in hpp?
 {
 	testSortByRankGetById();
 	testSortByRankGetByIdWithTop();
