@@ -94,6 +94,7 @@ void IndexConnection::start()
 				}
 			}
 
+
 			for ( const auto& d : docs )
 				result["docs"].push_back(d);
 
@@ -105,6 +106,7 @@ void IndexConnection::start()
 			writer.writeValue(result);
 			BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
 		}
+		in.close();
 	}).detach();
 }
     
