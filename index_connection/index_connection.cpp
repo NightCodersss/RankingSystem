@@ -40,9 +40,8 @@ void IndexConnection::start()
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 		
 		
-		std::string current_index_path = "/home/asio/rankingsystem/current_index/";		
-		auto index_id = static_cast<std::string>(request["index_id"]);
-		std::ifstream in(current_index_path + "index." + index_id + ".index");
+//		auto index_id = static_cast<std::string>(request["index_id"]);
+		int index_id = request["index_id"].asInt();
 
 		BOOST_LOG_TRIVIAL(trace) << "Index id: " << index_id << '\n';
 
@@ -50,6 +49,7 @@ void IndexConnection::start()
 		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
 
 		BOOST_LOG_TRIVIAL(trace) << "Before loop\n";
+		int sample_n = 0;
 		bool read_file = false;
 		while ( !read_file )
 		{
@@ -65,8 +65,13 @@ void IndexConnection::start()
 				DocID doc_id;
 				double correspondence;
 
-				if ( in >> word >> doc_id >> correspondence )
+				if ( sample_n < (*self->index)[index_id].size() )
 				{				
+					word = (*self->index)[index_id][sample_n].word;
+					doc_id = (*self->index)[index_id][sample_n].doc_id;
+					correspondence = (*self->index)[index_id][sample_n].correspondence;
+					++sample_n;
+
 					BOOST_LOG_TRIVIAL(trace) << "Word " << word << " read\n";
 
 					BOOST_LOG_TRIVIAL(trace) << "DOCID " << doc_id << " read\n";
@@ -106,7 +111,6 @@ void IndexConnection::start()
 			writer.writeValue(result);
 			BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
 		}
-		in.close();
 	}).detach();
 }
     

@@ -7,6 +7,8 @@
 #include <boost/asio.hpp>
 #include <value.hpp>
 
+#include "text_index_info.hpp"
+
 using boost::asio::ip::tcp;
 
 class IndexConnection : public std::enable_shared_from_this<IndexConnection>
@@ -22,6 +24,8 @@ public:
 
 private:
     IndexConnection(boost::asio::io_service& io_service);
+
+	std::vector<std::vector<TextIndexInfo>> const * index;
 
     SocketStream ranking_stream;
 };
