@@ -68,6 +68,7 @@ void IndexConnection::start()
 				DocID doc_id;
 				double correspondence;
 
+				BOOST_LOG_TRIVIAL(trace) << "Using sample " << sample_n << " of " << (*self->index)[index_id].size();
 				if ( sample_n < (*self->index)[index_id].size() )
 				{				
 					word = (*self->index)[index_id][sample_n].word;
@@ -114,6 +115,8 @@ void IndexConnection::start()
 			writer.writeValue(result);
 			BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
 		}
+
+		BOOST_LOG_TRIVIAL(trace) << "Leaving main lambda function. Resourses going to be freed.";
 	}).detach();
 }
     
@@ -121,5 +124,6 @@ IndexConnection::IndexConnection(boost::asio::io_service& io_service, IndexServe
 
 IndexConnection::~IndexConnection()
 {
+	BOOST_LOG_TRIVIAL(trace) << "Destructor of connection in.";
 	server->dec_connections();
 }
