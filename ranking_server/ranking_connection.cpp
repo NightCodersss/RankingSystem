@@ -1,4 +1,3 @@
-#include "ranking_connection.hpp"
 #include <sstream>
 #include <thread>
 #include <stream_reader.hpp>
@@ -9,18 +8,22 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 
+#include "ranking_connection.hpp"
+#include "ranking_server.hpp"
+
 using boost::asio::ip::tcp;
 
-RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config)
+RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config, RankingServer* const server)
 {
 	BOOST_LOG_TRIVIAL(trace) << "Connection creating\n";
-    return pointer(new RankingConnection(io_service, config));
+    return pointer(new RankingConnection(io_service, config, server));
 } 
 
 //TODO check the validity of config
 
 void RankingConnection::start()
 {
+	server->inc_connections();
 	std::thread([self = shared_from_this()]() {
 		BOOST_LOG_TRIVIAL(trace) << "Thread of connection has been started\n";
 		try
@@ -183,6 +186,11 @@ void RankingConnection::start()
 	}).detach();
 }
 
-RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config): config(config), data(config)
+RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config, RankingServer* server): config(config), data(config), server(server)
 {
+}
+
+RankingConnection::~RankingConnection()
+{
+	server->dec_connections();
 }

@@ -17,7 +17,7 @@ RankingServer::RankingServer(boost::asio::io_service& io_service, std::string co
     
 void RankingServer::start_accept()
 {
-    auto new_connection = RankingConnection::create(acceptor.get_io_service(), config);
+    auto new_connection = RankingConnection::create(acceptor.get_io_service(), config, this);
 
     acceptor.async_accept(*new_connection->south_stream.rdbuf(), // socket of stream
           [this, new_connection](const boost::system::error_code& error_code) { 
@@ -37,5 +37,19 @@ void RankingServer::handle_accept(RankingConnection::pointer new_connection, con
 		BOOST_LOG_TRIVIAL(error) << "!!!!! error caught at handle_accept\n";
 
     start_accept();
+}
+
+void RankingServer::inc_connections()
+{
+	std::lock_guard<std::mutex> lock(connections_mutex);
+	++connections;
+	BOOST_LOG_TRIVIAL(info) << "Connections uped to: " << connections;
+}
+
+void RankingServer::dec_connections()
+{
+	std::lock_guard<std::mutex> lock(connections_mutex);
+	--connections;
+	BOOST_LOG_TRIVIAL(info) << "Connections downed to: " << connections;
 }
 
