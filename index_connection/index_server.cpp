@@ -18,7 +18,7 @@ IndexServer::IndexServer(boost::asio::io_service& io_service, int port) : accept
     
 void IndexServer::start_accept()
 {
-    auto new_connection = IndexConnection::create(acceptor.get_io_service());
+    auto new_connection = IndexConnection::create(acceptor.get_io_service(), this);
 
     acceptor.async_accept(*new_connection->ranking_stream.rdbuf(), // socket of stream
           [this, new_connection](const boost::system::error_code& error_code) { 
@@ -70,3 +70,18 @@ void IndexServer::load_index()
 	}
 	BOOST_LOG_TRIVIAL(trace) << "End index load";
 }
+
+void IndexServer::inc_connections()
+{
+	std::lock_guard<std::mutex> lock(connections_mutex);
+	++connections;
+	BOOST_LOG_TRIVIAL(info) << "Connections uped to: " << connections;
+}
+
+void IndexServer::dec_connections()
+{
+	std::lock_guard<std::mutex> lock(connections_mutex);
+	--connections;
+	BOOST_LOG_TRIVIAL(info) << "Connections downed to: " << connections;
+}
+

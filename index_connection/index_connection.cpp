@@ -1,4 +1,3 @@
-#include "index_connection.hpp"
 #include <sstream>
 #include <thread>
 #include "../UbjsonCpp/include/value.hpp"
@@ -10,16 +9,20 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 
+#include "index_server.hpp"
+#include "index_connection.hpp"
+
 using boost::asio::ip::tcp;
 using DocID = long long;
 
-IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service)
+IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service, IndexServer* const server)
 {
-    return pointer(new IndexConnection(io_service));
+    return pointer(new IndexConnection(io_service, server));
 } 
     
 void IndexConnection::start()
 {
+	server->inc_connections();
 	std::thread([self = shared_from_this()]() {
 		ubjson::StreamReader<SocketStream> reader(self->ranking_stream);
 		auto request = reader.getNextValue();
@@ -114,4 +117,9 @@ void IndexConnection::start()
 	}).detach();
 }
     
-IndexConnection::IndexConnection(boost::asio::io_service& io_service) { }
+IndexConnection::IndexConnection(boost::asio::io_service& io_service, IndexServer* const server) : server(server) { }
+
+IndexConnection::~IndexConnection()
+{
+	server->dec_connections();
+}
