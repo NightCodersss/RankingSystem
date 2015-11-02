@@ -3,6 +3,8 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
+
+const int MAX_CONNECTIONS = 20;
     
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
@@ -35,6 +37,18 @@ void RankingServer::handle_accept(RankingConnection::pointer new_connection, con
 	}
 	else
 		BOOST_LOG_TRIVIAL(error) << "!!!!! error caught at handle_accept\n";
+
+	// Waiting for decreasing connections
+	int connections_local;
+	do
+	{
+		{
+			std::lock_guard<std::mutex> lock(connections_mutex);
+			connections_local = connections;
+		}
+		std::this_thread::yield();
+	}
+	while (connections_local >= MAX_CONNECTIONS);
 
     start_accept();
 }
