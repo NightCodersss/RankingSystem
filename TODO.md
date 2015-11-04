@@ -15,3 +15,4 @@
  * Highload tests
  * Block output
  * Make folders` name normal
+ * Fix gdbstart starting folder (log.log self-owerwrites)
