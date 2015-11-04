@@ -12,6 +12,7 @@ SouthServer::SouthServer(boost::asio::io_service& io_service, int port) : accept
 {
 	connections = 0;
 	BOOST_LOG_TRIVIAL(trace) << "Started south server on port " << port << '\n';
+	BOOST_LOG_TRIVIAL(info) << "Max connections of acceptor (implemetation defined): " << acceptor.max_connections;
     start_accept();
 }
     
