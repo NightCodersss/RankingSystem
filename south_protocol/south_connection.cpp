@@ -9,6 +9,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
+#include "south_server.hpp"
 
 using boost::asio::ip::tcp;
 
@@ -25,13 +26,14 @@ std::string SouthConnection::getUBJSONFromQuery(std::string input)
 	return output.str();
 }
 
-SouthConnection::pointer SouthConnection::create(boost::asio::io_service& io_service)
+SouthConnection::pointer SouthConnection::create(boost::asio::io_service& io_service, SouthServer* const server)
 {
-    return pointer(new SouthConnection(io_service));
+    return pointer(new SouthConnection(io_service, server));
 } 
  
 void SouthConnection::start()
 {
+	server->inc_connections();
 	std::thread([self = shared_from_this()]() {
 		std::getline(self->client_stream, self->input, '\n');
 
@@ -56,9 +58,14 @@ void SouthConnection::start()
 	}).detach();
 }
 
-SouthConnection::SouthConnection(boost::asio::io_service& io_service) : client(io_service)
+SouthConnection::SouthConnection(boost::asio::io_service& io_service, SouthServer* const server) : client(io_service), server(server)
 {
 	//std::cout << "South server's connection is connecting to ranking\n";
 	BOOST_LOG_TRIVIAL(trace) << "South server's connection is connecting to ranking\n";
 	server_stream.connect(host, port);
+}
+
+SouthConnection::~SouthConnection()
+{
+	server->dec_connections();
 }

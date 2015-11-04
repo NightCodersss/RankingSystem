@@ -5,6 +5,7 @@
 #include <memory>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <atomic>
 #include "south_connection.hpp"
 
 /**
@@ -17,12 +18,17 @@ public:
 
     SouthServer(boost::asio::io_service& io_service, int port = 15000);
 
+	void inc_connections();
+	void dec_connections();
+
 private:
 
     void start_accept();
     void handle_accept(SouthConnection::pointer new_connection, const boost::system::error_code& error);
-    
-    tcp::acceptor acceptor;
+
+	std::atomic<int> connections;
+
+    tcp::acceptor acceptor;	
 };
 
 #endif

@@ -26,7 +26,7 @@ int main()
     }
     catch (std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(error) << e.what() << std::endl;
     }
 
     return 0;
