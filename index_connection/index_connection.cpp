@@ -114,6 +114,13 @@ void IndexConnection::start()
 			BOOST_LOG_TRIVIAL(trace) << "Writing output to ranking server\n";
 			writer.writeValue(result);
 			BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
+			const auto& err = self->ranking_stream.error();  
+			if ( err )
+			{
+				BOOST_LOG_TRIVIAL(info) << "Error while writing: " << err.message();
+				BOOST_LOG_TRIVIAL(trace) << "Error while writing, so thread is going down.";
+				break;
+			}
 		}
 
 		BOOST_LOG_TRIVIAL(trace) << "Leaving main lambda function. Resourses going to be freed.";
