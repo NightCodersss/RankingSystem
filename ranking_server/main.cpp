@@ -13,7 +13,6 @@
 
 int main(int argc, char** argv)
 {
-
 	boost::log::add_file_log(
 		boost::log::keywords::file_name = "./log.log",
 		boost::log::keywords::auto_flush = true
@@ -32,7 +31,7 @@ int main(int argc, char** argv)
     }
     catch (std::exception& e)
     {
-        std::cerr << e.what() << std::endl;
+        BOOST_LOG_TRIVIAL(error) << e.what() << std::endl;
     }
 
     return 0;
