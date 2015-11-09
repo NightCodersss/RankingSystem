@@ -29,11 +29,14 @@ def attack():
 
 	result = []
 
+	time_start = 0;
+
 	try:
 		#pid = os.fork()  
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
 		s.connect(("localhost", 15000))
-		s.send("Fairytale\n");
+		s.send("Fairytale\n")
+		time_start = time.clock()
 #		print "OLOLOTROLOLO"
 #		s.settimeout(10)
 		time.sleep(1)
@@ -60,10 +63,22 @@ def attack():
 	if len(result) != RESULT_SIZE:
 #		print "Result size is not correct:", len(result)
 		size_errors[0] += 1
+		time_file.write("{}\n".format(-1))
 	else:
 		hist[permutation_metric(result)] += 1
+		els_time = (time.clock() - time_start)*1000
+		print "Took time: ", els_time, "ms"
+		time_file.write("{}\n".format(els_time))
 
 N = int(sys.argv[1])
+
+
+time_file_name = "time.log"
+if len(sys.argv) > 2:
+	time_file_name = sys.argv[2]
+
+time_file = open(time_file_name, "w")
+
 for i in range(N):
 	threading.Timer(0, attack).start()
 
