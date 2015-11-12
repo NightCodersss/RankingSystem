@@ -12,7 +12,7 @@ def stat(n):
 	t_avg = 0
 	errors = 0
 	c = 0
-	for i in range(n):
+	for i in xrange(n):
 		with open("test_{}.log".format(i)) as f:
 			for t_str in f:
 				t = float(t_str)
@@ -25,16 +25,20 @@ def stat(n):
 				t_avg += t
 				c += 1
 	t_avg /= c
-	return (t_min, t_avg, t_max, errors, errors/c)
+	return (t_min, t_avg, t_max, errors, errors / (c + errors))
+
+if len(sys.argv) < 4:
+	print "Usage: batch_size number_of_tests sleep_time" 
+	sys.exit()
 
 batch_size = int(sys.argv[1])
 test_count = int(sys.argv[2])
 sleep_time = float(sys.argv[3])
 
 i = 0
-for s in range(test_count):
+for s in xrange(test_count):
 	print "Session ", s, " started"
-	for _ in range(batch_size):
+	for _ in xrange(batch_size):
 		run_test(i)
 		i += 1
 	print "Session ", s, " ended, waiting"
