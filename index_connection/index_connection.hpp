@@ -29,8 +29,6 @@ public:
 private:
     IndexConnection(boost::asio::io_service& io_service, IndexServer * const server);
 
-	std::vector<std::vector<TextIndexInfo>> const * index;
-
     SocketStream ranking_stream;
 
 	IndexServer* const server;

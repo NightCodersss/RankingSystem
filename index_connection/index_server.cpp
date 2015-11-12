@@ -31,7 +31,6 @@ void IndexServer::handle_accept(IndexConnection::pointer new_connection, const b
     if (!error)
 	{
 		BOOST_LOG_TRIVIAL(info) << "New index connection\n";
-		new_connection->index = &index;
         new_connection->start();
 	}
 	else

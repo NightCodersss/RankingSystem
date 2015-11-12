@@ -68,12 +68,12 @@ void IndexConnection::start()
 				DocID doc_id;
 				double correspondence;
 
-				BOOST_LOG_TRIVIAL(trace) << "Using sample " << sample_n << " of " << (*self->index)[index_id].size();
-				if ( sample_n < (*self->index)[index_id].size() )
+				BOOST_LOG_TRIVIAL(trace) << "Using sample " << sample_n << " of " << self->server->index[index_id].size();
+				if ( sample_n < self->server->index[index_id].size() )
 				{				
-					word = (*self->index)[index_id][sample_n].word;
-					doc_id = (*self->index)[index_id][sample_n].doc_id;
-					correspondence = (*self->index)[index_id][sample_n].correspondence;
+					word = self->server->index[index_id][sample_n].word;
+					doc_id = self->server->index[index_id][sample_n].doc_id;
+					correspondence = self->server->index[index_id][sample_n].correspondence;
 					++sample_n;
 
 					BOOST_LOG_TRIVIAL(trace) << "Word " << word << " read\n";
@@ -83,7 +83,6 @@ void IndexConnection::start()
 					if (word == static_cast<std::string>(request["query"]))
 					{
 						BOOST_LOG_TRIVIAL(trace) << "Word " << word << " accepted\n";
-//						std::cout << "From index server: \n";
 						BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << '\n';
 
 						ubjson::Value doc;
