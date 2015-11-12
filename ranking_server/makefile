@@ -2,7 +2,7 @@ CXX=g++-5
 INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)/
 LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader
 CXXFLAGS=-c -DBOOST_LOG_DYN_LINK -g -std=c++14 $(INCLUDEPATH)
-LDFLAGS=-lboost_log -lboost_system -lboost_thread $(LIBRARYPATH) -lUbjsonCpp -lpthread -lconfig_loader
+LDFLAGS=-lboost_log -lboost_system -lboost_thread $(LIBRARYPATH) -lUbjsonCpp -lpthread -lconfig_loader -lboost_timer
 OBJECTS=main.o ranking_connection.o ranking_server.o ranking_struct.o doc.o
 EXECUTABLE=rankingserver
 
