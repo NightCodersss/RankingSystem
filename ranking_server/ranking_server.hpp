@@ -6,6 +6,8 @@
 #include <thread>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
+#include <boost/timer/timer.hpp>
+#include <fstream>
 #include <config_loader.hpp>
 
 #include "ranking_connection.hpp"
@@ -23,6 +25,8 @@ public:
 	void inc_connections();
 	void dec_connections();
 
+	void log_timer(char const * const message, boost::timer::cpu_timer& t);
+
 private:
 
 	config_type config;
@@ -32,6 +36,9 @@ private:
 
 	std::mutex connections_mutex;
 	int connections = 0;
+
+	std::mutex log_timer_mutex;
+	std::ofstream log_timer_file;
     
     tcp::acceptor acceptor;
 };

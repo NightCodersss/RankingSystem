@@ -8,6 +8,7 @@ static const int MAX_CONNECTIONS = 20;
     
 RankingServer::RankingServer(boost::asio::io_service& io_service, std::string config_file) : config(ConfigLoader(config_file).get())
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
+																			, log_timer_file("timing.log")
 {
 //	std::cout << "Started ranking server\n";
 //	std::cout << "Config: \n" << config << '\n';
@@ -67,3 +68,9 @@ void RankingServer::dec_connections()
 	BOOST_LOG_TRIVIAL(info) << "Connections downed to: " << connections;
 }
 
+void RankingServer::log_timer(char const * const message, boost::timer::cpu_timer& t)
+{
+	std::lock_guard<std::mutex> lock(log_timer_mutex);
+	log_timer_file << message << t.format() << "\n";
+	log_timer_file.flush();
+}

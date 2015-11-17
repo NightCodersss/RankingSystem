@@ -46,7 +46,7 @@ void RankingConnection::start()
 				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){
 					try
 					{	 
-						boost::timer::auto_cpu_timer t;
+						boost::timer::cpu_timer t;
 						int server_index = 0;
 						SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>()
 												, text["servers"][server_index]["port"].get<std::string>());
@@ -115,6 +115,7 @@ void RankingConnection::start()
 								break;
 							}
 						}
+						self->server->log_timer("Main try", t);
 					}
 					catch ( std::exception& e )
 					{
