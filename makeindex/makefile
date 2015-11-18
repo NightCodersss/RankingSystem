@@ -13,6 +13,7 @@ index_random:
 index_istinausers:
 	(cd makeindex; ./makeindex_istinausers.sh)
 	mv makeindex/*.index $(CURRENT_INDEX_PATH)
+	# TODO: make backup with timestamp
 	
 
 index_twitter:
