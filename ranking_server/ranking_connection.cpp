@@ -67,11 +67,15 @@ void RankingConnection::start()
 
 						while ( true ) // TODO wrap fetching into a stream
 						{
+							boost::timer::cpu_timer network_timer;
+
 							//Read answer
 							BOOST_LOG_TRIVIAL(trace) << "Waiting for another document\n";
 							auto res = reader.getNextValue();
 							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server " << text_id << text_index << ": ";
 						//	BOOST_LOG_TRIVIAL(trace) << ubjson::to_ostream(res) << '\n';
+
+							self->server->log_timer("Came answer in ", network_timer);
 						
 							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
 							{
@@ -126,7 +130,7 @@ void RankingConnection::start()
 			}
 
 			double C3 = 1.;
-			double max_swap_prob = 0.7;
+			double max_swap_prob = 0.01;
 
 			do 
 			{
