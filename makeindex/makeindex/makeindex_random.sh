@@ -1,6 +1,6 @@
 #!/bin/bash
 
 python makeindex_random.py
-../util/sortindex.sh
+python ../util/sortindex.py
 
 sort -r -n -t " " -k 2 checkfile -o checkfile
