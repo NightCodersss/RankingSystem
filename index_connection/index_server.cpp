@@ -42,13 +42,16 @@ void IndexServer::handle_accept(IndexConnection::pointer new_connection, const b
 void IndexServer::load_index()
 {
 	BOOST_LOG_TRIVIAL(trace) << "Begin index load";
-	std::string current_index_path = "/home/asio/rankingsystem/current_index/";		
+	std::string current_index_path = "/home/asio/rankingsystem/current_index/";
+
+	std::ifstream index_list(current_index_path + "indexlist");
 
 	index.clear();
-	index.resize(COUNT_INDEX);
-	for(int index_id = 0; index_id < COUNT_INDEX; ++index_id)
+	std::string index_name;
+	while (std::getline(index_list, index_name))
 	{
-		std::ifstream in(current_index_path + "index." + std::to_string(index_id) + ".index");
+		std::vector<TextIndexInfo> current = { };
+		std::ifstream in(current_index_path + index_name);
 		bool read_file = false;
 		while ( !read_file )
 		{
@@ -58,7 +61,7 @@ void IndexServer::load_index()
 
 			if ( in >> word >> doc_id >> correspondence )
 			{
-				index[index_id].push_back(TextIndexInfo{word, doc_id, correspondence});
+				current.push_back(TextIndexInfo{word, doc_id, correspondence});
 			}
 			else
 			{
@@ -66,7 +69,9 @@ void IndexServer::load_index()
 			}
 		}
 		in.close();
+		index.push_back(std::move(current));
 	}
+	index_list.close();
 	BOOST_LOG_TRIVIAL(trace) << "End index load";
 }
 
