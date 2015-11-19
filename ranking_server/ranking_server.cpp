@@ -10,6 +10,11 @@ RankingServer::RankingServer(boost::asio::io_service& io_service, std::string co
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 																			, log_timer_file("timing.log")
 {
+	if ( config["texts"].size() > Doc::TextCount )
+	{
+		throw std::logic_error("Too many texts. Change constant Doc::TextCount to bigger constant and recompile");
+	}
+
 //	std::cout << "Started ranking server\n";
 //	std::cout << "Config: \n" << config << '\n';
 	BOOST_LOG_TRIVIAL(info) << "Started ranking server\n";

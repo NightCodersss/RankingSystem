@@ -13,7 +13,7 @@ using TextIndex = int;
 
 struct Doc
 {
-	static const int TextCount = 10;
+	static const int TextCount = 500;
 
 	Doc(const ubjson::Value& d);
 	Doc() = default;
