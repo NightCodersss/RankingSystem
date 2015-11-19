@@ -2,7 +2,1019 @@
 	"ranking_server": {
 		"port": 14000
 	},
-	"texts": [
+    "texts": [
+        {
+            "factor": 2.5313386959899999e-06, 
+            "index_id": "0", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.000119003426154, 
+            "index_id": "1", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00026853044268700002, 
+            "index_id": "2", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00035007036112099998, 
+            "index_id": "3", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00047105596148800001, 
+            "index_id": "4", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00068575697085000004, 
+            "index_id": "5", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.000809265755535, 
+            "index_id": "6", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.000835753532059, 
+            "index_id": "7", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.000852188553989, 
+            "index_id": "8", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00091257887008400001, 
+            "index_id": "9", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0010689823310599999, 
+            "index_id": "10", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00125352084836, 
+            "index_id": "11", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0013035088730899999, 
+            "index_id": "12", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0014583176210099999, 
+            "index_id": "13", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0017403066986400001, 
+            "index_id": "14", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0017512325823, 
+            "index_id": "15", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00194218483889, 
+            "index_id": "16", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0021615651103699999, 
+            "index_id": "17", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0022290247357200001, 
+            "index_id": "18", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0022438274357899999, 
+            "index_id": "19", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0024851630782199998, 
+            "index_id": "20", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0027114595856000002, 
+            "index_id": "21", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0027445193475700001, 
+            "index_id": "22", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0027698092342100002, 
+            "index_id": "23", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0029746240007699999, 
+            "index_id": "24", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0030437164499599999, 
+            "index_id": "25", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00328656005385, 
+            "index_id": "26", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0032959924350399999, 
+            "index_id": "27", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00366419351924, 
+            "index_id": "28", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0037926566011500002, 
+            "index_id": "29", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00405609337909, 
+            "index_id": "30", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0041394601553299999, 
+            "index_id": "31", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0041463089317399998, 
+            "index_id": "32", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0048160704783599996, 
+            "index_id": "33", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0048622516559200003, 
+            "index_id": "34", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0049616225846900001, 
+            "index_id": "35", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0050893051097399998, 
+            "index_id": "36", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0051186901319099998, 
+            "index_id": "37", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0051198429989900004, 
+            "index_id": "38", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0055208458342600004, 
+            "index_id": "39", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0055427929643100003, 
+            "index_id": "40", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0057224191025199997, 
+            "index_id": "41", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00574033314175, 
+            "index_id": "42", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0058817208069800002, 
+            "index_id": "43", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00609186212667, 
+            "index_id": "44", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00619661215944, 
+            "index_id": "45", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00625797389023, 
+            "index_id": "46", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0063765166270400003, 
+            "index_id": "47", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0065809619114799997, 
+            "index_id": "48", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0066178163971700003, 
+            "index_id": "49", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0070159317790500003, 
+            "index_id": "50", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0070403440808499999, 
+            "index_id": "51", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0072181538136299999, 
+            "index_id": "52", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0073721505262000003, 
+            "index_id": "53", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0079036510210400007, 
+            "index_id": "54", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0085991156847799993, 
+            "index_id": "55", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0086444335905900005, 
+            "index_id": "56", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.00864702056979, 
+            "index_id": "57", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0086944823932399995, 
+            "index_id": "58", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0091874462348200004, 
+            "index_id": "59", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0094427162800900001, 
+            "index_id": "60", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0094470007286800006, 
+            "index_id": "61", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0094730939685799993, 
+            "index_id": "62", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.010257731033400001, 
+            "index_id": "63", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0102803349868, 
+            "index_id": "64", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.010412912445, 
+            "index_id": "65", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0109185118829, 
+            "index_id": "66", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.011227026815200001, 
+            "index_id": "67", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0122059853077, 
+            "index_id": "68", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0122656552437, 
+            "index_id": "69", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0133097156407, 
+            "index_id": "70", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0135866801051, 
+            "index_id": "71", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.013779442483999999, 
+            "index_id": "72", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0138804959312, 
+            "index_id": "73", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.013946551237300001, 
+            "index_id": "74", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.015002030908099999, 
+            "index_id": "75", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.015349185402000001, 
+            "index_id": "76", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.015561581851200001, 
+            "index_id": "77", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.015629948356500001, 
+            "index_id": "78", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.015909856663900001, 
+            "index_id": "79", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.016330154040699998, 
+            "index_id": "80", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0170158580654, 
+            "index_id": "81", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0173033166319, 
+            "index_id": "82", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0175985326967, 
+            "index_id": "83", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.018267778445799999, 
+            "index_id": "84", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.019491205565299999, 
+            "index_id": "85", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0202760243672, 
+            "index_id": "86", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.020812694178999998, 
+            "index_id": "87", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.021266799142600001, 
+            "index_id": "88", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0216836568603, 
+            "index_id": "89", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.021826285699200001, 
+            "index_id": "90", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.024005210012999999, 
+            "index_id": "91", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.024371857565200002, 
+            "index_id": "92", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.024480349451499999, 
+            "index_id": "93", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.0253402320326, 
+            "index_id": "94", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.026097796412999998, 
+            "index_id": "95", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.027133497717000001, 
+            "index_id": "96", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.028468347767199999, 
+            "index_id": "97", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.029393308156400001, 
+            "index_id": "98", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.040150267450599998, 
+            "index_id": "99", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.044410239792300001, 
+            "index_id": "100", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }
+    ],
+	"ala": [
 		{
 			"servers": [
 				{"host": "localhost", "port": "16000"}
