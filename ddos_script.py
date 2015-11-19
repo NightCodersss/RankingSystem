@@ -80,7 +80,8 @@ if len(sys.argv) > 2:
 time_file = open(time_file_name, "w")
 
 for i in range(N):
-	threading.Timer(3, attack).start()
+	threading.Timer(0, attack).start()
+	time.sleep(3)
 
 while True:
 	time.sleep(REFRESH_TIME)
