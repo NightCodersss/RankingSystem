@@ -1,12 +1,15 @@
+#!/usr/bin/python
+
 from os import listdir
 from os.path import isfile, join
+import os
 import json
 import re
 import numpy
 
 onlyfiles = [f for f in listdir("./") if isfile(join("./",f)) and f.startswith('sorted')]
 
-cs = list(numpy.loadtxt("/home/asio/rankingsystem/makeindex/makeindex/makeindex_random.config"))
+cs = list(numpy.loadtxt(os.environ["RANKING_SYSTEM_HOME"] + "/makeindex/makeindex/makeindex_random.config"))
 
 output = {
 	"texts": []
