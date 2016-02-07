@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import socket, sys, os, threading, re, time
 
 RESULT_SIZE = 10
@@ -22,23 +24,15 @@ def getnum(s):
 		return -1
 
 def permutation_metric(a):
-	return reduce(lambda x, y: x + y, [abs(i - gi) for i, gi in enumerate(a)])
+	return sum([abs(i - gi) for i, gi in enumerate(a)])
 
 
 def attack():
-
 	result = []
-
-	time_start = 0;
-
 	try:
-		#pid = os.fork()  
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
 		s.connect(("localhost", 15000))
 		s.send("Fairytale\n")
-		time_start = time.clock()
-#		print "OLOLOTROLOLO"
-#		s.settimeout(10)
 		time.sleep(1)
 		full_answer = ""
 		while True:
@@ -63,33 +57,29 @@ def attack():
 	if len(result) != RESULT_SIZE:
 #		print "Result size is not correct:", len(result)
 		size_errors[0] += 1
-		time_file.write("{}\n".format(-1))
 	else:
 		hist[permutation_metric(result)] += 1
-		els_time = (time.clock() - time_start)*1000
-		print "Took time: ", els_time, "ms"
-		time_file.write("{}\n".format(els_time))
-
-N = int(sys.argv[1])
 
 
-time_file_name = "time.log"
-if len(sys.argv) > 2:
-	time_file_name = sys.argv[2]
-
-time_file = open(time_file_name, "w")
-
-for i in range(N):
-	threading.Timer(0, attack).start()
-	time.sleep(3)
-
-while True:
-	time.sleep(REFRESH_TIME)
+def show_status():
 	print "Errors:", size_errors[0]
 	success = sum(hist)
 	print "Success: ", success 
 	print "Hist:", hist
-	if success + size_errors[0] == N:
-		break
+	if success + size_errors[0] < N:
+                threading.Timer(REFRESH_TIME, show_status).start()
+	    
 
+threading.Timer(0, show_status).start()
+
+N = int(sys.argv[1])
+
+for i in range(N):
+	threading.Timer(0, attack).start()
+	time.sleep(0.3)
+
+while True:
+    success = sum(hist)
+    if success + size_errors[0] >= N:
+        break
 

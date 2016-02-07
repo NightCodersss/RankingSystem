@@ -28,3 +28,7 @@ doc-md:
 
 clean:
 	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) clean ); done
+
+test:
+	./ddos_script.py 100
+	echo "38 is average for random permutation on 10 elements"
