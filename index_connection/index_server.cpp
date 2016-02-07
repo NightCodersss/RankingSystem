@@ -42,7 +42,9 @@ void IndexServer::handle_accept(IndexConnection::pointer new_connection, const b
 void IndexServer::load_index()
 {
 	BOOST_LOG_TRIVIAL(trace) << "Begin index load";
-	std::string current_index_path = "/home/asio/rankingsystem/current_index/";
+	std::string current_index_path = std::string(std::getenv("RANKING_SYSTEM_HOME")) + "/current_index/";
+
+    BOOST_LOG_TRIVIAL(debug) << "Index list path: " << current_index_path;
 
 	std::ifstream index_list(current_index_path + "indexlist");
 

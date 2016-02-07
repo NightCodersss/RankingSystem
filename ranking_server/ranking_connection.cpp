@@ -30,6 +30,7 @@ void RankingConnection::start()
 		try
 		{
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
+			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
 			auto request = reader.getNextValue();
 
 //			std::cout << "From ranking server: \n";
@@ -131,6 +132,7 @@ void RankingConnection::start()
 
 			double C3 = 1.;
 			double max_swap_prob = 0.01;
+            int check_size = 100;
 
 			do 
 			{
@@ -143,52 +145,44 @@ void RankingConnection::start()
 					Mdr_copy = self->data.Mdr;
 				}
 
-				BOOST_LOG_TRIVIAL(trace) << "Mdr " << Mdr_copy << '\n';
+				BOOST_LOG_TRIVIAL(info) << "Mdr: " << Mdr_copy << '\n';
 	
 				//TODO add check of amount
 				//TODO change top_const if docs_top.topSize() >= n
 	
-				BOOST_LOG_TRIVIAL(trace) << "docs_top: " << self->data.docs_top.top_size() << "\n";
+				BOOST_LOG_TRIVIAL(info) << "docs_top: " << self->data.docs_top.top_size() << "\n";
 
-				double swap_prob = 0;
-				if ( self->data.docs_top.top_size() >= 2 )
+                // only for root ranking server: self->data.updateCuttingConsts(request["amount"].asInt(), Mdr_copy);
+				if ( self->data.isTheTopDocGoodEnough(self->config, max_swap_prob, check_size) )
 				{
-					self->data.updateRankingConsts(request["amount"].asInt(), Mdr_copy);
-					swap_prob = self->data.computeSwapProbability(self->config);
+                    BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
+                    ubjson::Value answer = self->data.formAnswer();
+                    self->data.deleteTheTopDocument();
+                    writer.writeValue(answer);
 				}
 
-				BOOST_LOG_TRIVIAL(trace) << "Swap probability: " << swap_prob << '\n';
+                //BOOST_LOG_TRIVIAL(info) << "Swap probability: " << swap_prob << '\n';
 
 				const double eps = 1e-10;
+                /* TODO: Check for stop in root ranking server and for ranking threshold in all
 				if ( swap_prob < max_swap_prob && (self->data.docs_top.top_size() >= request["amount"].asInt() || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true\n";
 					self->data.is_end = true;
 				}
+                */
 
 			} while ( !self->data.is_end );
 			
-			std::size_t res_size = 0;
-			ubjson::Value answer;
-
-			BOOST_LOG_TRIVIAL(trace) << "Forming answer\n";
-			
-			answer = self->data.formAnswer(request["amount"].isNull() ? -1 : request["amount"].asInt());
-	//		BOOST_LOG_TRIVIAL(trace) << "Answer of ranking server: " << ubjson::to_ostream(answer) << '\n';
-			//answer is formed
-
-			BOOST_LOG_TRIVIAL(trace) << "Sending formed answer: \n";
 			BOOST_LOG_TRIVIAL(info) << "Downloaded documents: " << self->data.download_counter << '\n';
-
-			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
-			writer.writeValue(answer);
 			
-			BOOST_LOG_TRIVIAL(trace) << "Sent formed answer: \n";
+			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection\n";
 		}
 		catch( std::exception& e )
 		{
 			std::cout << "!!!!!! " << e.what() << '\n';
 			BOOST_LOG_TRIVIAL(error) << "!!!!!! " << e.what();
+			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection\n";
 		}
 	}).detach();
 }

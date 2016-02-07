@@ -68,6 +68,9 @@ void IndexConnection::start()
 				DocID doc_id;
 				double correspondence;
 
+                BOOST_LOG_TRIVIAL(debug) << "Number of servers: " << self->server->index.size();
+                BOOST_LOG_TRIVIAL(debug) << "Index id: " << index_id;
+
 				BOOST_LOG_TRIVIAL(trace) << "Using sample " << sample_n << " of " << self->server->index[index_id].size();
 				if ( sample_n < self->server->index[index_id].size() )
 				{				

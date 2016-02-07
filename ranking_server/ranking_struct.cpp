@@ -38,26 +38,19 @@ void RankingStruct::insertText(DocID docid, TextIndex text_index, const Doc& doc
 	}
 }
 
-ubjson::Value RankingStruct::formAnswer(long long amount)
+ubjson::Value RankingStruct::formAnswer()
 {
-	ubjson::Value answer;
-
-	long long res_size = 0;
-
-	for(auto doc_it = docs_top.top_begin(); doc_it != docs_top.top_end(); ++doc_it)
-	{
-		const auto& doc = *doc_it;
-		docs[doc.second].doc["rank"] = doc.first;
-		answer["docs"].push_back(docs[doc.second].doc);
-		++res_size;
-		if (amount != -1 && res_size >= amount)//TODO: add sup limit
- 			break;
-	}
-	answer["amount"] = res_size;
-	return answer;
+    const auto& doc = *docs_top.top_begin();
+    docs[doc.second].doc["rank"] = doc.first;
+	return docs[doc.second].doc;
+}
+    
+void RankingStruct::deleteTheTopDocument()
+{
+    // TODO: actually delete
 }
 
-void RankingStruct::updateRankingConsts(long long amount, double Mdr_copy)
+void RankingStruct::updateCuttingConsts(long long amount, double Mdr_copy)
 {
 	std::lock_guard<std::mutex> lock(docs_mutex);
 	if (docs_top.top_size() >= amount)
@@ -98,38 +91,31 @@ double RankingStruct::calculatePairSwapProbability(double x1, double dx1, double
 	return p;
 }
 
-double RankingStruct::computeSwapProbability(config_type const& config)
+bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_swap_probability, int check_size)
 {
 	std::lock_guard<std::mutex> lock(docs_mutex);
 
-	// TODO: refactor 3 lines: make it simpler
-	auto end = docs_top.top_end(); // End of docs_top.top
-	--end; //Last of docs_top.top
-	auto lastAndOne = docs_top.all_upper_bound(end -> first); // prev elem to (last in top) in docs_top.all 
+    auto the_top_document = docs_top.all_begin();
+    docs[the_top_document -> second].update(config, c);
+    double rank = the_top_document -> first;					
+    double d_rank = docs[the_top_document -> second].mdr;
 
-	double swap_prob = 0;
+    // Check document that we have not seen
+    if (calculatePairSwapProbability(rank, d_rank, 0, Mdr) > max_swap_probability)
+        return false;
 
-	// TODO: refactor: 
-	auto it = docs_top.all_begin();
-	for ( ; it != lastAndOne; ++it ) // *it is (rank_of_doc, doc_id)
+    // Check documents that we have already seen
+    auto it = docs_top.all_begin();
+    ++it;
+	for (int counter = 0; it != docs_top.all_end() && counter < check_size; ++it) // *it is (rank_of_doc, doc_id)
 	{
-		docs[it -> second].update(config, c);
-	}
-	docs[it -> second].update(config, c);
+        docs[it -> second].update(config, c);
+		double current_rank = it -> first;
+		double d_current_rank = docs[it -> second].mdr;
 
-	for (it = docs_top.all_begin(); it != lastAndOne; ++it) // *it is (rank_of_doc, doc_id)
-	{
-		double x1 = it -> first;					
-		double dx1 = docs[it -> second].mdr;
-
-		auto next = it;
-		++next; 
-
-		double x2 = next -> first;
-		double dx2 = docs[next -> second].mdr;
-
-		swap_prob += calculatePairSwapProbability(x1, dx1, x2, dx2);
+		if (calculatePairSwapProbability(rank, d_rank, current_rank, d_current_rank) > max_swap_probability)
+            return false;
 	}
 
-	return swap_prob;
+	return true;
 }
