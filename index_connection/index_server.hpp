@@ -18,6 +18,7 @@
 
 class IndexServer
 {
+    friend class IndexConnection;
 public:
 
     IndexServer(boost::asio::io_service& io_service, int port);

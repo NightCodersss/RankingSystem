@@ -1,4 +1,5 @@
-export PROJECTPATH=/home/asio/rankingsystem/
+export CXX=clang++
+export PROJECTPATH=$(shell pwd)
 SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server
 
 .PHONY: all $(SUBDIRECTORIES)

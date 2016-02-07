@@ -1,4 +1,4 @@
-CXX=g++-5
+#CXX=g++-5
 CXXFLAGS=-c -std=c++14 -fPIC
 LDFLAGS=-lboost_system -shared
 OBJECTS=config_loader.o

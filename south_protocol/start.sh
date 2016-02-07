@@ -1,4 +1,4 @@
 #!/bin/bash
 
-export LD_LIBRARY_PATH=/home/asio/rankingsystem/UbjsonCpp/src/
+export LD_LIBRARY_PATH=/home/viktor/rnkgsstm/rankingsystem/UbjsonCpp/src/
 ./southserver

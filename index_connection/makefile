@@ -1,4 +1,4 @@
-CXX=g++-5
+#CXX=g++-5
 INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)
 LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader
 CXXFLAGS=-g -DBOOST_LOG_DYN_LINK -c -std=c++14 $(INCLUDEPATH)
