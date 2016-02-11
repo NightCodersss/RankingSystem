@@ -1,6 +1,8 @@
 export CXX=clang++
 export PROJECTPATH=$(shell pwd)
-SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server
+export INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)/
+export LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader -L$(PROJECTPATH)/common
+SUBDIRECTORIES=config_loader index_connection south_protocol ranking_server common
 
 .PHONY: all $(SUBDIRECTORIES)
 
