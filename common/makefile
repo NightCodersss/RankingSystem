@@ -1,6 +1,6 @@
-CXXFLAGS=-c -std=c++14 -fPIC $(INCLUDEPATH)
-LDFLAGS=-lboost_system -shared
-OBJECTS=root_sender.o realtime_sender.o
+CXXFLAGS=-c -DBOOST_LOG_DYN_LINK -g -std=c++14 -fPIC $(INCLUDEPATH)
+LDFLAGS=-lboost_log -lboost_thread -lboost_system -shared
+OBJECTS=batch_sender.o realtime_sender.o sender.o
 EXECUTABLE=libcommon.so
 
 all: $(EXECUTABLE)

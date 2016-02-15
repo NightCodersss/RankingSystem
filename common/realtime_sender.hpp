@@ -5,5 +5,6 @@
 class RealTimeSender : public SenderInterface
 {
 public:
-	void send(SocketStream& stream, ubjson::Value val) override;
+	RealTimeSender(SocketStream& stream); 
+	void send(ubjson::Value val) override;
 };

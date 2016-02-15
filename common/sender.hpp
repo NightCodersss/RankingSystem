@@ -8,5 +8,11 @@ class SenderInterface
 public:
 	using SocketStream = boost::asio::ip::tcp::iostream;
 
-	virtual void send(SocketStream& stream, ubjson::Value val) = 0;
+protected:
+	SocketStream& stream;
+
+	SenderInterface(SocketStream& stream);
+
+public:
+	virtual void send(ubjson::Value val) = 0;
 };
