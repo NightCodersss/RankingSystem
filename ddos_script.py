@@ -75,8 +75,7 @@ threading.Timer(0, show_status).start()
 N = int(sys.argv[1])
 
 for i in range(N):
-	threading.Timer(0, attack).start()
-	time.sleep(0.3)
+	threading.Timer(3 * N, attack).start()
 
 while True:
     success = sum(hist)
