@@ -2,6 +2,8 @@
 #include <thread>
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
+#include <batch_sender.hpp>
+#include <realtime_sender.hpp>
 #include <bitset>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -29,8 +31,8 @@ void RankingConnection::start()
 		BOOST_LOG_TRIVIAL(trace) << "Thread of connection has been started\n";
 		try
 		{
+			// TODO: delegate top analics to special class from connection
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
-			ubjson::StreamWriter<SocketStream> writer(self->south_stream);
 			auto request = reader.getNextValue();
 
 //			std::cout << "From ranking server: \n";
@@ -40,6 +42,7 @@ void RankingConnection::start()
 				return;
 			self->index_results.clear();
 
+			auto sender = std::make_unique<BatchSender>(self->south_stream, 10, 1); // TODO: implement policy of root/non-root ranking 
 	
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
@@ -158,7 +161,7 @@ void RankingConnection::start()
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
                     ubjson::Value answer = self->data.formAnswer();
                     self->data.deleteTheTopDocument();
-                    writer.writeValue(answer);
+                    sender->send(answer);
 				}
 
                 //BOOST_LOG_TRIVIAL(info) << "Swap probability: " << swap_prob << '\n';
