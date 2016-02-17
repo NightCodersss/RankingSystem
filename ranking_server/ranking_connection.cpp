@@ -35,9 +35,6 @@ void RankingConnection::start()
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
 			auto request = reader.getNextValue();
 
-//			std::cout << "From ranking server: \n";
-//			std::cout << "Read json: " << ubjson::to_ostream(request) << '\n';
-
 			if(request["query"].isNull())
 				return;
 			self->index_results.clear();
@@ -66,7 +63,7 @@ void RankingConnection::start()
 						ubjson::StreamWriter<SocketStream> writer(index_stream);
 						ubjson::StreamReader<SocketStream> reader(index_stream);
 							
-						//Send query
+						//Send query to index server
 						writer.writeValue(query);
 
 						while ( true ) // TODO wrap fetching into a stream
@@ -162,6 +159,14 @@ void RankingConnection::start()
                     ubjson::Value answer = self->data.formAnswer();
                     self->data.deleteTheTopDocument();
                     sender->send(answer);
+
+					const auto& err = self->south_stream.error();  
+					if ( err )
+					{
+						BOOST_LOG_TRIVIAL(info) << "Error while writing (to south stream): " << err.message();
+						BOOST_LOG_TRIVIAL(trace) << "Error while writing (to south stream), so thread is going down.";
+						break;
+					}
 				}
 
                 //BOOST_LOG_TRIVIAL(info) << "Swap probability: " << swap_prob << '\n';
