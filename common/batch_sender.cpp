@@ -14,10 +14,14 @@ BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of
 
 void BatchSender::send(ubjson::Value val)
 {
+	if (number_of_batches <= 0) {
+		return;
+	}
+
 	queue.push(val);
 	BOOST_LOG_TRIVIAL(trace) << "Something is pushed to send queue. Queue size: " << queue.size() << ". ";
 
-	if (number_of_batches > 0 && queue.size() >= number_of_docs) {
+	if (queue.size() >= number_of_docs) {
 		BOOST_LOG_TRIVIAL(trace) << "There are enough data to send, making batch…";
 		ubjson::StreamWriter<SocketStream> writer(stream);
 
