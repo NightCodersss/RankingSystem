@@ -31,6 +31,11 @@ doc-md:
 clean:
 	for d in $(SUBDIRECTORIES); do (cd $$d; $(MAKE) clean ); done
 
+log_clean:
+	rm -f ./ranking_server/log.log
+	rm -f ./index_connection/log.log
+	rm -f ./south_protocol/log.log
+
 test:
 	./ddos_script.py 100
 	echo "38 is average for random permutation on 10 elements"
