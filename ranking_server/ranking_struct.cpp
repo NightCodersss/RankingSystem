@@ -48,6 +48,10 @@ ubjson::Value RankingStruct::formAnswer()
 void RankingStruct::deleteTheTopDocument()
 {
     // TODO: actually delete
+    const auto& doc = *docs_top.top_begin();
+    DocID top_doc_id = doc.second;
+    docs.erase(top_doc_id);
+    docs_top.deleteTheTopDocument();
 }
 
 void RankingStruct::updateCuttingConsts(long long amount, double Mdr_copy)

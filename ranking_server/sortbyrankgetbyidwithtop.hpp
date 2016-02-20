@@ -68,6 +68,12 @@ public:
 		return all.size();
 	}
 
+	void deleteTheTopDocument()
+	{
+		top.deleteTheTopDocument();
+		all.deleteTheTopDocument();
+	}
+
 private:
 	SortByRankGetById<ID, Rank> top;
 	SortByRankGetById<ID, Rank> all;

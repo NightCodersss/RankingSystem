@@ -48,6 +48,13 @@ public:
 		}
 	}
 
+	void deleteTheTopDocument()
+	{
+		ID id = rank_and_id.begin()->second;
+		rank_by_id.erase(id);
+		rank_and_id.erase(rank_and_id.begin());
+	}
+
 private:
 	std::map<ID, Rank> rank_by_id;
 	std::set< std::pair<Rank, ID> , std::greater<std::pair<Rank, ID>>> rank_and_id;
