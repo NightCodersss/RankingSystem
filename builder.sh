@@ -2,4 +2,4 @@
 
 git pull
 make
-./deploy
+./deploy.sh
