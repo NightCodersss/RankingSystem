@@ -7,8 +7,6 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 
-const int COUNT_INDEX = 3;
-    
 IndexServer::IndexServer(boost::asio::io_service& io_service, int port) : acceptor(io_service, tcp::endpoint(tcp::v4(), port))
 {
 	load_index();

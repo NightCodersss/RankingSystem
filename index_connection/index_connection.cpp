@@ -73,10 +73,12 @@ void IndexConnection::start()
 
 				BOOST_LOG_TRIVIAL(trace) << "Using sample " << sample_n << " of " << self->server->index[index_id].size();
 				if ( sample_n < self->server->index[index_id].size() )
-				{				
-					word = self->server->index[index_id][sample_n].word;
-					doc_id = self->server->index[index_id][sample_n].doc_id;
-					correspondence = self->server->index[index_id][sample_n].correspondence;
+				{	
+					const auto& row = self->server->index.at(index_id).at(sample_n);
+
+					word = row.word;
+					doc_id = row.doc_id;
+					correspondence = row.correspondence;
 					++sample_n;
 
 					BOOST_LOG_TRIVIAL(trace) << "Word " << word << " read\n";
