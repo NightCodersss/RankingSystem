@@ -157,8 +157,8 @@ void RankingConnection::start()
 				{
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
                     ubjson::Value answer = self->data.formAnswer();
-                    self->data.deleteTheTopDocument();
                     sender->send(answer);
+                    self->data.deleteTheTopDocument();
 
 					const auto& err = self->south_stream.error();  
 					if ( err )
