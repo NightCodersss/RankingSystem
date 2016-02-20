@@ -1,6 +1,44 @@
 {
-	"indexserver": 
-	{
-		"port": "16000"
-	}
+    "texts": [
+        {
+            "factor": 0.0110731983212, 
+            "index_id": "0", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.19772140060999999, 
+            "index_id": "1", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.215383167757, 
+            "index_id": "2", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }, 
+        {
+            "factor": 0.57582223331100002, 
+            "index_id": "3", 
+            "servers": [
+                {
+                    "host": "localhost", 
+                    "port": "16000"
+                }
+            ]
+        }
+    ]
 }
