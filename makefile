@@ -39,3 +39,24 @@ log_clean:
 test:
 	./ddos_script.py 100
 	echo "38 is average for random permutation on 10 elements"
+
+show_todo:
+	echo "" > source_files
+	find -name *.cpp >> source_files
+	find -name *.hpp >> source_files
+	grep "TODO" -ni `cat source_files` | sed "s/\:[^#]*\/\//\t/g"
+	rm source_files
+
+show_note:
+	echo "" > source_files
+	find -name *.cpp >> source_files
+	find -name *.hpp >> source_files
+	grep "NOTE" -ni `cat source_files` | sed "s/\:[^#]*\/\//\t/g"
+	rm source_files
+
+show_warn:
+	echo "" > source_files
+	find -name *.cpp >> source_files
+	find -name *.hpp >> source_files
+	grep "WARN" -ni `cat source_files` | sed "s/\:[^#]*\/\//\t/g"
+	rm source_files
