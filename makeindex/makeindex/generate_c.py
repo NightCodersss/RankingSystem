@@ -22,4 +22,4 @@ def generate(n, s):
 
 	return result
 
-print ' '.join(map(str, generate(100, 1.0)))
+print ' '.join(map(str, generate(3, 1.0)))

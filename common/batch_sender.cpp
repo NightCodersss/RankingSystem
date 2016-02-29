@@ -12,6 +12,11 @@ BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of
 {
 }
 
+BatchSender::~BatchSender()
+{
+	formAndSend();
+}
+
 void BatchSender::send(ubjson::Value val)
 {
 	if (number_of_batches <= 0) {
@@ -22,19 +27,24 @@ void BatchSender::send(ubjson::Value val)
 	BOOST_LOG_TRIVIAL(trace) << "Something is pushed to send queue. Queue size: " << queue.size() << ". ";
 
 	if (queue.size() >= number_of_docs) {
-		BOOST_LOG_TRIVIAL(trace) << "There are enough data to send, making batch…";
-		ubjson::StreamWriter<SocketStream> writer(stream);
-
-		ubjson::Value batch;
-
-		for (int i = 0; i < number_of_docs; ++i) {
-			batch["docs"].push_back(queue.front());
-			queue.pop();
-		}
-
-		BOOST_LOG_TRIVIAL(trace) << "Batch is done, sending";
-		writer.writeValue(batch);
-		--number_of_batches;
-		BOOST_LOG_TRIVIAL(trace) << "Batch is sent";
+		formAndSend();
 	}
+}
+
+void BatchSender::formAndSend()
+{
+	BOOST_LOG_TRIVIAL(trace) << "There are enough data to send, making batch…";
+	ubjson::StreamWriter<SocketStream> writer(stream);
+
+	ubjson::Value batch;
+
+	for (int i = 0; i < number_of_docs && !queue.empty(); ++i) {
+		batch["docs"].push_back(queue.front());
+		queue.pop();
+	}
+
+	BOOST_LOG_TRIVIAL(trace) << "Batch is done, sending";
+	writer.writeValue(batch);
+	--number_of_batches;
+	BOOST_LOG_TRIVIAL(trace) << "Batch is sent";
 }
