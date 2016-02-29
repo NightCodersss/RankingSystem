@@ -14,7 +14,7 @@ do
 		sed -i -e "s/$from/$to/g" $filename
 	done
 	
-	for name in `ls $from*` 
+	for name in `ls *$from*` 
 	do
 	mv "$name" "${name/$from/$to}"
 	done
