@@ -21,12 +21,14 @@ def generate_file(number_of_docs, r):
 	checkfile = open('checkfile', 'w')
 
 	for d in range(number_of_docs):	# d is document id
-		lambdas = generate_lambda(cs, r(d + 1)) # monotonal 
+		with open("{}.forward".format(d), "w") as forward_file:
+			lambdas = generate_lambda(cs, r(d + 1)) # monotonal 
 
-		for f, l in zip(files, lambdas):
-			f.write("Fairytale {} {}\n".format(d, l))
+			for f, l in zip(files, lambdas):
+				f.write("Fairytale {} {}\n".format(d, l))
+				forward_file.write("Fairytale {}\n".format(l))
 
-		checkfile.write("{} {}\n".format(d, r(d+1)))
+		checkfile.write("{} {}\n".format(d, r(d + 1)))
 	
 	checkfile.close()
 
