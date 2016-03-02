@@ -36,7 +36,7 @@ private:
     
     tcp::acceptor acceptor;
 
-	std::vector<std::vector<TextForwardIndexInfo>> forward_index;
+	std::vector<std::map<std::string, TextForwardIndexInfo>> forward_index;
 	void load_forward_index();
 };
 

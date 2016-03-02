@@ -1,4 +1,4 @@
-export CXX=clang++
+export CXX=g++
 export PROJECTPATH=$(shell pwd)
 export INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)/ -I$(PROJECTPATH)/common/
 export LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader -L$(PROJECTPATH)/common

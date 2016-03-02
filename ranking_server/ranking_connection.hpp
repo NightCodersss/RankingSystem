@@ -14,11 +14,9 @@
 #include "sortbyrankgetbyidwithtop.hpp"
 #include "ranking_struct.hpp"
 
+#include <defines.hpp>
+
 using boost::asio::ip::tcp;
-using DocID = long long;
-using TextID = std::string;
-		
-using TextIndex = int;
 
 class RankingServer;
 
