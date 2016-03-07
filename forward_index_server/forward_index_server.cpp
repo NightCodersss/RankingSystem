@@ -40,7 +40,7 @@ void ForwardIndexServer::handle_accept(ForwardIndexConnection::pointer new_conne
 void ForwardIndexServer::load_forward_index()
 {
 	BOOST_LOG_TRIVIAL(trace) << "Begin forward_index load";
-	std::string current_forward_index_path = std::string(std::getenv("RANKING_SYSTEM_HOME")) + "/current_forward_index/";
+	std::string current_forward_index_path = std::string(std::getenv("RANKING_SYSTEM_HOME")) + "/current_index/";
 
     BOOST_LOG_TRIVIAL(debug) << "ForwardIndex list path: " << current_forward_index_path;
 
@@ -48,20 +48,27 @@ void ForwardIndexServer::load_forward_index()
 
 	forward_index.clear();
 	std::string forward_index_name;
+	std::stringstream ss;
 	while (std::getline(forward_index_list, forward_index_name))
 	{
-		std::vector<TextForwardIndexInfo> current = { };
+		ss.clear();
+		ss << forward_index_name;
+		DocID doc_id;
+		std::string word;
+		ss >> doc_id;
+		ss >> word;
+		std::map<TextID, TextForwardIndexInfo> current = { };
 		std::ifstream in(current_forward_index_path + forward_index_name);
 		bool read_file = false;
 		while ( !read_file )
 		{
 			std::string word;
-			long long doc_id;
+			TextID text_id;
 			double correspondence;
 
-			if ( in >> word >> doc_id >> correspondence )
+			if ( in >> text_id >> correspondence )
 			{
-				current.push_back(TextForwardIndexInfo{word, doc_id, correspondence});
+				current[text_id] = TextForwardIndexInfo{word, doc_id, correspondence, text_id};
 			}
 			else
 			{
@@ -69,7 +76,7 @@ void ForwardIndexServer::load_forward_index()
 			}
 		}
 		in.close();
-		forward_index.push_back(std::move(current));
+		forward_index[doc_id][word] = std::move(current);
 	}
 	forward_index_list.close();
 	BOOST_LOG_TRIVIAL(trace) << "End forward_index load";

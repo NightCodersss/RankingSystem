@@ -42,8 +42,6 @@ void ForwardIndexConnection::start()
 		DocID doc_id = request["doc_id"].asInt();
 		std::string query = static_cast<std::string>(request["query"]);
 
-		BOOST_LOG_TRIVIAL(trace) << "ForwardIndex id: " << forward_index_id << '\n';
-
 		BOOST_LOG_TRIVIAL(trace) << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
 		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
 
@@ -53,8 +51,8 @@ void ForwardIndexConnection::start()
 		for (auto const& index_info: indexes_info)
 		{
 			ubjson::Value index_info_json;
-			index_info_json["text_id"] = index_info.text_id;
-			index_info_json["correspondence"] = index_info.correspondence;
+			index_info_json["text_id"] = index_info.second.text_id; 
+			index_info_json["correspondence"] = index_info.second.correspondence; 
 			result.push_back(index_info_json);
 		}
 		//answer is formed

@@ -36,7 +36,7 @@ private:
     
     tcp::acceptor acceptor;
 
-	std::vector<std::map<std::string, TextForwardIndexInfo>> forward_index;
+	std::map<DocID, std::map<std::string, std::map<TextID, TextForwardIndexInfo>>> forward_index; // doc_id, query, text_id
 	void load_forward_index();
 };
 
