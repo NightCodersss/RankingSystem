@@ -13,27 +13,32 @@ def generate_lambda(c, r): # d is id of document (number)
 			map(lambda x: x * sum(map(lambda a, b: a * b, y, c)) / l2, c))
 	return x
 
-def generate_file(number_of_docs, r):
+def generate_index(number_of_docs, r, word):
 
 	n = len(cs)
 
-	files = [open('index.{}.index'.format(i), 'w') for i in range(n)]
+	inverse_index_files = [open('{word} {text_id}.index'.format(word=word, text_id=i), 'w') for i in range(n)]
 	checkfile = open('checkfile', 'w')
 
-	for d in range(number_of_docs):	# d is document id
-		with open("{}.forward".format(d), "w") as forward_file:
-			lambdas = generate_lambda(cs, r(d + 1)) # monotonal 
+	forward_index_list = open('forwardindexlist', 'a') # indexlist is generated in ../util/sortindex.py
 
-			for f, l in zip(files, lambdas):
-				f.write("Fairytale {} {}\n".format(d, l))
-				forward_file.write("Fairytale {}\n".format(l))
+	for doc_id in range(number_of_docs):
+		forward_index_list.write("{} {}.forward\n".format(doc_id, word))
+		with open("{} {}.forward".format(doc_id, word), "w") as forward_file:
+			lambdas = generate_lambda(cs, r(doc_id + 1)) # monotonic 
 
-		checkfile.write("{} {}\n".format(d, r(d + 1)))
-	
+			for text_id, (f, l) in enumerate(zip(inverse_index_files, lambdas)):
+				f.write("{doc_id} {correspondence}\n".format(doc_id=doc_id, correspondence=l))
+				forward_file.write("{text_id} {correspondence}\n".format(text_id=text_id, correspondence=l))
+
+				checkfile.write("{doc_id} {rank}\n".format(doc_id=doc_id, rank=r(doc_id + 1)))
+		
+	forward_index_list.close()
 	checkfile.close()
 
-	for f in files:
-		f.close()
+	map(file.close, inverse_index_files)
+#	for f in files:
+#		f.close()
 	
 	
 def read_cs(filename):
@@ -45,4 +50,7 @@ def gen_rank(d):
 	return d**(-1.2)
 #	return d**-0.5
 
-generate_file(10000, gen_rank)
+words_list = ["Fairytale", "Happiness"]
+
+for word in words_list:
+	generate_index(10000, gen_rank, word)

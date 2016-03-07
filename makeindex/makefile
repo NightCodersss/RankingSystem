@@ -10,6 +10,7 @@ index_random:
 	mv makeindex/*.forward $(CURRENT_INDEX_PATH)
 	mv makeindex/checkfile $(CURRENT_INDEX_PATH)
 	mv makeindex/indexlist $(CURRENT_INDEX_PATH)
+	mv makeindex/forwardindexlist $(CURRENT_INDEX_PATH)
 	echo "!!!!! checkfile does not seem to be correct"
 
 
@@ -17,6 +18,7 @@ index_istinausers:
 	(cd makeindex; ./makeindex_istinausers.sh)
 	mv makeindex/*.index $(CURRENT_INDEX_PATH)
 	mv makeindex/indexlist $(CURRENT_INDEX_PATH)
+	mv makeindex/forwardindexlist $(CURRENT_INDEX_PATH)
 	# TODO: make backup with timestamp
 	# TODO WARN: build forward index
 	
@@ -25,6 +27,7 @@ index_twitter:
 	(cd makeindex; ./makeindex_twitter.sh)
 	mv makeindex/*.index $(CURRENT_INDEX_PATH)
 	mv makeindex/indexlist $(CURRENT_INDEX_PATH)
+	mv makeindex/forwardindexlist $(CURRENT_INDEX_PATH)
 	# TODO WARN: build forward index
 
 clean:
