@@ -36,7 +36,7 @@ private:
     
     tcp::acceptor acceptor;
 
-	std::vector<std::vector<TextIndexInfo>> index;
+	std::map<std::string, std::map<TextID, std::vector<TextIndexInfo>>> index;
 	void load_index();
 };
 

@@ -46,22 +46,30 @@ void IndexServer::load_index()
 
 	std::ifstream index_list(current_index_path + "indexlist");
 
+	std::stringstream ss;
+
 	index.clear();
 	std::string index_name;
 	while (std::getline(index_list, index_name))
 	{
-		std::vector<TextIndexInfo> current = { };
+		ss.clear();
+		ss << index_name;
+		
+		std::string word;
+		TextID text_id;
+		ss >> word >> text_id;
+
+		std::vector<TextIndexInfo> current;
 		std::ifstream in(current_index_path + index_name);
 		bool read_file = false;
 		while ( !read_file )
 		{
-			std::string word;
-			long long doc_id;
+			DocID doc_id;
 			double correspondence;
 
-			if ( in >> word >> doc_id >> correspondence )
+			if ( in >> doc_id >> correspondence )
 			{
-				current.push_back(TextIndexInfo{word, doc_id, correspondence});
+				current.emplace_back(doc_id, correspondence);
 			}
 			else
 			{
@@ -69,7 +77,7 @@ void IndexServer::load_index()
 			}
 		}
 		in.close();
-		index.push_back(std::move(current));
+		index[word][text_id] = std::move(current);
 	}
 	index_list.close();
 	BOOST_LOG_TRIVIAL(trace) << "End index load";
