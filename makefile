@@ -12,7 +12,7 @@ $(SUBDIRECTORIES):
 	$(MAKE) -C $@
 
 stop-servers:
-	./stopservers.sh
+	./stopservers.sh || true
 
 ranking_server: config_loader 
 south_protocol: config_loader 
