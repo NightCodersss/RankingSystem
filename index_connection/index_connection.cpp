@@ -45,6 +45,17 @@ void IndexConnection::start()
 
 		BOOST_LOG_TRIVIAL(trace) << "Before loop\n";
 		
+		try 
+		{
+			const auto& _ = self->server->index.at(word).at(index_id);
+		}
+		catch (const std::exception& err)
+		{
+			BOOST_LOG_TRIVIAL(info) << "Error: you are asikng word that I dont know: " << err.what();
+			return;
+		}
+
+		// now we really know that we can get word_text_vector correctly
 		const auto& word_text_vector = self->server->index.at(word).at(index_id);
 
 		for (const auto& index_info: word_text_vector)

@@ -22,3 +22,4 @@
 	* Think about adding rank to already sent document
  * Fix test failing (tester problem)
  * Separate (physically) dveloping, building and testing actions (I have a big pain in the ass because of ping)
+ * Handle disconnection of index serever
