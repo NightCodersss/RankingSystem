@@ -17,14 +17,14 @@ def generate_index(number_of_docs, r, word):
 
 	n = len(cs)
 
-	inverse_index_files = [open('{word} {text_id}.index'.format(word=word, text_id=i), 'w') for i in range(n)]
+	inverse_index_files = [open('{word} {text_id} .index'.format(word=word, text_id=i), 'w') for i in range(n)]
 	checkfile = open('checkfile', 'w')
 
 	forward_index_list = open('forwardindexlist', 'a') # indexlist is generated in ../util/sortindex.py
 
 	for doc_id in range(number_of_docs):
-		forward_index_list.write("{} {}.forward\n".format(doc_id, word))
-		with open("{} {}.forward".format(doc_id, word), "w") as forward_file:
+		forward_index_list.write("{} {} .forward\n".format(doc_id, word))
+		with open("{} {} .forward".format(doc_id, word), "w") as forward_file:
 			lambdas = generate_lambda(cs, r(doc_id + 1)) # monotonic 
 
 			for text_id, (f, l) in enumerate(zip(inverse_index_files, lambdas)):
