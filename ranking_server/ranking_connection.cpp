@@ -2,8 +2,11 @@
 #include <thread>
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
+
+#include <sender.hpp>
 #include <batch_sender.hpp>
 #include <realtime_sender.hpp>
+
 #include <bitset>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -37,9 +40,13 @@ void RankingConnection::start()
 
 			if(request["query"].isNull())
 				return;
+			int requsted_amount = std::min(100, request["amount"].asInt());
 			self->index_results.clear();
 
-			auto sender = std::make_unique<BatchSender>(self->south_stream, 10, 1); // TODO: implement policy of root/non-root ranking 
+                // TODO: Check for stop in root ranking server and for ranking threshold in all
+			bool is_root = true; // WARN
+			auto sender = is_root ? static_cast<std::unique_ptr<SenderInterface>>(std::make_unique<BatchSender>(self->south_stream, 10, 1))
+								  : std::make_unique<RealTimeSender>(self->south_stream);
 	
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
@@ -165,20 +172,16 @@ void RankingConnection::start()
 					{
 						BOOST_LOG_TRIVIAL(info) << "Error while writing (to south stream): " << err.message();
 						BOOST_LOG_TRIVIAL(trace) << "Error while writing (to south stream), so thread is going down.";
-						break;
+						self->data.is_end = true;
 					}
 				}
 
-                //BOOST_LOG_TRIVIAL(info) << "Swap probability: " << swap_prob << '\n';
-
-				const double eps = 1e-10;
-                /* TODO: Check for stop in root ranking server and for ranking threshold in all
-				if ( swap_prob < max_swap_prob && (self->data.docs_top.top_size() >= request["amount"].asInt() || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				const double eps = 1e-3;
+				if ( is_root && (dynamic_cast<BatchSender*>(sender.get())->sent >= requsted_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true\n";
 					self->data.is_end = true;
 				}
-                */
 
 			} while ( !self->data.is_end );
 			

@@ -7,6 +7,7 @@
 
 BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of_batches) 
 	: SenderInterface(stream)
+	, sent(0)
 	, number_of_docs(number_of_docs)
 	, number_of_batches(number_of_batches)
 {
@@ -24,6 +25,7 @@ void BatchSender::send(ubjson::Value val)
 	}
 
 	queue.push(val);
+	++sent;
 	BOOST_LOG_TRIVIAL(trace) << "Something is pushed to send queue. Queue size: " << queue.size() << ". ";
 
 	if (queue.size() >= number_of_docs) {
