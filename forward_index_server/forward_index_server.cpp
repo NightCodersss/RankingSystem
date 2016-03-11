@@ -51,7 +51,7 @@ void ForwardIndexServer::load_forward_index()
 	std::stringstream ss;
 	while (std::getline(forward_index_list, forward_index_name))
 	{
-		ss.clear();
+		ss.str(std::string());
 		ss << forward_index_name;
 		DocID doc_id;
 		std::string word;

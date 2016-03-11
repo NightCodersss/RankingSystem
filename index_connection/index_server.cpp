@@ -52,7 +52,7 @@ void IndexServer::load_index()
 	std::string index_name;
 	while (std::getline(index_list, index_name))
 	{
-		ss.clear();
+		ss.str(std::string());
 		ss << index_name;
 		
 		std::string word;
@@ -78,6 +78,7 @@ void IndexServer::load_index()
 		}
 		in.close();
 		index[word][text_id] = std::move(current);
+		BOOST_LOG_TRIVIAL(debug) << "Load word: " << word << " in text: " << text_id;
 	}
 	index_list.close();
 	BOOST_LOG_TRIVIAL(trace) << "End index load";
