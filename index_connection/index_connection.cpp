@@ -76,6 +76,7 @@ void IndexConnection::start()
 			doc["correspondence"] = correspondence;
 			doc["docname"] = std::to_string(doc_id);
 			doc["url"] = "google.com/" + std::to_string(doc_id);
+			doc["amount"] = 1;
 
 			sender->send(doc);
 
