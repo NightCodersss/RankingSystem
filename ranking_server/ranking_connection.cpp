@@ -1,5 +1,7 @@
 #include <sstream>
 #include <thread>
+#include <chrono>
+
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
 
@@ -18,6 +20,7 @@
 #include "ranking_server.hpp"
 
 using boost::asio::ip::tcp;
+using namespace std::literals;
 
 RankingConnection::pointer RankingConnection::create(boost::asio::io_service& io_service, const config_type& config, RankingServer* const server)
 {
@@ -40,13 +43,21 @@ void RankingConnection::start()
 
 			if(request["query"].isNull())
 				return;
-			int requsted_amount = std::min(100, request["amount"].asInt());
+			int requested_amount = std::min(100, request["amount"].asInt());
 			self->index_results.clear();
 
-                // TODO: Check for stop in root ranking server and for ranking threshold in all
+			// TODO: Check for stop in root ranking server and for ranking threshold in all
 			bool is_root = true; // WARN
-			auto sender = is_root ? static_cast<std::unique_ptr<SenderInterface>>(std::make_unique<BatchSender>(self->south_stream, 10, 1))
-								  : std::make_unique<RealTimeSender>(self->south_stream);
+
+			std::unique_ptr<SenderInterface> sender;
+			if ( is_root )
+			{
+				sender = std::make_unique<BatchSender>(self->south_stream, 10, 1);
+			}
+			else 
+			{
+				sender = std::make_unique<RealTimeSender>(self->south_stream);
+			}
 	
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
@@ -58,7 +69,7 @@ void RankingConnection::start()
 						int server_index = 0;
 						SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>()
 												, text["servers"][server_index]["port"].get<std::string>());
-							
+
 						TextID text_id = text["index_id"].get<TextID>();
 
 						//Make query for index server
@@ -143,7 +154,8 @@ void RankingConnection::start()
 
 			do 
 			{
-				std::this_thread::yield();
+//				std::this_thread::yield();
+				std::this_thread::sleep_for(2ms);
 
 				double Mdr_copy;
 
@@ -177,16 +189,18 @@ void RankingConnection::start()
 				}
 
 				const double eps = 1e-3;
-				if ( is_root && (dynamic_cast<BatchSender*>(sender.get())->sent >= requsted_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				BOOST_LOG_TRIVIAL(info) << dynamic_cast<BatchSender*>(sender.get())->sent;
+				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
+				if ( is_root && (dynamic_cast<BatchSender*>(sender.get())->sent >= requested_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true\n";
 					self->data.is_end = true;
+					BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy << "; is_end = true";
 				}
 
 			} while ( !self->data.is_end );
 			
 			BOOST_LOG_TRIVIAL(info) << "Downloaded documents: " << self->data.download_counter << '\n';
-			
 			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection\n";
 		}
 		catch( std::exception& e )

@@ -99,6 +99,10 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 {
 	std::lock_guard<std::mutex> lock(docs_mutex);
 
+	if ( docs_top.all_begin() == docs_top.all_end() ) {
+		return false;
+	}
+
     auto the_top_document = docs_top.all_begin();
     docs[the_top_document -> second].update(config, c);
     double rank = the_top_document -> first;					
