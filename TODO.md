@@ -22,3 +22,5 @@
  * Fix test failing (tester problem)
  * Separate (physically) dveloping, building and testing actions (I have a big pain in the ass because of ping)
  * Handle disconnection of index serever
+
+ * Make Document class and Fetcher class to return it instead of ubjson
