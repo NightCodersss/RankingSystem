@@ -18,5 +18,10 @@ screen -r "South" -X stuff $". $RANKING_SYSTEM_HOME/export_config.sh\n"
 screen -r "South" -X stuff $"$RANKING_SYSTEM_HOME/south_protocol/gdbstart.sh\n"
 sleep 1
 
+screen -dmS "Forward" 
+screen -r "Forward" -X stuff $". $RANKING_SYSTEM_HOME/export_config.sh\n"
+screen -r "Forward" -X stuff $"$RANKING_SYSTEM_HOME/forward_index_server/gdbstart.sh\n"
+sleep 1
+
 #screen -dmS "Ranking" "./ranking_server/gdbstart.sh" ""; sleep 1;
 #screen -dmS "South" "./south_protocol/gdbstart.sh" ""; sleep 1;
