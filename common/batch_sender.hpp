@@ -11,9 +11,6 @@ public:
 
 	void send(ubjson::Value val) override;
 
-public:
-	int sent;
-
 private:
 	void formAndSend();
 	

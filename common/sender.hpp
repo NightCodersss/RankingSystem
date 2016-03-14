@@ -10,6 +10,9 @@ public:
 	
 	virtual void send(ubjson::Value val) = 0;
 
+public:
+	int sent;
+
 protected:
 	SenderInterface(SocketStream& stream);
 	

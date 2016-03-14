@@ -7,7 +7,6 @@
 
 BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of_batches) 
 	: SenderInterface(stream)
-	, sent(0)
 	, number_of_docs(number_of_docs)
 	, number_of_batches(number_of_batches)
 {

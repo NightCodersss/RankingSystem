@@ -191,7 +191,7 @@ void RankingConnection::start()
 				const double eps = 1e-3;
 				BOOST_LOG_TRIVIAL(info) << dynamic_cast<BatchSender*>(sender.get())->sent;
 				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
-				if ( is_root && (dynamic_cast<BatchSender*>(sender.get())->sent >= requested_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				if ( is_root && (sender->sent >= requested_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true\n";
 					self->data.is_end = true;
