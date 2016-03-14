@@ -18,8 +18,7 @@ int main(int argc, char** argv)
 	boost::log::add_file_log(
 		boost::log::keywords::file_name = "./log.log",
 		boost::log::keywords::auto_flush = true,
-		boost::log::keywords::format = "[%TimeStamp%] <%ThreadID%> : %Message%",
- 		boost::log::keywords::time_based_rotation = boost::log::sinks::file::rotation_at_time_point(0, 0, 0)
+		boost::log::keywords::format = "[%TimeStamp%] <%ThreadID%> : %Message%"
 		);
 	BOOST_LOG_TRIVIAL(trace) << "Log begin";
 

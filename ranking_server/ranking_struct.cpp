@@ -1,5 +1,10 @@
-
 #include "ranking_struct.hpp"
+
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
 RankingStruct::RankingStruct(config_type const& config)
 {
@@ -33,6 +38,8 @@ void RankingStruct::insertText(DocID docid, TextIndex text_index, const Doc& doc
 	}
 	if (!docs[docid].got[text_index])
 	{
+		BOOST_LOG_TRIVIAL(trace) << "Inserting doc with id: " << docid;
+
 		docs[docid].got[text_index] = 1;
 		docs_top.increment(docid, delta);
 	}
