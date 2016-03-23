@@ -9,6 +9,8 @@
 #include <batch_sender.hpp>
 #include <realtime_sender.hpp>
 
+#include <fetcher.hpp>
+
 #include <bitset>
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
@@ -62,7 +64,7 @@ void RankingConnection::start()
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
 			{
-				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){
+				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){ // TODO: remove index_results vector
 					try
 					{	 
 						boost::timer::cpu_timer t;
@@ -79,65 +81,53 @@ void RankingConnection::start()
 						query["index_id"] = text_id;
 							
 						ubjson::StreamWriter<SocketStream> writer(index_stream);
-						ubjson::StreamReader<SocketStream> reader(index_stream);
 							
 						//Send query to index server
 						writer.writeValue(query);
 
-						while ( true ) // TODO wrap fetching into a stream
+						double text_factor = text["factor"].get<double>();
+
+						for (Document doc: Fetcher(index_stream))
 						{
 							boost::timer::cpu_timer network_timer;
 
-							//Read answer
-							BOOST_LOG_TRIVIAL(trace) << "Waiting for another document\n";
-							auto res = reader.getNextValue();
 							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server " << text_id << text_index << ": ";
-						//	BOOST_LOG_TRIVIAL(trace) << ubjson::to_ostream(res) << '\n';
 
 							self->server->log_timer("Came answer in ", network_timer);
 						
-							if ( res["amount"].asInt() == 0 ) // TODO need to understand why static_cast<int> doesn't work
-							{
-								BOOST_LOG_TRIVIAL(info) << "Amount is zero. Changing c to 0.\n"; 
-								self->data.update_C(text_id, text["factor"].get<double>(), 0);
-								BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
-								break;
-							}
 
 							// Adding necessary information for next processing
-							double text_factor = text["factor"].get<double>();
 
-							//Async processing
 							// TODO Lock-free
-							{
+							{ // for lock guard
 								BOOST_LOG_TRIVIAL(trace) << "Entering lock\n";
 								std::lock_guard<std::mutex> lock(self->data.docs_mutex);
-								for(const auto& doc: res["docs"])
+								self->data.download_counter += 1;
 								{
-									DocID docid = static_cast<const DocID&>(doc["docid"]);
-									double correspondence = static_cast<double>(doc["correspondence"]);
-									self->data.download_counter += 1;
-									{
 										BOOST_LOG_TRIVIAL(trace) << "Mdr updating\n";
-										self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], correspondence));
-									}
+										self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], doc.correspondence)); // TODO: get rid of the parameters
+								}
 
-									if (self->data.is_end)
-									{
+								if (self->data.is_end) // if main thread decided to finish this work
+								{
 										BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
 										break;
-									}
-
-									self->data.insertText(docid, text_index, Doc(doc), text_factor * correspondence);
 								}
+
+								self->data.insertText(doc.doc_id, text_index, Doc(doc) /* WTF? TODO cut out this shit */, text_factor * doc.correspondence); // TODO: get rid of the parameters
 								BOOST_LOG_TRIVIAL(trace) << "Leaving lock\n";
 							}
+
 							if (self->data.is_end)
 							{
 								BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
 								break;
 							}
 						}
+
+						BOOST_LOG_TRIVIAL(info) << "Amount is zero. Changing c to 0.\n"; 
+						self->data.update_C(text_id, text["factor"].get<double>(), 0);
+						BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
 						self->server->log_timer("Main try", t);
 					}
 					catch ( std::exception& e )
