@@ -27,7 +27,6 @@ public:
 
     using pointer = std::shared_ptr<RankingConnection>;
 	using ErrorCode = boost::system::error_code;
-	using SocketStream = boost::asio::ip::tcp::iostream;
 
     static pointer create(boost::asio::io_service& io_service, const config_type& config, RankingServer * const server);
 

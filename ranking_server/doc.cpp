@@ -1,6 +1,6 @@
 #include "doc.hpp"
 
-Doc::Doc(const ubjson::Value& d) : doc(d) { }
+Doc::Doc(const Document& d) : doc(d) { }
 
 void Doc::update(json const& config, std::map<TextID, double> const& c)
 {

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <document.hpp>
+#include <stream_reader.hpp>
 
 class Fetcher 
 {
@@ -12,6 +14,7 @@ public:
 		void operator ++ ();
 		Document operator * ();
 		bool operator == (const Iterator& other);
+		bool operator != (const Iterator& other);
 	private:
 		Iterator(Fetcher* fetcher);
 	

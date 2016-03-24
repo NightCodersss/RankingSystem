@@ -48,8 +48,9 @@ void RankingStruct::insertText(DocID docid, TextIndex text_index, const Doc& doc
 ubjson::Value RankingStruct::formAnswer()
 {
     const auto& doc = *docs_top.top_begin();
-    docs[doc.second].doc["rank"] = doc.first;
-	return docs[doc.second].doc;
+    auto doc_ubjson = docs[doc.second].doc.packToUbjson();
+	doc_ubjson["rank"] = doc.first;
+	return doc_ubjson;
 }
     
 void RankingStruct::deleteTheTopDocument()

@@ -5,6 +5,7 @@
 #include <map>
 #include <config_loader.hpp>
 #include <value.hpp>
+#include <document.hpp>
 
 using DocID = long long;
 using TextID = std::string;
@@ -15,10 +16,10 @@ struct Doc
 {
 	static const int TextCount = 500;
 
-	Doc(const ubjson::Value& d);
+	Doc(const Document& d);
 	Doc() = default;
 
-	ubjson::Value doc;
+	Document doc;
 	std::bitset<TextCount> got = { };
 	double mdr = 1;
 	void update(json const& config, std::map<TextID, double> const& c); // TODO cut this shit out

@@ -46,7 +46,7 @@ void Fetcher::Iterator::operator ++ ()
 	*this = fetcher->begin();
 }
 
-Document Fetcher::Itarator::operator * ()
+Document Fetcher::Iterator::operator * ()
 {
 	if (is_end)
 			throw std::out_of_range("");
@@ -56,4 +56,9 @@ Document Fetcher::Itarator::operator * ()
 bool Fetcher::Iterator::operator == (const Fetcher::Iterator& other)
 {
 	return is_end && other.is_end;
+}
+
+bool Fetcher::Iterator::operator != (const Fetcher::Iterator& other)
+{
+	return !(*this == other);
 }
