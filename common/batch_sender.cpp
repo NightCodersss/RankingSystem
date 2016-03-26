@@ -14,6 +14,7 @@ BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of
 
 BatchSender::~BatchSender()
 {
+	BOOST_LOG_TRIVIAL(trace) << "Sending by destructor. Queue size: " << queue.size() << ". ";
 	formAndSend();
 }
 
