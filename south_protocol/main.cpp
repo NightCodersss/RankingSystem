@@ -7,14 +7,17 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
 
 #include "south_server.hpp"
 
 int main()
 {
+	boost::log::add_common_attributes();
 	boost::log::add_file_log(
 		boost::log::keywords::file_name = "./log.log",
-		boost::log::keywords::auto_flush = true
+		boost::log::keywords::auto_flush = true,
+		boost::log::keywords::format = "[%TimeStamp%] <%ThreadID%> : %Message%"
 		);
 	BOOST_LOG_TRIVIAL(trace) << "Log begin";
 
