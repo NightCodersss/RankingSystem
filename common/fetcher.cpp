@@ -8,8 +8,11 @@ Fetcher::Fetcher(SocketStream& stream)
 boost::optional<Document> Fetcher::fetch()
 {
 		ubjson::Value doc_ubjson = reader.getNextValue();
-		if(static_cast<int>(doc_ubjson["is_end"]) == 1)
-			return boost::none;
+		try {
+			if(static_cast<int>(doc_ubjson["is_end"]) == 1)
+				return boost::none;
+		} catch (const std::exception& e) { // is_end is not set. // TODO check work if it is set
+		}
 		return Document(static_cast<const DocID&>(doc_ubjson["docid"])
 					  , static_cast<double>      (doc_ubjson["correspondence"]));
 }
