@@ -99,13 +99,17 @@ double RankingStruct::calculatePairSwapProbability(double x1, double dx1, double
 
 	if (p < 0)
 		p = 0;
+
+	BOOST_LOG_TRIVIAL(trace) << "Swap pobability of pair: " << p;
 		
 	return p;
 }
 
 bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_swap_probability, int check_size)
 {
+	BOOST_LOG_TRIVIAL(trace) << "isTheTopDocGoodEnough before lock";
 	std::lock_guard<std::mutex> lock(docs_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "isTheTopDocGoodEnough before in lock";
 
 	if ( docs_top.all_begin() == docs_top.all_end() ) {
 		return false;

@@ -91,7 +91,7 @@ void RankingConnection::start()
 						{
 							boost::timer::cpu_timer network_timer;
 
-							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server " << text_id << text_index << ": ";
+							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server " << text_id << text_index << ": " << doc.toString();
 
 							self->server->log_timer("Came answer in ", network_timer);
 						
@@ -179,11 +179,11 @@ void RankingConnection::start()
 				}
 
 				const double eps = 1e-3;
-				BOOST_LOG_TRIVIAL(info) << dynamic_cast<BatchSender*>(sender.get())->sent;
+				BOOST_LOG_TRIVIAL(info) << "Sender->sent: " << sender->sent;
 				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
 				if ( is_root && (sender->sent >= requested_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
-					BOOST_LOG_TRIVIAL(info) << "Set is_end = true\n";
+					BOOST_LOG_TRIVIAL(info) << "Set is_end = true by logic of root-server ending";
 					self->data.is_end = true;
 					BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy << "; is_end = true";
 				}
@@ -191,14 +191,16 @@ void RankingConnection::start()
 			} while ( !self->data.is_end );
 			
 			BOOST_LOG_TRIVIAL(info) << "Downloaded documents: " << self->data.download_counter << '\n';
-			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection\n";
+			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection in try";
 		}
 		catch( std::exception& e )
 		{
 			std::cout << "!!!!!! " << e.what() << '\n';
 			BOOST_LOG_TRIVIAL(error) << "!!!!!! " << e.what();
-			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection\n";
+			BOOST_LOG_TRIVIAL(trace) << "Shutdowning connection in catch";
 		}
+
+		BOOST_LOG_TRIVIAL(trace) << "The last line in thread of 'start'";
 	}).detach();
 }
 
