@@ -13,8 +13,7 @@ boost::optional<Document> Fetcher::fetch()
 				return boost::none;
 		} catch (const std::exception& e) { // is_end is not set. // TODO check work if it is set
 		}
-		return Document(static_cast<const DocID&>(doc_ubjson["docid"])
-					  , static_cast<double>      (doc_ubjson["correspondence"]));
+		return Document::unpackFromUbjson(doc_ubjson);
 }
 
 Fetcher::Iterator Fetcher::begin()
