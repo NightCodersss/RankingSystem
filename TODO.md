@@ -23,4 +23,7 @@
  * Separate (physically) dveloping, building and testing actions (I have a big pain in the ass because of ping)
  * Handle disconnection of index serever
 
- * Make Document class and Fetcher class to return it instead of ubjson
+ * Make Document class and Fetcher class to return it instead of ubjson +
+ * Discuss logic of structs with correspondence and rank
+ * Research why destructor of sender is not calling
+ * Make pretty out of table of docs
