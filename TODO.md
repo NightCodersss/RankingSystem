@@ -26,4 +26,4 @@
  * Make Document class and Fetcher class to return it instead of ubjson +
  * Discuss logic of structs with correspondence and rank
  * Research why destructor of sender is not calling
- * Make pretty out of table of docs
+ * Make pretty out of table of docs +

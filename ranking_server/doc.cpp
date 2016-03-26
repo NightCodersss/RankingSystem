@@ -1,4 +1,5 @@
 #include "doc.hpp"
+#include <sstream>
 
 Doc::Doc(const Document& d) : doc(d) { }
 
@@ -13,3 +14,9 @@ void Doc::update(json const& config, std::map<TextID, double> const& c)
 	}
 }
 
+std::string Doc::toString() const 
+{
+	std::stringstream ss;
+	ss << doc.toString() << "\t" << "mdr: " << mdr << "\t" << "got: " << got.to_string('.', '+');
+	return ss.str();
+}

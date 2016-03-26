@@ -2,15 +2,13 @@
 #define DOC_HPP
 
 #include <bitset>
+#include <string>
 #include <map>
 #include <config_loader.hpp>
 #include <value.hpp>
 #include <document.hpp>
+#include <defines.hpp>
 
-using DocID = long long;
-using TextID = std::string;
-		
-using TextIndex = int;
 
 struct Doc
 {
@@ -18,6 +16,8 @@ struct Doc
 
 	Doc(const Document& d);
 	Doc() = default;
+
+	std::string toString() const;
 
 	Document doc;
 	std::bitset<TextCount> got = { };

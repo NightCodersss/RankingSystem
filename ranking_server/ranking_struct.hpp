@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <future>
+#include <string>
 #include "sortbyrankgetbyidwithtop.hpp"
 #include "doc.hpp"
 
@@ -23,6 +24,8 @@ struct RankingStruct
     bool isTheTopDocGoodEnough(config_type const& config, double max_swap_probability, int check_size);
     void deleteTheTopDocument();
 
+	std::string docTableToString();
+
 private: 
 	double calculatePairSwapProbability(double x1, double dx1, double x2, double dx2);
 
@@ -30,6 +33,7 @@ public:
 	std::map<DocID, Doc> docs; // docid, doc
 	SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
 	std::mutex docs_mutex;
+
 	bool is_end = false; // NOTE: maybe use std::atomic_flag
 	int download_counter = 0;
 	double Mdr;

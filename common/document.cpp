@@ -25,7 +25,7 @@ Document Document::unpackFromUbjson(const ubjson::Value& doc_ubjson)
 	}
 }
 
-std::string Document::toString()
+std::string Document::toString() const
 {
 	std::stringstream ss;
 	ss << "Document: {docid: " << doc_id << "; correspondence: " << correspondence << "}";

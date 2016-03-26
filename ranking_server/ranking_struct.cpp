@@ -1,5 +1,7 @@
 #include "ranking_struct.hpp"
 
+#include <sstream>
+
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -138,4 +140,18 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 	}
 
 	return true;
+}
+
+std::string RankingStruct::docTableToString() 
+{
+	std::stringstream ss;
+    
+	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)
+	{
+		double current_rank = it -> first;
+		const Doc& doc = docs[it -> second];
+		ss << doc.toString() << "\t" << "rank: " << current_rank <<"\n";
+	}
+	
+	return ss.str();
 }

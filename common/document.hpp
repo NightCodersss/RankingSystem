@@ -10,7 +10,7 @@ struct Document
 	ubjson::Value packToUbjson();
 	static Document unpackFromUbjson(const ubjson::Value& doc_json);
 	
-	std::string toString();
+	std::string toString() const;
 
 	DocID doc_id;
 	double correspondence;

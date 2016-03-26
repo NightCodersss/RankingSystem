@@ -160,6 +160,8 @@ void RankingConnection::start()
 				//TODO change top_const if docs_top.topSize() >= n
 	
 				BOOST_LOG_TRIVIAL(info) << "docs_top: " << self->data.docs_top.top_size() << "\n";
+				
+				BOOST_LOG_TRIVIAL(info) << "Doc table:\n" << self->data.docTableToString();
 
                 // only for root ranking server: self->data.updateCuttingConsts(request["amount"].asInt(), Mdr_copy);
 				if ( self->data.isTheTopDocGoodEnough(self->config, max_swap_prob, check_size) )
