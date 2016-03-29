@@ -147,6 +147,7 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 
 std::string RankingStruct::docTableToString() 
 {
+	std::lock_guard<std::mutex> lock(docs_mutex);
 	std::stringstream ss;
 	int n = 0;    
 	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)
