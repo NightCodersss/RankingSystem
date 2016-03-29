@@ -105,7 +105,7 @@ void RankingConnection::start()
 								self->data.download_counter += 1;
 								{
 										BOOST_LOG_TRIVIAL(trace) << "Mdr updating\n";
-										self->data.update_C(text_id, text_factor, std::min(self->data.c[text_id], doc.correspondence)); // TODO: get rid of the parameters
+										self->data.update_min_for_text(self->data.index_by_id.at(text_id), doc.rank); 
 								}
 
 								if (self->data.is_end) // if main thread decided to finish this work
@@ -114,7 +114,7 @@ void RankingConnection::start()
 										break;
 								}
 
-								self->data.insertText(doc.doc_id, text_index, Doc(doc) /* WTF? TODO cut out this shit */, text_factor * doc.correspondence); // TODO: get rid of the parameters
+								self->data.insertText(doc, text_index); // TODO: get rid of the parameters
 								BOOST_LOG_TRIVIAL(trace) << "Leaving lock\n";
 							}
 
@@ -126,7 +126,7 @@ void RankingConnection::start()
 						}
 
 						BOOST_LOG_TRIVIAL(info) << "Amount is zero. Changing c to 0.\n"; 
-						self->data.update_C(text_id, text["factor"].get<double>(), 0);
+						self->data.update_min_for_text(self->data.index_by_id.at(text_id), 0); 
 						BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
 						self->server->log_timer("Main try", t);
 					}

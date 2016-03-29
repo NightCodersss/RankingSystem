@@ -13,46 +13,51 @@ RankingStruct::RankingStruct(config_type const& config)
 	//Sum of 𝛎's
 	Mdr = 0.;
 
+	TextIndex text_index = 0;
+
 	for ( const auto& text: config["texts"] )
 	{
 		auto text_id = text["index_id"].get<TextID>();
-		c[text_id] = 1.;
-		Mdr += text["factor"].get<double>();
+
+		index_by_id[text_id] = text_index;
+		++text_index;
+
+		id_by_index.push_back(text_id);
+
+		rank_linear_form.push_back(text["factor"].get<double>());
+		Mdr += rank_linear_form.back();
+	    min_for_text.push_back(1.);
 	}
 
 }
-void RankingStruct::update_C(TextID text_id, double factor, double new_val)
+void RankingStruct::update_min_for_text(TextIndex text_index, double new_val)
 {
-	Mdr -= c[text_id] * factor;
-	c[text_id] = new_val;
-	Mdr += c[text_id] * factor;
+	Mdr -= min_for_text[text_index] * rank_linear_form[text_index];
+	min_for_text[text_index] = std::min(new_val, min_for_text[text_index]);
+	Mdr += min_for_text[text_index] * rank_linear_form[text_index];
 }
 		
-void RankingStruct::insertText(DocID docid, TextIndex text_index, const Doc& doc, double delta)
+void RankingStruct::insertText(Document doc, TextIndex text_index)
 {
 	/**
 	* It inserts text of one document to datastruct. 
 	* Used at getting documetns from index_server.
 	*/
-	if(docs.find(docid) == docs.end())
+	if(docs.find(doc.doc_id) == docs.end())
 	{
-		docs[docid] = doc;
+		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form));
 	}
-	if (!docs[docid].got[text_index])
-	{
-		BOOST_LOG_TRIVIAL(trace) << "Inserting doc with id: " << docid;
 
-		docs[docid].got[text_index] = 1;
-		docs_top.increment(docid, delta);
-	}
+	docs[doc.doc_id].addDocument(doc, text_index/*, delta*/);
+
+	double delta = rank_linear_form.at(text_index) * doc.rank;
+	docs_top.increment(doc.doc_id, delta); // TODO replace `increment` to `update` without delta, but `with docs[...].rank`. Now it is inconsistent to calc rank of doc in DocumentAggregator and at docs_top.increment.
 }
 
 ubjson::Value RankingStruct::formAnswer()
 {
     const auto& doc = *docs_top.top_begin();
-    auto doc_ubjson = docs[doc.second].doc.packToUbjson();
-	doc_ubjson["rank"] = doc.first;
-	return doc_ubjson;
+    return docs[doc.second].aggregate().packToUbjson();
 }
     
 void RankingStruct::deleteTheTopDocument()
@@ -118,9 +123,8 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 	}
 
     auto the_top_document = docs_top.all_begin();
-    docs[the_top_document -> second].update(config, c);
     double rank = the_top_document -> first;					
-    double d_rank = docs[the_top_document -> second].mdr;
+    double d_rank = docs[the_top_document -> second].mdr(min_for_text);
 
     // Check document that we have not seen
     if (calculatePairSwapProbability(rank, d_rank, 0, Mdr) > max_swap_probability)
@@ -131,9 +135,8 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
     ++it;
 	for (int counter = 0; it != docs_top.all_end() && counter < check_size; ++it) // *it is (rank_of_doc, doc_id)
 	{
-        docs[it -> second].update(config, c);
 		double current_rank = it -> first;
-		double d_current_rank = docs[it -> second].mdr;
+		double d_current_rank = docs[it -> second].mdr(min_for_text);
 
 		if (calculatePairSwapProbability(rank, d_rank, current_rank, d_current_rank) > max_swap_probability)
             return false;
@@ -149,8 +152,8 @@ std::string RankingStruct::docTableToString()
 	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)
 	{
 		double current_rank = it -> first;
-		const Doc& doc = docs[it -> second];
-		ss << doc.toString() << "\t" << "rank: " << current_rank <<"\n";
+		DocumentAccumulator& doc = docs[it -> second];
+		ss << doc.toString(min_for_text) << "\t" << "rank: " << current_rank <<"\n";
 	}
 	
 	return ss.str();

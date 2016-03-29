@@ -13,5 +13,5 @@ struct Document
 	std::string toString() const;
 
 	DocID doc_id;
-	double correspondence;
+	double rank;
 };

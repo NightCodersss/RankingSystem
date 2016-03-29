@@ -10,9 +10,9 @@ RankingServer::RankingServer(boost::asio::io_service& io_service, std::string co
 																			, acceptor(io_service, tcp::endpoint(tcp::v4(), config["ranking_server"]["port"].get<int>()))
 																			, log_timer_file("timing.log")
 {
-	if ( config["texts"].size() > Doc::TextCount )
+	if ( config["texts"].size() > DocumentAccumulator::DocCount )
 	{
-		throw std::logic_error("Too many texts. Change constant Doc::TextCount to bigger constant and recompile");
+		throw std::logic_error("Too many texts. Change constant DocumentAccumulator::DocCount to bigger constant and recompile");
 	}
 
 //	std::cout << "Started ranking server\n";
