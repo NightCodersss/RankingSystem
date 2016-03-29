@@ -73,7 +73,7 @@ void IndexConnection::start()
 
 			ubjson::Value doc;
 			doc["docid"] = doc_id;
-			doc["correspondence"] = correspondence;
+			doc["rank"] = correspondence;
 			doc["docname"] = std::to_string(doc_id);
 			doc["url"] = "google.com/" + std::to_string(doc_id);
 			doc["amount"] = 1;
