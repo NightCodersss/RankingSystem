@@ -47,12 +47,16 @@ void ForwardIndexConnection::start()
 
 		ubjson::Value result;
 
+		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << "\n";
+		BOOST_LOG_TRIVIAL(trace) << "Forward index size: " << self->server->forward_index.size() << "\n";
+
 		const auto& indexes_info = self->server->forward_index.at(doc_id).at(query);
 		for (auto const& index_info: indexes_info)
 		{
 			ubjson::Value index_info_json;
+			index_info_json["doc_id"] = doc_id;
 			index_info_json["text_id"] = index_info.second.text_id; 
-			index_info_json["correspondence"] = index_info.second.correspondence; 
+			index_info_json["rank"] = index_info.second.correspondence; 
 			result.push_back(index_info_json);
 		}
 		//answer is formed

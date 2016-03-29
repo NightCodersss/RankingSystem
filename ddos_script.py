@@ -12,8 +12,10 @@ def getnum(s):
 	idx = s.find("docid")
 	if idx != -1:
 		n = -1
+		str_to_parse = s.split()[-1]
+		print "str_to_parse:", str_to_parse
 		try:
-			n = int(s[idx + 9: -1])
+			n = int(str_to_parse)
 		except Exception as e:
 			print e
 			print s
@@ -32,11 +34,14 @@ def attack():
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
 		s.connect(("localhost", 15000))
+		print "connected"
 		s.send("Fairytale\n")
+		print "sent"
 		time.sleep(1)
 		full_answer = ""
 		while True:
 			st = s.recv(4096)
+			time.sleep(0.5)
 
 
 			full_answer += st
@@ -75,7 +80,7 @@ threading.Timer(0, show_status).start()
 N = int(sys.argv[1])
 
 for i in range(N):
-	threading.Timer(3 * N, attack).start()
+	threading.Timer(3 * i, attack).start()
 
 while True:
     success = sum(hist)

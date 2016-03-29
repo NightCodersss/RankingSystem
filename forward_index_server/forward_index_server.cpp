@@ -44,7 +44,7 @@ void ForwardIndexServer::load_forward_index()
 
     BOOST_LOG_TRIVIAL(debug) << "ForwardIndex list path: " << current_forward_index_path;
 
-	std::ifstream forward_index_list(current_forward_index_path + "forward_indexlist");
+	std::ifstream forward_index_list(current_forward_index_path + "forwardindexlist");
 
 	forward_index.clear();
 	std::string forward_index_name;

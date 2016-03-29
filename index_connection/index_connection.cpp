@@ -72,7 +72,7 @@ void IndexConnection::start()
 			BOOST_LOG_TRIVIAL(trace) << "Correspondence " << correspondence << " read\n";
 
 			ubjson::Value doc;
-			doc["docid"] = doc_id;
+			doc["doc_id"] = doc_id;
 			doc["rank"] = correspondence;
 			doc["docname"] = std::to_string(doc_id);
 			doc["url"] = "google.com/" + std::to_string(doc_id);

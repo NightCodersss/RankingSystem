@@ -2,6 +2,12 @@
 	"ranking_server": {
 		"port": 14000
 	},
+	"forward_servers": [
+		{
+			"host": "localhost",
+			"port": "17000"
+		}
+	],
     "texts": [
         {
             "factor": 0.0110731983212, 

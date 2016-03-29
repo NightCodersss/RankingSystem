@@ -167,6 +167,30 @@ void RankingConnection::start()
 				if ( self->data.isTheTopDocGoodEnough(self->config, max_swap_prob, check_size) )
 				{
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
+
+					{ // Fetch from forward index server
+						int server_index = 0;				
+						
+						SocketStream forward_index_stream(self->config["forward_servers"][server_index]["host"].get<std::string>()
+											         	, self->config["forward_servers"][server_index]["port"].get<std::string>());
+						ubjson::StreamWriter<SocketStream> writer(forward_index_stream);
+						
+						ubjson::Value query;
+						query["query"] = request["query"];
+						query["doc_id"] = self->data.docs_top.top_begin()->second;
+
+						writer.writeValue(query);
+
+						ubjson::StreamReader<SocketStream> reader(forward_index_stream);
+						auto answer = reader.getNextValue();
+						
+						for (const auto& doc: answer) {
+							auto text_id = static_cast<std::string>(doc["text_id"]);
+							auto d = Document::unpackFromUbjson(doc);
+							self->data.insertText(d, self->data.index_by_id.at(text_id));
+						}
+					}
+
                     ubjson::Value answer = self->data.formAnswer();
                     sender->send(answer);
                     self->data.deleteTheTopDocument();
