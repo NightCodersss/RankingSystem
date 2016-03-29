@@ -26,7 +26,7 @@ double DocumentAccumulator::mdr(const std::vector<double>& min_for_text)
 std::string DocumentAccumulator::toString(const std::vector<double>& min_for_text) 
 {
 	std::stringstream ss;
-	ss << "rank: " << rank << "\t" << "mdr: " << mdr(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
+	ss << "doc_id: " << doc_id << "rank (doc_acc): " << rank << "\t" << "mdr: " << mdr(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
 	return ss.str();
 }
 

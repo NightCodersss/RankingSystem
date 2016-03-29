@@ -148,12 +148,12 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 std::string RankingStruct::docTableToString() 
 {
 	std::stringstream ss;
-    
+	int n = 0;    
 	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)
 	{
 		double current_rank = it -> first;
 		DocumentAccumulator& doc = docs[it -> second];
-		ss << doc.toString(min_for_text) << "\t" << "rank: " << current_rank <<"\n";
+		ss << "N: " << n << "; " << doc.toString(min_for_text) << "\t" << "rank (docs_top): " << current_rank <<"\n";
 	}
 	
 	return ss.str();

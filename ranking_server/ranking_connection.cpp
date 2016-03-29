@@ -91,7 +91,7 @@ void RankingConnection::start()
 						{
 							boost::timer::cpu_timer network_timer;
 
-							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server " << text_id << text_index << ": " << doc.toString();
+							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server {text_id: " << text_id <<", text_index: " << text_index << "}: " << doc.toString();
 
 							self->server->log_timer("Came answer in ", network_timer);
 						
