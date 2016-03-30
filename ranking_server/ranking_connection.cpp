@@ -64,7 +64,7 @@ void RankingConnection::start()
 			int text_index = 0;
 			for(const auto& text: self->config["texts"])
 			{
-				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){ // TODO: remove index_results vector
+				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
 					try
 					{	 
 						boost::timer::cpu_timer t;
