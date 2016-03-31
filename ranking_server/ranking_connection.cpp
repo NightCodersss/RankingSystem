@@ -41,15 +41,12 @@ void RankingConnection::start()
 		{
 			// TODO: delegate top analics to special class from connection
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
-			auto request = reader.getNextValue();
+			Requster requester(reader.getNextValue());
 
-			if(request["query"].isNull())
-				return;
-			int requested_amount = std::min(100, request["amount"].asInt());
 			self->index_results.clear();
 
 			// TODO: Check for stop in root ranking server and for ranking threshold in all
-			bool is_root = true; // WARN
+			bool is_root = requester.is_root; 
 
 			std::unique_ptr<SenderInterface> sender;
 			if ( is_root )
@@ -61,33 +58,25 @@ void RankingConnection::start()
 				sender = std::make_unique<RealTimeSender>(self->south_stream);
 			}
 	
-			int text_index = 0;
-			for(const auto& text: self->config["texts"])
+			//for(const auto& text: self->config["texts"])
+			for (const auto& request: requester.requests)
 			{
 				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
 					try
 					{	 
 						boost::timer::cpu_timer t;
-						int server_index = 0;
-						SocketStream index_stream(text["servers"][server_index]["host"].get<std::string>()
-												, text["servers"][server_index]["port"].get<std::string>());
 
-						TextID text_id = text["index_id"].get<TextID>();
+						auto available_servers = self->config["servers"][request.type == Request::Type::Ranking ? "ranking" : "index"];
+						auto choosen_server = available_servers[std::rand() % available_servers.size()] // WARN std::rand() 
+						SocketStream up_stream(choosen_server["host"].get<std::string>()
+											 , choosen_server["port"].get<std::string>());
 
-						//Make query for index server
-						ubjson::Value query;
-						query["query"] = request["query"];
-						query["fields"] = {"docname", "url", "docid"};
-						query["index_id"] = text_id;
-							
-						ubjson::StreamWriter<SocketStream> writer(index_stream);
-							
-						//Send query to index server
-						writer.writeValue(query);
+						ubjson::StreamWriter<SocketStream> writer(up_stream);
+						writer.writeValue(request.formUbjsonReuqest());
 
-						double text_factor = text["factor"].get<double>();
+						int text_index = request.text_index;
 
-						for (Document doc: Fetcher(index_stream))
+						for (Document doc: Fetcher(up_stream))
 						{
 							boost::timer::cpu_timer network_timer;
 
@@ -105,7 +94,7 @@ void RankingConnection::start()
 								self->data.download_counter += 1;
 								{
 										BOOST_LOG_TRIVIAL(trace) << "Mdr updating\n";
-										self->data.update_min_for_text(self->data.index_by_id.at(text_id), doc.rank); 
+										self->data.update_min_for_text(text_index, doc.rank); 
 								}
 
 								if (self->data.is_end) // if main thread decided to finish this work
@@ -126,7 +115,7 @@ void RankingConnection::start()
 						}
 
 						BOOST_LOG_TRIVIAL(info) << "Amount is zero. Changing c to 0.\n"; 
-						self->data.update_min_for_text(self->data.index_by_id.at(text_id), 0); 
+						self->data.update_min_for_text(text_index, 0); 
 						BOOST_LOG_TRIVIAL(info) << "Thread is going to finish\n";
 						self->server->log_timer("Main try", t);
 					}
@@ -138,7 +127,6 @@ void RankingConnection::start()
 				text_index++;
 			}
 
-			double C3 = 1.;
 			double max_swap_prob = 0.01;
             int check_size = 100;
 
@@ -168,18 +156,17 @@ void RankingConnection::start()
 				{
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
 
+					if (requester.is_request_atomic)
 					{ // Fetch from forward index server
 						int server_index = 0;				
 						
-						SocketStream forward_index_stream(self->config["forward_servers"][server_index]["host"].get<std::string>()
-											         	, self->config["forward_servers"][server_index]["port"].get<std::string>());
+						SocketStream forward_index_stream(self->config["servers"]["forward"][server_index]["host"].get<std::string>()
+											         	, self->config["servers"]["forward"][server_index]["port"].get<std::string>());
 						ubjson::StreamWriter<SocketStream> writer(forward_index_stream);
 						
-						ubjson::Value query;
-						query["query"] = request["query"];
-						query["doc_id"] = self->data.docs_top.top_begin()->second;
+						DocID doc_id = self->data.docs_top.top_begin()->second;
 
-						writer.writeValue(query);
+						writer.writeValue(requester.forwardQuery(doc_id));
 
 						ubjson::StreamReader<SocketStream> reader(forward_index_stream);
 						auto answer = reader.getNextValue();
@@ -207,7 +194,7 @@ void RankingConnection::start()
 				const double eps = 1e-3;
 				BOOST_LOG_TRIVIAL(info) << "Sender->sent: " << sender->sent;
 				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
-				if ( is_root && (sender->sent >= requested_amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				if ( is_root && (sender->sent >= requester.amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true by logic of root-server ending";
 					self->data.is_end = true;

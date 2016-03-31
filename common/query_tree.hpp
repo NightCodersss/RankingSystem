@@ -12,10 +12,13 @@ public:
 	QueryTree(std::string word);
 	QueryTree(QueryOperator op, std::vector<std::unique_ptr<QueryTree>> children);
 	Query packToQuery() const;
+	bool isAtom() const;
 
-private:
+public:
 	QueryOperator op;
 	std::vector<std::unique_ptr<QueryTree>> children;
+
+private:
 	std::string word;
 };
 
