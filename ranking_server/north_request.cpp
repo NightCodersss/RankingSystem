@@ -1,6 +1,6 @@
 #include "request.hpp"
 
-ubjson::Value Request::formUbjsonReuqest(TextID text_id)
+ubjson::Value Request::formUbjsonReuqest()
 {
 	ubjson::Value query;
 	query["query"] = query.getText();

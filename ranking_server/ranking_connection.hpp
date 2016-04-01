@@ -13,6 +13,7 @@
 
 #include "sortbyrankgetbyidwithtop.hpp"
 #include "ranking_struct.hpp"
+#include "streams_dispatcher.hpp"
 
 #include <defines.hpp>
 
@@ -39,6 +40,7 @@ private:
 
 	const config_type& config;
 	RankingStruct data; // NOTE: defined here but not locally in main lambda becuse it need to be on the heap
+	StreamsDispatcher streams_dispatcher;
 	SocketStream south_stream;
 	std::vector<std::future<void>> index_results;
 

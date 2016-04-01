@@ -1,5 +1,5 @@
-#include "querytree.hpp"
-#include "queryparser.hpp"
+#include "query_tree.hpp"
+#include "query_parser.hpp"
 
 QueryTree::QueryTree(QueryOperator op, std::vector<std::unique_ptr<QueryTree>> children) 
 	: op(op)

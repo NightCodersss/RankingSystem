@@ -5,6 +5,7 @@
 #include <stream_reader.hpp>
 #include <stream_writer.hpp>
 
+#include <query.hpp>
 #include <sender.hpp>
 #include <batch_sender.hpp>
 #include <realtime_sender.hpp>
@@ -41,12 +42,14 @@ void RankingConnection::start()
 		{
 			// TODO: delegate top analics to special class from connection
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
-			Requster requester(reader.getNextValue());
+			SouthRequest south_request;
+			south_request.parse(reader.getNextValue());
+			self->streams_dispatcher.parse(south_request);
 
 			self->index_results.clear();
 
 			// TODO: Check for stop in root ranking server and for ranking threshold in all
-			bool is_root = requester.is_root; 
+			bool is_root = south_request.is_root; 
 
 			std::unique_ptr<SenderInterface> sender;
 			if ( is_root )
@@ -59,15 +62,18 @@ void RankingConnection::start()
 			}
 	
 			//for(const auto& text: self->config["texts"])
-			for (const auto& request: requester.requests)
+			for (NorthRequest& request: streams_dispatcher.requests)
 			{
-				self->index_results.push_back(std::async(std::launch::async, [&, request, text, text_index](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
+				self->index_results.push_back(std::async(std::launch::async, [&](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
 					try
 					{	 
 						boost::timer::cpu_timer t;
 
-						auto available_servers = self->config["servers"][request.type == Request::Type::Ranking ? "ranking" : "index"];
-						auto choosen_server = available_servers[std::rand() % available_servers.size()] // WARN std::rand() 
+						auto available_servers = self->config["servers"]
+							[request.type == Request::Type::Ranking 
+								? std::string("ranking") 
+								: std::string("index") ];
+						auto choosen_server = available_servers[std::rand() % available_servers.size()]; // WARN std::rand() 
 						SocketStream up_stream(choosen_server["host"].get<std::string>()
 											 , choosen_server["port"].get<std::string>());
 
@@ -80,7 +86,7 @@ void RankingConnection::start()
 						{
 							boost::timer::cpu_timer network_timer;
 
-							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server {text_id: " << text_id <<", text_index: " << text_index << "}: " << doc.toString();
+							BOOST_LOG_TRIVIAL(trace) << "Came another doc from index server {text_id: " << request.text_id <<", text_index: " << text_index << "}: " << doc.toString();
 
 							self->server->log_timer("Came answer in ", network_timer);
 						
@@ -124,7 +130,6 @@ void RankingConnection::start()
 						BOOST_LOG_TRIVIAL(error) << "!!!!!! " << e.what() << '\n';
 					}
 				}));
-				text_index++;
 			}
 
 			double max_swap_prob = 0.01;

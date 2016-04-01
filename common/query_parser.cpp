@@ -1,6 +1,6 @@
-#include "queryparser.hpp"
+#include "query_parser.hpp"
 #include "util.hpp"
-#include "queryparseerror.hpp"
+#include "query_parse_error.hpp"
 #include <cctype>
 
 std::unique_ptr<QueryTree> QueryParser::parse(const Query& query)

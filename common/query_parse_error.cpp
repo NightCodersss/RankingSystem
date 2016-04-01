@@ -1,4 +1,4 @@
-#include "queryparseerror.hpp"
+#include "query_parse_error.hpp"
 
 QueryParseError::QueryParseError(const Query& query, int pos, const std::string& explanation) 
 	: std::invalid_argument(std::string("Error parsing query: ")
