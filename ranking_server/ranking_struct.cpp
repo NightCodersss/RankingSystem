@@ -9,27 +9,13 @@
 #include <boost/log/utility/setup/common_attributes.hpp>
 
 RankingStruct::RankingStruct(config_type const& config)
+	: Mdr(1.)
+//	, min_for_text(config["texts"].size(), 1.)
 {
-	//Sum of 𝛎's
-	Mdr = 0.;
-
-	TextIndex text_index = 0;
-
-	for ( const auto& text: config["texts"] )
-	{
-		auto text_id = text["index_id"].get<TextID>();
-
-		index_by_id[text_id] = text_index;
-		++text_index;
-
-		id_by_index.push_back(text_id);
-
-		rank_linear_form.push_back(text["factor"].get<double>());
-		Mdr += rank_linear_form.back();
-	    min_for_text.push_back(1.);
-	}
-
+	BOOST_LOG_TRIVIAL(trace) << "Number of texts: " << config["texts"].size();
+	min_for_text.resize(config["texts"].size(), 1.);
 }
+
 void RankingStruct::update_min_for_text(TextIndex text_index, double new_val)
 {
 	Mdr -= min_for_text[text_index] * rank_linear_form[text_index];

@@ -62,7 +62,7 @@ void RankingConnection::start()
 			}
 	
 			//for(const auto& text: self->config["texts"])
-			for (NorthRequest& request: streams_dispatcher.requests)
+			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{
 				self->index_results.push_back(std::async(std::launch::async, [&](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
 					try
@@ -70,7 +70,7 @@ void RankingConnection::start()
 						boost::timer::cpu_timer t;
 
 						auto available_servers = self->config["servers"]
-							[request.type == Request::Type::Ranking 
+							[request.type == NorthRequest::Type::Ranking 
 								? std::string("ranking") 
 								: std::string("index") ];
 						auto choosen_server = available_servers[std::rand() % available_servers.size()]; // WARN std::rand() 
@@ -161,7 +161,7 @@ void RankingConnection::start()
 				{
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
 
-					if (requester.is_request_atomic)
+					if (south_request.is_request_atomic)
 					{ // Fetch from forward index server
 						int server_index = 0;				
 						
@@ -171,7 +171,7 @@ void RankingConnection::start()
 						
 						DocID doc_id = self->data.docs_top.top_begin()->second;
 
-						writer.writeValue(requester.forwardQuery(doc_id));
+						writer.writeValue(south_request.forwardQuery(doc_id));
 
 						ubjson::StreamReader<SocketStream> reader(forward_index_stream);
 						auto answer = reader.getNextValue();
@@ -199,7 +199,7 @@ void RankingConnection::start()
 				const double eps = 1e-3;
 				BOOST_LOG_TRIVIAL(info) << "Sender->sent: " << sender->sent;
 				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
-				if ( is_root && (sender->sent >= requester.amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				if ( is_root && (sender->sent >= south_request.amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true by logic of root-server ending";
 					self->data.is_end = true;
@@ -222,7 +222,11 @@ void RankingConnection::start()
 	}).detach();
 }
 
-RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config, RankingServer* server): config(config), data(config), server(server)
+RankingConnection::RankingConnection(boost::asio::io_service& io_service, const config_type& config, RankingServer* server)
+	: config(config)
+	, data(config)
+	, server(server)
+	, streams_dispatcher(& data.rank_linear_form, & data.index_by_id, & data.id_by_index, & this->config)
 {
 }
 

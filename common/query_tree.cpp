@@ -11,6 +11,7 @@ QueryTree::QueryTree(std::string word) : word(word) { }
 
 Query QueryTree::packToQuery() const
 {
+	// WARN TODO What if childrens are empty?
 	std::string query;
 
 	std::string delim;
@@ -39,4 +40,9 @@ std::unique_ptr<QueryTree> unpackFromQuery(const Query& query)
 {
 	QueryParser parser;
 	return parser.parse(query);
+}
+
+bool QueryTree::isAtom() const
+{
+	return children.size() == 0; // WARN TODO: it is not correct. It is a correct tree: or ( a, or ( _nothing_ ) )
 }

@@ -1,5 +1,9 @@
+#pragma once
+#include <value.hpp>
+#include <query.hpp>
+#include <defines.hpp>
 
-class Request
+class NorthRequest
 {
 public:
 	enum class Type { Ranking, Index };

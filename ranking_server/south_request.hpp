@@ -1,5 +1,7 @@
 #pragma once
 
+#include <value.hpp>
+#include <defines.hpp>
 #include <query.hpp>
 #include <query_tree.hpp>
 #include <query_parser.hpp>
@@ -8,16 +10,15 @@
 class SouthRequest
 {
 public:
-	Requester();
-	void parseSouthRequest(ubjson::Value request);
+	SouthRequest() = default;
+	void parse(ubjson::Value request);
 
 	ubjson::Value forwardQuery(DocID doc_id);
 
 	bool is_root = true;
 	bool is_request_atomic;
-	int amount;
+	int amount = 10; // standart amount
 	Query query;
 	QueryOperator query_operator;
-private:
 	std::unique_ptr<QueryTree> query_tree;
 };

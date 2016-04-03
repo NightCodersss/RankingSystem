@@ -1,11 +1,11 @@
-#include "request.hpp"
+#include "north_request.hpp"
 
-ubjson::Value Request::formUbjsonReuqest()
+ubjson::Value NorthRequest::formUbjsonReuqest()
 {
-	ubjson::Value query;
-	query["query"] = query.getText();
-	query["fields"] = {"docname", "url", "docid"};
-	query["index_id"] = text_id;
-	query["nonroot"] = "yes"; // is used only by ranking server, so it is always non-root
-	return query;
+	ubjson::Value request;
+	request["request"] = query.getText();
+	request["fields"] = {"docname", "url", "docid"};
+	request["index_id"] = text_id;
+	request["nonroot"] = "yes"; // is used only by ranking server, so it is always non-root
+	return request;
 }
