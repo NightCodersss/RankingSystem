@@ -14,9 +14,8 @@ StreamsDispatcher::StreamsDispatcher(
 
 void StreamsDispatcher::parse(const SouthRequest& south_request)
 {
-	// TODO set linear form
 	rank_linear_form->clear();
-	if (south_request.is_request_atomic) // Reuqests for index server 
+	if (south_request.is_request_atomic) // Requests for index server 
 	{
 		int text_index = 0;
 		for (auto const& text: (*config)["texts"])

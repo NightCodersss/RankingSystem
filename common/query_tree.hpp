@@ -14,6 +14,8 @@ public:
 	Query packToQuery() const;
 	bool isAtom() const;
 
+	std::string toString() const;
+
 public:
 	QueryOperator op;
 	std::vector<std::unique_ptr<QueryTree>> children;

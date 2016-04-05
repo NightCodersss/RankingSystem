@@ -1,14 +1,19 @@
 #include "south_request.hpp"
 #include <cassert>
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
 
 void SouthRequest::parse(ubjson::Value request)
 {
-	// TODO non-root detcter
+	// TODO non-root detector
 	if (request["query"].isNull())
 		throw std::logic_error("query is empty");
 	amount = std::min(100, request["amount"].asInt());
 	query = Query(request["query"]);
 	query_tree = QueryParser().parse(query);
+	BOOST_LOG_TRIVIAL(trace) << "QueryTree: " << query_tree->toString();
 	is_request_atomic = query_tree->isAtom();
 	query_operator = query_tree->op;
 }

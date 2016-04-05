@@ -43,7 +43,13 @@ void RankingConnection::start()
 			// TODO: delegate top analics to special class from connection
 			ubjson::StreamReader<SocketStream> reader(self->south_stream);
 			SouthRequest south_request;
-			south_request.parse(reader.getNextValue());
+			auto request = reader.getNextValue();
+			
+			std::stringstream ss;
+			ss << ubjson::to_ostream(request);
+			BOOST_LOG_TRIVIAL(trace) << "REQUEST: " << ss.str();
+
+			south_request.parse(request);
 			self->streams_dispatcher.parse(south_request);
 
 			self->index_results.clear();
@@ -109,7 +115,7 @@ void RankingConnection::start()
 										break;
 								}
 
-								self->data.insertText(doc, text_index); // TODO: get rid of the parameters
+								self->data.insertText(doc, text_index); 
 								BOOST_LOG_TRIVIAL(trace) << "Leaving lock\n";
 							}
 

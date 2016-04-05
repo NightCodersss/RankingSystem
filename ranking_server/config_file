@@ -6,7 +6,7 @@
 		"ranking": [
 			{
 				"host": "localhost",
-				"port": 14000
+				"port": "14000"
 			}
 		],
 		"index": [
@@ -25,19 +25,19 @@
     "texts": [
         {
             "factor": 0.0110731983212, 
-            "index_id": "0"
+            "text_id": "0"
         }, 
         {
             "factor": 0.19772140060999999, 
-            "index_id": "1" 
+            "text_id": "1" 
         }, 
         {
             "factor": 0.215383167757, 
-            "index_id": "2" 
+            "text_id": "2" 
         }, 
         {
             "factor": 0.57582223331100002, 
-            "index_id": "3" 
+            "text_id": "3" 
         }
     ]
 }

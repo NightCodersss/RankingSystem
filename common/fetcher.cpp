@@ -9,7 +9,7 @@ boost::optional<Document> Fetcher::fetch()
 {
 		ubjson::Value doc_ubjson = reader.getNextValue();
 		try {
-			if(static_cast<int>(doc_ubjson["is_end"]) == 1)
+			if(!doc_ubjson["is_end"].isNull())
 				return boost::none;
 		} catch (const std::exception& e) { // is_end is not set. // TODO check work if it is set
 		}

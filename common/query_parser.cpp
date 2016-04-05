@@ -60,6 +60,10 @@ std::unique_ptr<QueryTree> QueryParser::parse_or()
 		++pos;
 		ops.push_back(parse_and());
 	}
+	
+	if (ops.size() == 1) {
+		return std::move(ops[0]);
+	}
 
 	return std::make_unique<QueryTree>(QueryOperator::Or, std::move(ops));
 }
@@ -72,6 +76,10 @@ std::unique_ptr<QueryTree> QueryParser::parse_and()
 	while (pos < tokens.size() && tokens[pos] != "|") {
 		++pos;
 		ops.push_back(parse_atom());
+	}
+
+	if (ops.size() == 1) {
+		return std::move(ops[0]);
 	}
 
 	return std::make_unique<QueryTree>(QueryOperator::And, std::move(ops));
