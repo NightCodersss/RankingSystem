@@ -74,7 +74,6 @@ std::unique_ptr<QueryTree> QueryParser::parse_and()
 
 	ops.push_back(parse_atom());
 	while (pos < tokens.size() && tokens[pos] != "|") {
-		++pos;
 		ops.push_back(parse_atom());
 	}
 
