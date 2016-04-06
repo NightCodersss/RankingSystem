@@ -16,6 +16,7 @@ void SouthRequest::parse(ubjson::Value request)
 	BOOST_LOG_TRIVIAL(trace) << "QueryTree: " << query_tree->toString();
 	is_request_atomic = query_tree->isAtom();
 	query_operator = query_tree->op;
+	is_root = request["nonroot"].isNull();
 }
 
 ubjson::Value SouthRequest::forwardQuery(DocID doc_id) // TODO move it from here

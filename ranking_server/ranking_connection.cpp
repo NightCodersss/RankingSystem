@@ -66,8 +66,8 @@ void RankingConnection::start()
 			{
 				sender = std::make_unique<RealTimeSender>(self->south_stream);
 			}
+			self->data.min_for_text.resize(self->streams_dispatcher.requests.size(), 1.);
 	
-			//for(const auto& text: self->config["texts"])
 			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{
 				self->index_results.push_back(std::async(std::launch::async, [&](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
