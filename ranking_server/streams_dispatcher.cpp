@@ -24,7 +24,8 @@ void StreamsDispatcher::parse(const SouthRequest& south_request)
 
 			NorthRequest request;
 			request.type = NorthRequest::Type::Index;
-			request.query = south_request.query;
+			//request.query = south_request.query;
+			request.query = south_request.query_tree->packToQuery();
 			request.text_index = text_index;
 			request.text_id = text_id;
 

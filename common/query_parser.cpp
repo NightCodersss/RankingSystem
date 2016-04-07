@@ -73,7 +73,7 @@ std::unique_ptr<QueryTree> QueryParser::parse_and()
 	std::vector<std::unique_ptr<QueryTree>> ops;
 
 	ops.push_back(parse_atom());
-	while (pos < tokens.size() && tokens[pos] != "|") {
+	while (pos < tokens.size() && tokens[pos] != "|" && tokens[pos] != ")") {
 		ops.push_back(parse_atom());
 	}
 
@@ -96,7 +96,7 @@ std::unique_ptr<QueryTree> QueryParser::parse_atom()
 	}
 	else if (word == "(") {
 		auto q = parse_tree();
-		if (word != ")") {
+		if (tokens[pos] != ")") {
 			throw QueryParseError(query, pos, "Inbalanced parentheses");
 		}
 		++pos;
