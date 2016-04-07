@@ -18,6 +18,13 @@ public:
 		rank_and_id.insert({rank_by_id[key], key});
 	}
 
+	void set(ID key, Rank value) 
+	{
+		rank_and_id.erase({rank_by_id[key], key});
+		rank_by_id[key] = value;
+		rank_and_id.insert({rank_by_id[key], key});
+	}
+
 	auto upper_bound(Rank rank) const
 	{
 		return rank_and_id.upper_bound({rank, std::numeric_limits<ID>::max()});

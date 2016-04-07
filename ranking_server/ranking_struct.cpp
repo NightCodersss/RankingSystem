@@ -33,10 +33,9 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form));
 	}
 
-	docs[doc.doc_id].addDocument(doc, text_index/*, delta*/);
+	docs[doc.doc_id].addDocument(doc, text_index);
 
-	double delta = rank_linear_form.at(text_index) * doc.rank;
-	docs_top.increment(doc.doc_id, delta); // TODO replace `increment` to `update` without delta, but `with docs[...].rank`. Now it is inconsistent to calc rank of doc in DocumentAggregator and at docs_top.increment.
+	docs_top.set(doc.doc_id, docs[doc.doc_id].rank);
 }
 
 ubjson::Value RankingStruct::formAnswer()

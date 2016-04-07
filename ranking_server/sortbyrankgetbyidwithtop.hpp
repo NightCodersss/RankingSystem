@@ -17,6 +17,13 @@ public:
 		cutOff();
 	}
 
+	void set(ID key, Rank value) 
+	{
+		all.set(key, value);
+		top.set(key, value);
+		cutOff(); // WARN cutoff may work wrong, if rank may decrease, but really do not know
+	}
+
 	auto all_upper_bound(Rank rank) const
 	{
 		return all.upper_bound(rank);
