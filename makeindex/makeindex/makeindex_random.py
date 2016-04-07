@@ -47,7 +47,8 @@ def read_cs(filename):
 cs = read_cs("makeindex_random.config")
 
 def gen_rank(d):
-	return d**(-1.2)
+	p = -1.2
+	return uniform((d+1) ** p, d ** p)
 #	return d**-0.5
 
 words_list = ["Fairytale", "Happiness"]
