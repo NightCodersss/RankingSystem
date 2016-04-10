@@ -34,16 +34,16 @@ void RankingServer::start_accept()
           });
 }
     
-void RankingServer::handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& error)
+void RankingServer::handle_accept(RankingConnection::pointer new_connection, const boost::system::error_code& err)
 {
-    if (!error)
+    if (!err)
 	{
 //		std::cout << "New ranking connection\n";
 		BOOST_LOG_TRIVIAL(trace) << "New ranking connection\n";
         new_connection->start();
 	}
 	else
-		BOOST_LOG_TRIVIAL(error) << "!!!!! error caught at handle_accept\n";
+		BOOST_LOG_TRIVIAL(error) << "!!!!! error caught at handle_accept: " << err;
 
 	// Waiting for decreasing connections
 	int connections_local;

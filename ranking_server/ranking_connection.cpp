@@ -105,9 +105,10 @@ void RankingConnection::start()
 
 							// TODO Lock-free
 							{ // for lock guard
-								BOOST_LOG_TRIVIAL(trace) << "Entering lock\n";
-								std::lock_guard<std::mutex> lock(self->data.docs_mutex);
-								self->data.download_counter += 1;
+								{
+									std::lock_guard<std::mutex> lock(self->data.download_counter_mutex);
+									self->data.download_counter += 1;
+								}
 								{
 										BOOST_LOG_TRIVIAL(trace) << "Mdr updating\n";
 										self->data.update_min_for_text(text_index, doc.rank); 
@@ -120,7 +121,6 @@ void RankingConnection::start()
 								}
 
 								self->data.insertText(doc, text_index); 
-								BOOST_LOG_TRIVIAL(trace) << "Leaving lock\n";
 							}
 
 							if (self->data.is_end)

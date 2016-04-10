@@ -17,6 +17,9 @@ RankingStruct::RankingStruct(config_type const& config)
 
 void RankingStruct::update_min_for_text(TextIndex text_index, double new_val)
 {
+	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
+	std::lock_guard<std::mutex> lock(min_for_text_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
 	Mdr -= min_for_text[text_index] * rank_linear_form[text_index];
 	min_for_text[text_index] = std::min(new_val, min_for_text[text_index]);
 	Mdr += min_for_text[text_index] * rank_linear_form[text_index];
@@ -28,6 +31,19 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 	* It inserts text of one document to datastruct. 
 	* Used at getting documetns from index_server.
 	*/
+	{
+		BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
+		std::lock_guard<std::mutex> lock(deleted_mutex);
+		BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
+		if(deleted.find(doc.doc_id) != deleted.end())
+		{
+			BOOST_LOG_TRIVIAL(trace) << "Ignoring insert text for doc_id: " << doc.doc_id << " , because document is deleted (already done and sent)";
+			return;
+		}
+	}
+	BOOST_LOG_TRIVIAL(trace) << "Before lock 2: " << __FUNCTION__;
+	std::lock_guard<std::mutex> lock(docs_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "After lock 2: " << __FUNCTION__;
 	if(docs.find(doc.doc_id) == docs.end())
 	{
 		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form, rank_form_policity));
@@ -40,22 +56,38 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 
 ubjson::Value RankingStruct::formAnswer()
 {
+	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
+	std::lock_guard<std::mutex> lock(docs_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
     const auto& doc = *docs_top.top_begin();
     return docs[doc.second].aggregate().packToUbjson();
 }
     
 void RankingStruct::deleteTheTopDocument()
 {
-    // TODO: actually delete
-    const auto& doc = *docs_top.top_begin();
-    DocID top_doc_id = doc.second;
-    docs.erase(top_doc_id);
-    docs_top.deleteTheTopDocument();
+	DocID top_doc_id;
+	{
+		BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
+		std::lock_guard<std::mutex> lock(docs_mutex);
+		BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
+		const auto& doc = *docs_top.top_begin();
+		top_doc_id = doc.second;
+		docs.erase(top_doc_id);
+		docs_top.deleteTheTopDocument();
+	}
+	{
+		BOOST_LOG_TRIVIAL(trace) << "Before lock 2: " << __FUNCTION__;
+		std::lock_guard<std::mutex> lock(deleted_mutex);
+		BOOST_LOG_TRIVIAL(trace) << "After lock 2: " << __FUNCTION__;
+		deleted.insert(top_doc_id);
+	}
 }
 
 void RankingStruct::updateCuttingConsts(long long amount, double Mdr_copy)
 {
+	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
 	std::lock_guard<std::mutex> lock(docs_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
 	if (docs_top.top_size() >= amount)
 	{
 		auto last_in_top = docs_top.top_end();
@@ -100,6 +132,7 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 {
 	BOOST_LOG_TRIVIAL(trace) << "isTheTopDocGoodEnough before lock";
 	std::lock_guard<std::mutex> lock(docs_mutex);
+	std::lock_guard<std::mutex> lock2(min_for_text_mutex);
 	BOOST_LOG_TRIVIAL(trace) << "isTheTopDocGoodEnough before in lock";
 
 	if ( docs_top.all_begin() == docs_top.all_end() ) {
@@ -131,7 +164,11 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 
 std::string RankingStruct::docTableToString() 
 {
+	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
 	std::lock_guard<std::mutex> lock(docs_mutex);
+	std::lock_guard<std::mutex> lock2(min_for_text_mutex);
+	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
+
 	std::stringstream ss;
 	int n = 0;    
 	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)

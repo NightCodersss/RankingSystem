@@ -4,6 +4,7 @@
 #include <thread>
 #include <future>
 #include <string>
+#include <set>
 #include "sortbyrankgetbyidwithtop.hpp"
 #include "document_accumulator.hpp"
 #include <defines.hpp>
@@ -33,13 +34,18 @@ public:
 
 	bool is_end = false; // NOTE: maybe use std::atomic_flag
 	int download_counter = 0;
+	std::mutex download_counter_mutex;
 	double Mdr;
 
 	std::vector<double> rank_linear_form;
+
 	std::vector<double> min_for_text;
+	std::mutex min_for_text_mutex;
+
 	RankFormPolicity rank_form_policity;
 
 	std::set<DocID> deleted;
+	std::mutex deleted_mutex;
 
 	std::map<TextID, TextIndex> index_by_id;
 	std::vector<TextID> id_by_index;
