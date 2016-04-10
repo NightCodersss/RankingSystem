@@ -21,7 +21,7 @@ Document Document::unpackFromUbjson(const ubjson::Value& doc_ubjson)
 		return Document(static_cast<const DocID&>(doc_ubjson["doc_id"])
 					  , static_cast<double>      (doc_ubjson["rank"]));
 	} catch (const std::exception& e) {
-		throw std::logic_error(std::string("wrong format of incoming ubjson document: ") + e.what());
+		throw std::logic_error(std::string("wrong format of incoming ubjson document: ") + e.what() /*+ doc_ubjson.toString()*/);
 	}
 }
 

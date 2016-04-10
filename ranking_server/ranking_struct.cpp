@@ -30,7 +30,7 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 	*/
 	if(docs.find(doc.doc_id) == docs.end())
 	{
-		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form));
+		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form, rank_form_policity));
 	}
 
 	docs[doc.doc_id].addDocument(doc, text_index);

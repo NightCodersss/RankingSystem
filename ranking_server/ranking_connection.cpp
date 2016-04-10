@@ -67,6 +67,10 @@ void RankingConnection::start()
 				sender = std::make_unique<RealTimeSender>(self->south_stream);
 			}
 			self->data.min_for_text.resize(self->streams_dispatcher.requests.size(), 1.);
+			self->data.rank_form_policity = south_request.is_request_atomic ? RankFormPolicity::Sum : // text from index server 
+				south_request.query_operator == QueryOperator::And ? RankFormPolicity::Sum :
+				south_request.query_operator == QueryOperator::Or ? RankFormPolicity::Max :
+				/* south_request.query_operator == Not */ RankFormPolicity::NotImplemented;
 	
 			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{

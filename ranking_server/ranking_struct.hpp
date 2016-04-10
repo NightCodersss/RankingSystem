@@ -37,6 +37,9 @@ public:
 
 	std::vector<double> rank_linear_form;
 	std::vector<double> min_for_text;
+	RankFormPolicity rank_form_policity;
+
+	std::set<DocID> deleted;
 
 	std::map<TextID, TextIndex> index_by_id;
 	std::vector<TextID> id_by_index;
