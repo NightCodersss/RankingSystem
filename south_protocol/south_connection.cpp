@@ -54,7 +54,7 @@ void SouthConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->server_stream);
 
 		auto v = reader.getNextValue();
-		self->client_stream << "ANSWER: " << ubjson::to_ostream(v);
+		self->client_stream << "ANSWER: " << ubjson::to_ostream(v) << "\n";
 	}).detach();
 }
 
