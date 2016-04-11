@@ -74,6 +74,7 @@ ForceRankingConnection::~ForceRankingConnection()
 }
 
 double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
+	// TODO It's kind of copy od document aggregator. Think about replace it to aggregator
 	if (tree->isAtom()) // Fetch from forward index server
 	{
 		int server_index = 0;				

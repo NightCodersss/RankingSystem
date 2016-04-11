@@ -16,14 +16,17 @@
  * Block output
  * Make folders` name normal
 
- * Streaming data
- 	* Delete top doc
-	* Think about adding rank to already sent document
- * Fix test failing (tester problem)
- * Separate (physically) dveloping, building and testing actions (I have a big pain in the ass because of ping)
+ * Streaming data +
+ 	* Delete top doc +
+	* Think about adding rank to already sent document +
+ * Fix test failing (tester problem) +
+ * Separate (physically) dveloping, building and testing actions (I have a big pain in the ass because of ping) +
  * Handle disconnection of index serever
 
  * Make Document class and Fetcher class to return it instead of ubjson +
- * Discuss logic of structs with correspondence and rank
- * Research why destructor of sender is not calling
+ * Discuss logic of structs with correspondence and rank +
+ * Research why destructor of sender is not calling ?
  * Make pretty out of table of docs +
+
+ * Make consistent folders for files in common
+ * Fix compiling all (!) common in one lib
