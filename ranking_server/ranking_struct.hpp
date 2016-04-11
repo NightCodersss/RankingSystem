@@ -6,7 +6,7 @@
 #include <string>
 #include <set>
 #include "sortbyrankgetbyidwithtop.hpp"
-#include "document_accumulator.hpp"
+#include <document_accumulator.hpp>
 #include <defines.hpp>
 
 struct RankingStruct
