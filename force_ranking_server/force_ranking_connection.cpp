@@ -4,6 +4,11 @@
 #include "../UbjsonCpp/include/stream_reader.hpp"
 #include "../UbjsonCpp/include/stream_writer.hpp"
 
+#include <query.hpp>
+#include <query_tree.hpp>
+#include <query_parser.hpp>
+#include <query_parse_error.hpp>
+
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -35,31 +40,17 @@ void ForceRankingConnection::start()
 		if(request["query"].isNull())
 			return;
 
+		Query query(request["query"]);
+		auto query_tree = QueryParser().parse(query);
+		self->doc_id = request["doc_id"].asInt();
+		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << self->doc_id << "\n";
+
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
-		
-		
-//		int force_ranking_id = request["force_ranking_id"].asInt();
-		DocID doc_id = request["doc_id"].asInt();
-		std::string query = static_cast<std::string>(request["query"]);
-
-		BOOST_LOG_TRIVIAL(trace) << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
-		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
-
 		ubjson::Value result;
 
-		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << "\n";
-//		BOOST_LOG_TRIVIAL(trace) << "Forward index size: " << self->server->force_ranking.size() << "\n";
+		result["doc_id"] = self->doc_id;
+		result["rank"] = self->Eval(std::move(query_tree)); 
 
-//		const auto& indexes_info = self->server->force_ranking.at(doc_id).at(query);
-//		for (auto const& index_info: indexes_info)
-//		{
-//			ubjson::Value index_info_json;
-//			index_info_json["doc_id"] = doc_id;
-//			index_info_json["text_id"] = index_info.second.text_id; 
-//			index_info_json["rank"] = index_info.second.correspondence; 
-//			result.push_back(index_info_json);
-//		}
-		//answer is formed
 		BOOST_LOG_TRIVIAL(trace) << "Writing output to ranking server\n";
 		writer.writeValue(result);
 		BOOST_LOG_TRIVIAL(trace) << "Wrote output to ranking server\n";
@@ -78,4 +69,8 @@ ForceRankingConnection::~ForceRankingConnection()
 {
 	BOOST_LOG_TRIVIAL(trace) << "Destructor of connection in.";
 	server->dec_connections();
+}
+
+double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
+	return 0.5;
 }

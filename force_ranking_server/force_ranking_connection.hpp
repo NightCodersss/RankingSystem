@@ -6,6 +6,7 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <value.hpp>
+#include <defines.hpp>
 
 using boost::asio::ip::tcp;
 
@@ -26,6 +27,9 @@ public:
 
 private:
     ForceRankingConnection(boost::asio::io_service& io_service, ForceRankingServer * const server);
+
+	double Eval(std::unique_ptr<QueryTree> tree);
+	DocID doc_id;
 
     SocketStream ranking_stream;
 
