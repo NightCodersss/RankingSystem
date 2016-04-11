@@ -36,6 +36,8 @@ private:
 
 	std::mutex connections_mutex;
 	int connections = 0;
+
+	std::map<std::string, double> rank_form_by_id;
     
     tcp::acceptor acceptor;
 };

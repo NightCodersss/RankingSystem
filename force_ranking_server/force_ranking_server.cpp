@@ -14,6 +14,11 @@ ForceRankingServer::ForceRankingServer(boost::asio::io_service& io_service, int 
 	BOOST_LOG_TRIVIAL(info) << "Started force_ranking server on port: " << port << '\n';
 	BOOST_LOG_TRIVIAL(trace) << "Config: \n" << config << '\n';
 
+	for(const auto& text: config["texts"]) {
+		TextID text_id = text["text_id"].get<TextID>();
+		rank_form_by_id[text_id] = text["factor"].get<double>();
+	}
+
     start_accept();
 }
     

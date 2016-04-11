@@ -14,6 +14,8 @@
 #include <boost/log/expressions.hpp>
 #include <boost/log/utility/setup/file.hpp>
 
+#include <document.hpp>
+
 #include "force_ranking_server.hpp"
 #include "force_ranking_connection.hpp"
 
@@ -72,5 +74,54 @@ ForceRankingConnection::~ForceRankingConnection()
 }
 
 double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
-	return 0.5;
+	if (tree->isAtom()) // Fetch from forward index server
+	{
+		int server_index = 0;				
+
+		SocketStream forward_index_stream(server->config["servers"]["forward"][server_index]["host"].get<std::string>()
+				, server->config["servers"]["forward"][server_index]["port"].get<std::string>());
+		ubjson::StreamWriter<SocketStream> writer(forward_index_stream);
+
+		writer.writeValue(forwardQuery(tree->packToQuery().getText()));
+
+		ubjson::StreamReader<SocketStream> reader(forward_index_stream);
+		auto answer = reader.getNextValue();
+
+		double res = 0;
+		for (const auto& doc: answer) {
+			auto text_id = static_cast<std::string>(doc["text_id"]);
+			auto d = Document::unpackFromUbjson(doc);
+			res += d.rank * server->rank_form_by_id.at(text_id);
+		}
+		return res;
+	}
+	else
+	{
+		if (tree->op == QueryOperator::And) 
+		{
+			double res = 0;
+			double factor = 1./tree->children.size();
+			for (int i = 0; i < tree->children.size(); ++i) {
+				res += Eval(std::move(tree->children[i])) * factor;
+			}
+			return res;
+		}
+		else if (tree->op == QueryOperator::Or) {
+			double res = 0;
+			for (int i = 0; i < tree->children.size(); ++i) {
+				res = std::max(res, Eval(std::move(tree->children[i])));
+			}
+			return res;
+		}
+		else
+			throw std::logic_error("Not operator is not implemented yet");
+	}
+}
+
+ubjson::Value ForceRankingConnection::forwardQuery(std::string word) 
+{
+	ubjson::Value res;
+	res["query"] = word; 
+	res["doc_id"] = doc_id;
+	return res;
 }

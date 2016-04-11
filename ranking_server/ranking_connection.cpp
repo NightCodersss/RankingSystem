@@ -171,30 +171,6 @@ void RankingConnection::start()
 				{
                     BOOST_LOG_TRIVIAL(trace) << "The top document is done\n";
 
-/*
-					if (south_request.is_request_atomic)
-					{ // Fetch from forward index server
-						int server_index = 0;				
-						
-						SocketStream forward_index_stream(self->config["servers"]["forward"][server_index]["host"].get<std::string>()
-											         	, self->config["servers"]["forward"][server_index]["port"].get<std::string>());
-						ubjson::StreamWriter<SocketStream> writer(forward_index_stream);
-						
-						DocID doc_id = self->data.docs_top.top_begin()->second;
-
-						writer.writeValue(south_request.forwardQuery(doc_id));
-
-						ubjson::StreamReader<SocketStream> reader(forward_index_stream);
-						auto answer = reader.getNextValue();
-						
-						for (const auto& doc: answer) {
-							auto text_id = static_cast<std::string>(doc["text_id"]);
-							auto d = Document::unpackFromUbjson(doc);
-							self->data.insertText(d, self->data.index_by_id.at(text_id));
-						}
-					}
-*/
-
 					int server_index = 0;				
 					SocketStream force_ranking_stream(self->config["servers"]["force_ranking"][server_index]["host"].get<std::string>()
 													, self->config["servers"]["force_ranking"][server_index]["port"].get<std::string>());

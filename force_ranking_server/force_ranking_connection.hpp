@@ -33,6 +33,7 @@ private:
     ForceRankingConnection(boost::asio::io_service& io_service, ForceRankingServer * const server);
 
 	double Eval(std::unique_ptr<QueryTree> tree);
+	ubjson::Value forwardQuery(std::string word);
 	DocID doc_id;
 
     SocketStream ranking_stream;
