@@ -17,7 +17,7 @@ struct RankingStruct
 	void update_min_for_text(TextIndex text_index, double new_val);
 
 	void insertText(Document doc, TextIndex text_index);
-	ubjson::Value formAnswer();
+	ubjson::Value formAnswer(DocID doc_id, double rank);
 	void updateCuttingConsts(long long amount, double tmpMdr);
     bool isTheTopDocGoodEnough(config_type const& config, double max_swap_probability, int check_size);
     void deleteTheTopDocument();

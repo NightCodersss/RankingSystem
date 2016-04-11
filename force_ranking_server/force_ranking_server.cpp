@@ -27,15 +27,15 @@ void ForceRankingServer::start_accept()
           });
 }
     
-void ForceRankingServer::handle_accept(ForceRankingConnection::pointer new_connection, const boost::system::error_code& error)
+void ForceRankingServer::handle_accept(ForceRankingConnection::pointer new_connection, const boost::system::error_code& err)
 {
-    if (!error)
+    if (!err)
 	{
 		BOOST_LOG_TRIVIAL(info) << "New force_ranking connection\n";
         new_connection->start();
 	}
 	else
-		BOOST_LOG_TRIVIAL(error) << "!!!!! Error at accepting";
+		BOOST_LOG_TRIVIAL(error) << "!!!!! Error at accepting: " << err;
 
     start_accept();
 }

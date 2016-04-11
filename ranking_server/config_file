@@ -20,6 +20,12 @@
 				"host": "localhost",
 				"port": "17000"
 			}
+		],
+		"force_ranking": [
+			{
+				"host": "localhost",
+				"port": "18000"
+			}
 		]
 	},
     "texts": [

@@ -7,6 +7,10 @@
 #include <boost/asio.hpp>
 #include <value.hpp>
 #include <defines.hpp>
+#include <query.hpp>
+#include <query_tree.hpp>
+#include <query_parser.hpp>
+#include <query_parse_error.hpp>
 
 using boost::asio::ip::tcp;
 

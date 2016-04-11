@@ -54,13 +54,9 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 	docs_top.set(doc.doc_id, docs[doc.doc_id].rank);
 }
 
-ubjson::Value RankingStruct::formAnswer()
+ubjson::Value RankingStruct::formAnswer(DocID doc_id, double rank)
 {
-	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
-	std::lock_guard<std::mutex> lock(docs_mutex);
-	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
-    const auto& doc = *docs_top.top_begin();
-    return docs[doc.second].aggregate().packToUbjson();
+    return Document(doc_id, rank).packToUbjson();
 }
     
 void RankingStruct::deleteTheTopDocument()
