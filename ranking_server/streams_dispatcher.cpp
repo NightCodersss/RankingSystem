@@ -1,5 +1,11 @@
 #include "streams_dispatcher.hpp"
 
+#include <boost/log/core.hpp>
+#include <boost/log/trivial.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/timer/timer.hpp>
+
 StreamsDispatcher::StreamsDispatcher(
 		std::vector<double>* rank_linear_form, 
 		std::map<TextID, TextIndex>* index_by_id, 
@@ -39,7 +45,17 @@ void StreamsDispatcher::parse(const SouthRequest& south_request)
 	}
 	else // request is a composite
 	{
-		double linear_form_coeff = 1./south_request.query_tree->children.size();
+		int number_of_positive_childrens = 0;
+		for (auto const& sub_query: south_request.query_tree->children) 
+		{
+			if (sub_query->op != QueryOperator::Not) 
+				++number_of_positive_childrens;
+		}
+		double linear_form_coeff = 1./number_of_positive_childrens;
+		double linear_form_coeff_negative = south_request.query_tree->children.size() != number_of_positive_childrens ? 
+			-1. / (south_request.query_tree->children.size() - number_of_positive_childrens) :
+			0.;
+		BOOST_LOG_TRIVIAL(trace) << "Linear_form_coeff: " << linear_form_coeff <<"; negate: " << linear_form_coeff_negative;
 		int text_index = 0;
 		for (auto const& sub_query: south_request.query_tree->children)
 		{
@@ -55,7 +71,7 @@ void StreamsDispatcher::parse(const SouthRequest& south_request)
 			else
 			{
 				request.query = sub_query->children[0]->packToQuery();
-				rank_linear_form->push_back( -linear_form_coeff);
+				rank_linear_form->push_back(linear_form_coeff_negative);
 			}
 
 			// index_id are meaningless if request is composite

@@ -50,8 +50,10 @@ void ForceRankingConnection::start()
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
 		ubjson::Value result;
 
+		double rank = self->Eval(std::move(query_tree));
 		result["doc_id"] = self->doc_id;
-		result["rank"] = self->Eval(std::move(query_tree)); 
+		result["rank"] = rank; 
+		BOOST_LOG_TRIVIAL(trace) << "Result: doc_id: " << self->doc_id << ", rank: " << rank <<", query: " << query.getText() << "\n";
 
 		BOOST_LOG_TRIVIAL(trace) << "Writing output to ranking server\n";
 		writer.writeValue(result);
@@ -74,7 +76,6 @@ ForceRankingConnection::~ForceRankingConnection()
 }
 
 double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
-	// TODO It's kind of copy od document aggregator. Think about replace it to aggregator
 	if (tree->isAtom()) // Fetch from forward index server
 	{
 		int server_index = 0;				
@@ -100,14 +101,26 @@ double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
 	{
 		if (tree->op == QueryOperator::And) 
 		{
+			BOOST_LOG_TRIVIAL(trace) << "Parse and";
 			double res = 0;
-			double factor = 1./tree->children.size();
+			int number_of_positive = 0;
 			for (int i = 0; i < tree->children.size(); ++i) {
-				res += Eval(std::move(tree->children[i])) * factor;
+				if (tree->children[i]->op != QueryOperator::Not) {
+					++number_of_positive;
+				}
+			}
+			double positive_factor = 1./number_of_positive;
+			double negative_factor = tree->children.size() != number_of_positive ? 
+				1./(tree->children.size() - number_of_positive) :
+				0.;
+			for (int i = 0; i < tree->children.size(); ++i) {
+				double e = Eval(std::move(tree->children[i]));
+				res +=  e > 0 ? e * positive_factor : e * negative_factor; // minus for negative factor became from "not" case
 			}
 			return res;
 		}
 		else if (tree->op == QueryOperator::Or) {
+			BOOST_LOG_TRIVIAL(trace) << "Parse or";
 			double res = 0;
 			for (int i = 0; i < tree->children.size(); ++i) {
 				res = std::max(res, Eval(std::move(tree->children[i])));
@@ -115,10 +128,11 @@ double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
 			return res;
 		}
 		else if (tree->op == QueryOperator::Not) {
+			BOOST_LOG_TRIVIAL(trace) << "Parse not";
 			return -Eval(std::move(tree->children[0]));
 		}
 		else
-			throw std::logic_error("Not operator is not implemented yet");
+			throw std::logic_error("Operator is not implemented yet");
 	}
 }
 

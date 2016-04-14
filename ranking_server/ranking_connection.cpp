@@ -71,6 +71,11 @@ void RankingConnection::start()
 				south_request.query_operator == QueryOperator::And ? RankFormPolicity::Sum :
 				south_request.query_operator == QueryOperator::Or ? RankFormPolicity::Max :
 				/* south_request.query_operator == Not */ RankFormPolicity::NotImplemented;
+
+			for (int i = 0; i < self->data.rank_linear_form.size(); ++i)
+			{
+				BOOST_LOG_TRIVIAL(trace) << "i: " << i << " rank_linear_form: " << self->data.rank_linear_form[i];
+			}
 	
 			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{

@@ -14,6 +14,7 @@ void SouthRequest::parse(ubjson::Value request)
 	query = Query(request["query"]);
 	query_tree = QueryParser().parse(query);
 	BOOST_LOG_TRIVIAL(trace) << "QueryTree: " << query_tree->toString();
+	BOOST_LOG_TRIVIAL(trace) << "Root operator is 'and': " << (int)(query_tree->op == QueryOperator::And);
 	is_request_atomic = query_tree->isAtom();
 	query_operator = query_tree->op;
 	is_root = request["nonroot"].isNull();
