@@ -114,6 +114,9 @@ double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
 			}
 			return res;
 		}
+		else if (tree->op == QueryOperator::Not) {
+			return -Eval(std::move(tree->children[0]));
+		}
 		else
 			throw std::logic_error("Not operator is not implemented yet");
 	}
