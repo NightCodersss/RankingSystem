@@ -13,6 +13,14 @@ index_random:
 	mv makeindex/forwardindexlist $(CURRENT_INDEX_PATH)
 	echo "!!!!! checkfile does not seem to be correct"
 
+index_random_2:
+	(cd makeindex; ./makeindex_random_2.py)
+	mv makeindex/*.index $(CURRENT_INDEX_PATH)
+	mv makeindex/*.forward $(CURRENT_INDEX_PATH)
+	mv makeindex/indexlist $(CURRENT_INDEX_PATH)
+	mv makeindex/forwardindexlist $(CURRENT_INDEX_PATH)
+	mv makeindex/*.txt $(CURRENT_INDEX_PATH)
+
 
 index_istinausers:
 	(cd makeindex; ./makeindex_istinausers.sh)
