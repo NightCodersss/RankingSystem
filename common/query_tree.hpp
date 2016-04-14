@@ -4,7 +4,7 @@
 #include <vector>
 #include "query.hpp"
 
-enum class QueryOperator { And, Or, Not };
+enum class QueryOperator { And, Or, Not, Leaf };
 
 class QueryTree
 {

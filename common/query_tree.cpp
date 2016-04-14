@@ -7,7 +7,11 @@ QueryTree::QueryTree(QueryOperator op, std::vector<std::unique_ptr<QueryTree>> c
 {
 }
 	
-QueryTree::QueryTree(std::string word) : word(word) { } 
+QueryTree::QueryTree(std::string word) 
+	: op(QueryOperator::Leaf)
+	, word(word) 
+{
+} 
 
 Query QueryTree::packToQuery() const
 {
@@ -48,7 +52,7 @@ std::unique_ptr<QueryTree> unpackFromQuery(const Query& query)
 
 bool QueryTree::isAtom() const
 {
-	return children.size() == 0; // WARN TODO: it is not correct. It is a correct tree: or ( a, or ( _nothing_ ) )
+	return op == QueryOperator::Leaf; 
 }
 
 std::string QueryTree::toString() const
@@ -60,8 +64,8 @@ std::string QueryTree::toString() const
 	std::string operation;
 	switch (op) {
 		case QueryOperator::Not: operation = "not"; break;
-		case QueryOperator::And: operation = "or"; break;
-		case QueryOperator::Or: operation = "and"; break;		
+		case QueryOperator::And: operation = "and"; break;
+		case QueryOperator::Or: operation = "or"; break;		
 		default: break;
 	}
 
