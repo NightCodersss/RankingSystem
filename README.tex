@@ -47,6 +47,16 @@
 }
 \end{verbatim}
 
+Грамматика задающая формат поискового запроса:
+\begin{verbatim}
+	Query \rightarrow OrQuery
+	OrQuery \rightarrow AndQuery | OrQuery | \varepsilon
+	AndQuery \rightarrow NotQuery & AndQuery | \varepsilon
+	NotQuery \rightarrow !Atom | Atom
+	Atom \rightarrow Word | (Query)
+\end{verbatim}
+По факту, это произвольный булевый запрос.
+
 Ответ состоит из потока документов, где каждый документ представлен отдельным ubjson. Об окончании потока говорит фейковый документ, у которого $amount == 0$. Если ожидаются еще документы $amount$ должен быть не нулевым числом (у нас принята единица).
 \begin{verbatim}
 {
