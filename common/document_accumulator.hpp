@@ -18,15 +18,18 @@ struct DocumentAccumulator
 
 	Document aggregate();
 	double mdr(const std::vector<double>& min_for_text);
+	double rank_lower_bound(const std::vector<double>& min_for_text);
+	double rank_upper_bound(const std::vector<double>& min_for_text);
 	void addDocument(const Document& doc, TextIndex text_index);
 
 	std::string toString(const std::vector<double>& min_for_text);
 
 	RankFormPolicity rank_form_policity;
 	std::bitset<DocCount> got = { };
-	double rank = 0;
 	DocID doc_id;
 	const std::vector<double> * rank_linear_form;
+private:
+	double rank = 0; // hidden to avoid misunderstang of rank. It's partly calculated rank. You can get bound by upper_bound and lower_bound methods.
 };
 
 #endif

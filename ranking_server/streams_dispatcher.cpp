@@ -45,12 +45,20 @@ void StreamsDispatcher::parse(const SouthRequest& south_request)
 		{
 			NorthRequest request;
 			request.type = NorthRequest::Type::Ranking;
-			request.query = sub_query->packToQuery();
 			request.text_index = text_index;
 			request.text_id = std::string("operation TextID: ") + std::to_string(text_index);
+			if (sub_query->op != QueryOperator::Not) 
+			{
+				request.query = sub_query->packToQuery();
+				rank_linear_form->push_back(linear_form_coeff);
+			}
+			else
+			{
+				request.query = sub_query->children[0]->packToQuery();
+				rank_linear_form->push_back( -linear_form_coeff);
+			}
 
 			// index_id are meaningless if request is composite
-			rank_linear_form->push_back(linear_form_coeff);
 			requests.push_back(request);
 			text_index++;
 		}

@@ -51,7 +51,7 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 
 	docs[doc.doc_id].addDocument(doc, text_index);
 
-	docs_top.set(doc.doc_id, docs[doc.doc_id].rank);
+	docs_top.set(doc.doc_id, docs[doc.doc_id].rank_lower_bound(min_for_text));
 }
 
 ubjson::Value RankingStruct::formAnswer(DocID doc_id, double rank)
@@ -136,7 +136,7 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 	}
 
     auto the_top_document = docs_top.all_begin();
-    double rank = the_top_document -> first;					
+    double rank = the_top_document -> first; // actualy it's lower bound rank					
     double d_rank = docs[the_top_document -> second].mdr(min_for_text);
 
     // Check document that we have not seen

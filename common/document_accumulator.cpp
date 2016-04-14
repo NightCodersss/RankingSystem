@@ -14,6 +14,32 @@ DocumentAccumulator::DocumentAccumulator(DocID doc_id, const std::vector<double>
 
 double DocumentAccumulator::mdr(const std::vector<double>& min_for_text)
 {
+	return rank_upper_bound(min_for_text) - rank_lower_bound(min_for_text);
+}
+
+double DocumentAccumulator::rank_lower_bound(const std::vector<double>& min_for_text)
+{
+	if (min_for_text.size() != rank_linear_form->size())
+		throw std::logic_error("min_for_text.size() must be equal to rank_linear_form.size()");
+	if (rank_form_policity == RankFormPolicity::Sum)
+	{
+		double negative_mdr = 0;
+		for ( TextIndex i = 0; i < min_for_text.size(); ++i)
+		{
+			negative_mdr = !got[i] * ((*rank_linear_form)[i] < 0) * min_for_text[i] * (*rank_linear_form)[i];
+		}
+		return rank + negative_mdr;
+	}
+	else if (rank_form_policity == RankFormPolicity::Max)
+	{
+		return rank;
+	}
+	else
+		throw std::logic_error(std::string("Not implemented ") + __FUNCTION__ + "with policity");
+}
+
+double DocumentAccumulator::rank_upper_bound(const std::vector<double>& min_for_text)
+{
 	if (min_for_text.size() != rank_linear_form->size())
 		throw std::logic_error("min_for_text.size() must be equal to rank_linear_form.size()");
 	double mdr = 0;
@@ -22,7 +48,7 @@ double DocumentAccumulator::mdr(const std::vector<double>& min_for_text)
 	{
 		for ( TextIndex i = 0; i < min_for_text.size(); ++i)
 		{
-			mdr += !got[i] * min_for_text[i] * (*rank_linear_form)[i];
+			mdr += !got[i] * ((*rank_linear_form)[i] > 0) * min_for_text[i] * (*rank_linear_form)[i];
 		}
 	}
 	else if (rank_form_policity == RankFormPolicity::Max)
@@ -38,13 +64,13 @@ double DocumentAccumulator::mdr(const std::vector<double>& min_for_text)
 	else
 		throw std::logic_error("Not implemented mdr with policity");
 
-	return mdr;
+	return rank + mdr;
 }
 
 std::string DocumentAccumulator::toString(const std::vector<double>& min_for_text) 
 {
 	std::stringstream ss;
-	ss << "doc_id: " << doc_id << "rank (doc_acc): " << rank << "\t" << "mdr: " << mdr(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
+	ss << "doc_id: " << doc_id << "rank (doc_acc): " << rank << "\t" << "rank_lower_bound: " << rank_lower_bound(min_for_text) << "\t" << "rank_upper_bound: " << rank_lower_bound(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
 	return ss.str();
 }
 
