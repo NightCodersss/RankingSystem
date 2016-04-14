@@ -50,6 +50,12 @@ void ForwardIndexConnection::start()
 		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << "\n";
 		BOOST_LOG_TRIVIAL(trace) << "Forward index size: " << self->server->forward_index.size() << "\n";
 
+		try {
+			const auto& indexes_info = self->server->forward_index.at(doc_id).at(query);
+		} catch (std::out_of_range& err) {
+			BOOST_LOG_TRIVIAL(info) << "Error: you are asikng word that I dont know: " << err.what();
+			return;
+		}
 		const auto& indexes_info = self->server->forward_index.at(doc_id).at(query);
 		for (auto const& index_info: indexes_info)
 		{
