@@ -88,7 +88,7 @@ void RankingConnection::start()
 											 , choosen_server["port"].get<std::string>());
 
 						ubjson::StreamWriter<SocketStream> writer(up_stream);
-						writer.writeValue(request.formUbjsonReuqest());
+						writer.writeValue(request.formUbjsonRequest());
 
 						int text_index = request.text_index;
 
@@ -230,7 +230,7 @@ RankingConnection::RankingConnection(boost::asio::io_service& io_service, const 
 	: config(config)
 	, data(config)
 	, server(server)
-	, streams_dispatcher(& data.rank_linear_form, & data.index_by_id, & data.id_by_index, & this->config)
+	, streams_dispatcher(&data.rank_linear_form, &data.index_by_id, &data.id_by_index, &this->config)
 {
 }
 

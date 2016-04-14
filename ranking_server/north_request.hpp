@@ -8,7 +8,7 @@ class NorthRequest
 public:
 	enum class Type { Ranking, Index };
 
-	ubjson::Value formUbjsonReuqest();
+	ubjson::Value formUbjsonRequest();
 	Type type;
 	Query query;
 	TextIndex text_index;

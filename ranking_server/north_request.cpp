@@ -1,6 +1,6 @@
 #include "north_request.hpp"
 
-ubjson::Value NorthRequest::formUbjsonReuqest()
+ubjson::Value NorthRequest::formUbjsonRequest()
 {
 	ubjson::Value request;
 	request["query"] = query.getText();
