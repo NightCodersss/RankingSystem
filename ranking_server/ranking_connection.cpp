@@ -56,15 +56,18 @@ void RankingConnection::start()
 
 			// TODO: Check for stop in root ranking server and for ranking threshold in all
 			bool is_root = south_request.is_root; 
+			BOOST_LOG_TRIVIAL(trace) << "is root: " << (int)is_root;
 
 			std::unique_ptr<SenderInterface> sender;
 			if ( is_root )
 			{
 				sender = std::make_unique<BatchSender>(self->south_stream, 10, 1);
+				BOOST_LOG_TRIVIAL(trace) << "Batch sender requested";
 			}
 			else 
 			{
 				sender = std::make_unique<RealTimeSender>(self->south_stream);
+				BOOST_LOG_TRIVIAL(trace) << "RealTime sender requested";
 			}
 			self->data.min_for_text.resize(self->streams_dispatcher.requests.size(), 1.);
 			self->data.rank_form_policity = south_request.is_request_atomic ? RankFormPolicity::Sum : // text from index server 
@@ -79,7 +82,7 @@ void RankingConnection::start()
 	
 			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{
-				self->index_results.push_back(std::async(std::launch::async, [&](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
+				self->index_results.push_back(std::async(std::launch::async, [&request, &self](){ // Can not cut out index_results, becuse we want features live until connection exist. Other way will be sync (becuse future wait for thread in destructor) 
 					try
 					{	 
 						boost::timer::cpu_timer t;
