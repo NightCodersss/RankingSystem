@@ -26,6 +26,9 @@ struct RankingStruct
 
 	std::string docTableToString();
 
+	bool needsRefreshingRanksInMap = false; // enabled if there is negative values - in this case rank_lower_bound may be updated not only at inserting text
+	void RefreshRanksInMap();
+
 private: 
 	double calculatePairSwapProbability(double x1, double dx1, double x2, double dx2);
 

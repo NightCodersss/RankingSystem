@@ -78,7 +78,10 @@ void RankingConnection::start()
 			for (int i = 0; i < self->data.rank_linear_form.size(); ++i)
 			{
 				BOOST_LOG_TRIVIAL(trace) << "i: " << i << " rank_linear_form: " << self->data.rank_linear_form[i];
+				if (self->data.rank_linear_form[i] < 0)
+					self->data.needsRefreshingRanksInMap = true;
 			}
+			BOOST_LOG_TRIVIAL(trace) << "needsRefreshingRanksInMap: " << (int)self->data.needsRefreshingRanksInMap;
 	
 			for (NorthRequest& request: self->streams_dispatcher.requests)
 			{

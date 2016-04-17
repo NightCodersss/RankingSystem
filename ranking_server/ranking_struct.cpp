@@ -57,6 +57,7 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 	docs[doc.doc_id].addDocument(doc, text_index);
 
 	docs_top.set(doc.doc_id, docs[doc.doc_id].rank_lower_bound(min_for_text));
+	RefreshRanksInMap();
 }
 
 ubjson::Value RankingStruct::formAnswer(DocID doc_id, double rank)
@@ -199,4 +200,15 @@ ubjson::Value RankingStruct::forwardQuery(DocID doc_id, std::string& query)
 	res["query"] = query;
 	res["doc_id"] = doc_id;
 	return res;
+}
+
+void RankingStruct::RefreshRanksInMap()
+{
+	if (!needsRefreshingRanksInMap)
+		return;
+	
+	for (auto it = docs_top.all_begin(); it != docs_top.all_end(); ++it) // *it is (rank_of_doc, doc_id)
+	{
+		docs_top.set(it->second, docs[it->second].rank_lower_bound(min_for_text));
+	}
 }
