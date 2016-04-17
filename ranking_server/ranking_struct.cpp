@@ -49,14 +49,24 @@ void RankingStruct::insertText(Document doc, TextIndex text_index)
 	BOOST_LOG_TRIVIAL(trace) << "Before lock 2: " << __FUNCTION__;
 	std::lock_guard<std::mutex> lock(docs_mutex);
 	BOOST_LOG_TRIVIAL(trace) << "After lock 2: " << __FUNCTION__;
+	BOOST_LOG_TRIVIAL(trace) << "docs.size(): " << docs.size();
 	if(docs.find(doc.doc_id) == docs.end())
 	{
+		BOOST_LOG_TRIVIAL(trace) << "Emplacing new DocumentAccumulator";
 		docs.emplace(doc.doc_id, DocumentAccumulator(doc.doc_id, &rank_linear_form, rank_form_policity));
 	}
+	BOOST_LOG_TRIVIAL(trace) << "docs.size(): " << docs.size();
 
 	docs[doc.doc_id].addDocument(doc, text_index);
 
-	docs_top.set(doc.doc_id, docs[doc.doc_id].rank_lower_bound(min_for_text));
+	double rank = docs[doc.doc_id].rank_lower_bound(min_for_text);
+	BOOST_LOG_TRIVIAL(trace) << "This doc rank_lower_bound: " << rank;
+	BOOST_LOG_TRIVIAL(trace) << "docs_top.all_size() before: " << docs_top.all_size();
+	BOOST_LOG_TRIVIAL(trace) << "docs_top.top_size() before: " << docs_top.top_size();
+	docs_top.set(doc.doc_id, rank);
+	BOOST_LOG_TRIVIAL(trace) << "docs_top.all_size() after: " << docs_top.all_size();
+	BOOST_LOG_TRIVIAL(trace) << "docs_top.top_size() after: " << docs_top.top_size();
+
 	RefreshRanksInMap();
 }
 

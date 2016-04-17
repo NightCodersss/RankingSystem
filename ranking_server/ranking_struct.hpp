@@ -34,7 +34,7 @@ private:
 
 public:
 	std::map<DocID, DocumentAccumulator> docs; // docid, doc
-	SortByRankGetByIdWithTop<DocID, double> docs_top {0, 0}; // TODO set top_const, bottom_const
+	SortByRankGetByIdWithTop<DocID, double> docs_top {-10, -10}; // TODO set top_const, bottom_const
 	std::mutex docs_mutex;
 
 	bool is_end = false; // NOTE: maybe use std::atomic_flag
