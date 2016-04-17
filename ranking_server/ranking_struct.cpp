@@ -20,9 +20,11 @@ void RankingStruct::update_min_for_text(TextIndex text_index, double new_val)
 	BOOST_LOG_TRIVIAL(trace) << "Before lock: " << __FUNCTION__;
 	std::lock_guard<std::mutex> lock(min_for_text_mutex);
 	BOOST_LOG_TRIVIAL(trace) << "After lock: " << __FUNCTION__;
-	Mdr -= min_for_text[text_index] * rank_linear_form[text_index];
 	min_for_text[text_index] = std::min(new_val, min_for_text[text_index]);
-	Mdr += min_for_text[text_index] * rank_linear_form[text_index];
+	for (int i = 0; i < min_for_text.size(); ++i)
+		BOOST_LOG_TRIVIAL(trace) << "min_for_text " << i <<" : " << min_for_text[i];
+
+	Mdr = DocumentAccumulator(0 /*DocID*/, &rank_linear_form, rank_form_policity).rank_upper_bound(min_for_text); // Mdr is max possible increasing rank of new document
 }
 		
 void RankingStruct::insertText(Document doc, TextIndex text_index)
@@ -114,7 +116,7 @@ double RankingStruct::calculatePairSwapProbability(double x1, double dx1, double
 	else 
 		p = 1; // TODO change hard probolilities to normal
 
-	BOOST_LOG_TRIVIAL(trace) << "Swap pobability of pair: " << p;
+	BOOST_LOG_TRIVIAL(trace) << "Swap pobability of pair (" << x1 << ", " << x1 + dx1 << "; " << x2 << ", " << x2 + dx2 << "): " << p;
 		
 	return p;
 }
@@ -131,7 +133,7 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
 	}
 
     auto the_top_document = docs_top.all_begin();
-    double rank = the_top_document -> first; // actualy it's lower bound rank					
+    double rank = docs[the_top_document -> second].rank_lower_bound(min_for_text);
     double d_rank = docs[the_top_document -> second].mdr(min_for_text);
 
     // Check document that we have not seen
@@ -143,7 +145,7 @@ bool RankingStruct::isTheTopDocGoodEnough(config_type const& config, double max_
     ++it;
 	for (int counter = 0; it != docs_top.all_end() && counter < check_size; ++it) // *it is (rank_of_doc, doc_id)
 	{
-		double current_rank = it -> first;
+		double current_rank = docs[the_top_document -> second].rank_lower_bound(min_for_text);
 		double d_current_rank = docs[it -> second].mdr(min_for_text);
 
 		if (calculatePairSwapProbability(rank, d_rank, current_rank, d_current_rank) > max_swap_probability)
