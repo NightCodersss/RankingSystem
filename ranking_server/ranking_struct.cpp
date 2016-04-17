@@ -2,6 +2,9 @@
 
 #include <sstream>
 
+#include <stream_reader.hpp>
+#include <stream_writer.hpp>
+
 #include <boost/log/core.hpp>
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
@@ -172,4 +175,28 @@ std::string RankingStruct::docTableToString()
 	}
 	
 	return ss.str();
+}
+
+ubjson::Value RankingStruct::forceUpdate(DocID doc_id, SocketStream& force_ranking_stream, std::string& query)
+{
+	{
+		ubjson::StreamWriter<SocketStream> writer(force_ranking_stream);
+		writer.writeValue(forwardQuery(doc_id, query));
+	}
+	double rank;
+	{
+		ubjson::StreamReader<SocketStream> reader(force_ranking_stream);
+		auto answer = reader.getNextValue();
+		rank = static_cast<double>(answer["rank"]);
+	}
+	return formAnswer(doc_id, rank);
+}
+
+ubjson::Value RankingStruct::forwardQuery(DocID doc_id, std::string& query)
+{
+	ubjson::Value res;
+//	res["query"] = query.getText();
+	res["query"] = query;
+	res["doc_id"] = doc_id;
+	return res;
 }

@@ -184,20 +184,9 @@ void RankingConnection::start()
 													, self->config["servers"]["force_ranking"][server_index]["port"].get<std::string>());
 					DocID doc_id = self->data.docs_top.top_begin()->second;
                     self->data.deleteTheTopDocument(); // WARN Top document may be changed
-					{
-						ubjson::StreamWriter<SocketStream> writer(force_ranking_stream);
-						writer.writeValue(south_request.forwardQuery(doc_id));
-					}
-					double rank;
-					{
-						ubjson::StreamReader<SocketStream> reader(force_ranking_stream);
-						auto answer = reader.getNextValue();
-						rank = static_cast<double>(answer["rank"]);
-					}
-					
 
-                    ubjson::Value answer = self->data.formAnswer(doc_id, rank);
-                    sender->send(answer);
+					std::string query = south_request.query_tree->packToQuery().getText();
+                    sender->send(self->data.forceUpdate(doc_id, force_ranking_stream, query));
 
 					const auto& err = self->south_stream.error();  
 					if ( err )
@@ -216,6 +205,28 @@ void RankingConnection::start()
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true by logic of root-server ending";
 					self->data.is_end = true;
 					BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy << "; is_end = true";
+					BOOST_LOG_TRIVIAL(trace) << "Sending other docs";
+					for (auto it = self->data.docs_top.all_begin(); it != self->data.docs_top.all_end() 
+							&& sender->sent < south_request.amount; ++it) 
+					{
+						int server_index = 0;				
+						SocketStream force_ranking_stream(self->config["servers"]["force_ranking"][server_index]["host"].get<std::string>()
+								, self->config["servers"]["force_ranking"][server_index]["port"].get<std::string>());
+
+						DocID doc_id = it->second;
+						BOOST_LOG_TRIVIAL(trace) << "Sending other doc: " << doc_id;
+
+						std::string query = south_request.query_tree->packToQuery().getText();
+						sender->send(self->data.forceUpdate(doc_id, force_ranking_stream, query));
+
+						const auto& err = self->south_stream.error();  
+						if ( err )
+						{
+							BOOST_LOG_TRIVIAL(info) << "Error while writing (to south stream): " << err.message();
+							BOOST_LOG_TRIVIAL(trace) << "Error while writing (to south stream), so thread is going down.";
+							self->data.is_end = true;
+						}
+					}
 				}
 
 			} while ( !self->data.is_end );

@@ -20,11 +20,3 @@ void SouthRequest::parse(ubjson::Value request)
 	is_root = request["nonroot"].isNull();
 }
 
-ubjson::Value SouthRequest::forwardQuery(DocID doc_id) // TODO move it from here
-{
-	ubjson::Value res;
-//	res["query"] = query.getText();
-	res["query"] = query_tree->packToQuery().getText();
-	res["doc_id"] = doc_id;
-	return res;
-}

@@ -13,7 +13,6 @@ public:
 	SouthRequest() = default;
 	void parse(ubjson::Value request);
 
-	ubjson::Value forwardQuery(DocID doc_id);
 
 	bool is_root = true;
 	bool is_request_atomic;

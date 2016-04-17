@@ -21,6 +21,8 @@ struct RankingStruct
 	void updateCuttingConsts(long long amount, double tmpMdr);
     bool isTheTopDocGoodEnough(config_type const& config, double max_swap_probability, int check_size);
     void deleteTheTopDocument();
+	ubjson::Value forceUpdate(DocID doc_id, SocketStream& force_ranking_stream, std::string& query);
+	ubjson::Value forwardQuery(DocID doc_id, std::string& query);
 
 	std::string docTableToString();
 
