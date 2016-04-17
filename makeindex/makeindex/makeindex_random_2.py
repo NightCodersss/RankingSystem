@@ -8,7 +8,7 @@ from random import gauss, uniform
 words = ["Fairytale", "Happiness"]
 D = 100
 
-model = np.array([[uniform(0, 1) for _, i in enumerate(words)]for doc_id in range(D)]) # [doc_id, word_id]
+model = np.array([[uniform(0, 1) ** 20 for _, i in enumerate(words)] for doc_id in range(D)]) # [doc_id, word_id]
 
 #generating inverse
 forward_index_list = open('forwardindexlist', 'w')
