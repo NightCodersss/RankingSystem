@@ -5,3 +5,7 @@ SenderInterface::SenderInterface(SocketStream& stream)
 	, sent(0)
 {
 }
+
+SenderInterface::~SenderInterface()
+{
+}

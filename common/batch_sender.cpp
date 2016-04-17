@@ -10,10 +10,12 @@ BatchSender::BatchSender(SocketStream& stream, int number_of_docs, int number_of
 	, number_of_docs(number_of_docs)
 	, number_of_batches(number_of_batches)
 {
+	BOOST_LOG_TRIVIAL(trace) << "Batch sender constructor.";
 }
 
 BatchSender::~BatchSender()
 {
+	BOOST_LOG_TRIVIAL(trace) << "Batch sender destructor.";
 	BOOST_LOG_TRIVIAL(trace) << "Sending by destructor. Queue size: " << queue.size() << ". ";
 	formAndSend();
 }

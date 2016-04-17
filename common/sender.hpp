@@ -10,6 +10,8 @@ public:
 	
 	virtual void send(ubjson::Value val) = 0;
 
+	virtual ~SenderInterface() = 0;
+
 public:
 	int sent;
 

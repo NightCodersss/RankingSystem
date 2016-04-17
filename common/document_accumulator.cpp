@@ -70,7 +70,7 @@ double DocumentAccumulator::rank_upper_bound(const std::vector<double>& min_for_
 std::string DocumentAccumulator::toString(const std::vector<double>& min_for_text) 
 {
 	std::stringstream ss;
-	ss << "doc_id: " << doc_id << "rank (doc_acc): " << rank << "\t" << "rank_lower_bound: " << rank_lower_bound(min_for_text) << "\t" << "rank_upper_bound: " << rank_lower_bound(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
+	ss << "doc_id: " << doc_id << "rank (doc_acc): " << rank << "\t" << "rank_lower_bound: " << rank_lower_bound(min_for_text) << "\t" << "rank_upper_bound: " << rank_upper_bound(min_for_text) << "\t" << "got: " << got.to_string('.', '+');
 	return ss.str();
 }
 
