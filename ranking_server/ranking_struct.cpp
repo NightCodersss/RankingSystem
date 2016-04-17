@@ -102,22 +102,17 @@ void RankingStruct::updateCuttingConsts(long long amount, double Mdr_copy)
 
 double RankingStruct::calculatePairSwapProbability(double x1, double dx1, double x2, double dx2)
 {
+	if (x1 > x2) {
+		std::swap(x1, x2);
+		std::swap(dx1, dx2);
+	}
+	// now x1 < x2
 	double p;
-
-	double M = std::min(x1 + dx1, x2 + dx2);
-	double m = std::max(x1, x2);
-
-	const double eps = 1e-6;
-
-	if(std::abs(dx1) > eps && std::abs(dx2) > eps)
-		p = (x1 + dx1) * (M - m) / dx1 / dx2 - (M*M - m*m)/(2 * dx1 * dx2);
-	else if (std::abs(dx1) < eps)
+	
+	if ( x1 + dx1 <= x2 )
 		p = 0;
 	else 
-		p = (x1 + dx1 - x2) / dx1;
-
-	if (p < 0)
-		p = 0;
+		p = 1; // TODO change hard probolilities to normal
 
 	BOOST_LOG_TRIVIAL(trace) << "Swap pobability of pair: " << p;
 		
