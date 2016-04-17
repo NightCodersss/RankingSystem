@@ -1,6 +1,7 @@
 #pragma once
 
 #include <defines.hpp>
+#include "block.hpp"
 
 class Storage;
 
@@ -12,51 +13,71 @@ public:
 	
 	using offset_t = typename Storage<Value>::offset_t;
 
-	void write(Value value, offset_t block_offset, offset_t in_block_offset)
+	void write(Value value, Block block)
 	{
-		std::fstream io(filename, std::ios::binary);
+		std::fstream io(storage.filename, std::ios::binary);
 
-		io.seekg(block_offset, io.beg);
-		std::uint32_t block_size = deserialize(io, sizeof(block_size));
+		io.seekg(block.header_offset, io.beg);
+		auto block_size = deserialize<std::uint32_t>(io, sizeof(block_size));
 
-		std::vector<char> buf(storage.value_size * block_size);
+		// Get values in block
+		std::vector<char> buf(block.value_size * block_size);
+		io.seekg(block.data_offset, io.beg);
 		io.read(buf.data(), buf.size());
-
-		std::vector<Value> values = deserialize<Value>(buf, block_size, storage.values_size);
+		
+		std::vector<Value> values = deserialize<Value>(buf, block_size, block.values_size);
 		values.emplace_back(value);
-		std::sort(values.begin(), values.end());
+		std::sort(values.begin(), values.end(), std::greater<Value>());
+
+		auto max_val = values.front();
+		auto min_val = values.back();
 
 		if (block_size == storage.blockCapacity()) {		
-			io.seekp(block_offset, io.beg);
-			serialize(values.size() / 2, io);
+			Block new_block = storage.newBlock();
 
-			for (auto it = values.rbegin(); it != values.rbegin() + values.size() / 2; ++it) {
+			std::size_t first_block_size = values.size() / 2;
+			std::size_t second_block_size = values.size() - first_block_size;
+
+			auto first_min = values[first_block_size - 1];
+			auto second_max = values[first_block_size];
+
+			io.seekp(block.header_offset, io.beg);
+			serialize(first_block_size, io);
+			serialize(max_val, io);
+			serialize(first_min, io);
+
+			io.seekp(block.data_offset, io.beg);
+			for (auto it = values.begin(); it != values.begin() + first_block_size; ++it) {
 				serialize(*it, io);
 			}
 
-			offset_t block_end = block_offset + storage.blockCapacity() * storage.value_size + sizeof(offset_t);
-			io.seekg(block_end, io.beg);	
-			offset_t next_block_offset = deserialize(io, sizeof(next_block_offset));
+			io.seekg(block.end_offset, io.beg);	
+			offset_t next_block_offset = deserialize<offset_t>(io, sizeof(next_block_offset));
 
-			offset_t new_block_offset = storage.newBlock();
-			io.seekp(block_end, io.beg);
-			serialize(new_block_offset, io);
+			io.seekp(block.end_offset, io.beg);
+			serialize(new_block.header_offset, io);
 
-			io.seekp(new_block_offset, io.beg);
-			serialize(values.size() - values.size() / 2, io);
-			for (auto it = values.rbegin() + values.size() / 2; it != values.rend(); ++it) {
+			io.seekp(new_block.header_offset, io.beg);
+			serialize(second_block_size, io);
+			serialize(second_max, io);
+			serialize(min_val, io);
+
+			io.seekp(new_block.data_offset, io.beg);
+			for (auto it = values.begin() + first_block_size; it != values.end(); ++it) {
 				serialize(*it, io);
 			}
 
-			offset_t next_block_end = new_block_offset + storage.blockCapacity() * storage.value_size + sizeof(offset_t);
-			io.seekp(next_block_end, io.beg);
+			io.seekp(new_block.end_offset, io.beg);
 			serialize(next_block_offset, io);
-
+			
 		} else {
-			io.seekp(block_offset);
+			io.seekp(block.header_offset, io.beg);
 			serialize(block_size + 1, io);
+			serialize(max_val, io);
+			serialize(min_val, io);
 
-			for (auto it = values.rbegin(); it != values.rend(); ++it) {
+			io.seekp(block.data_offset, io.beg);
+			for (auto it = values.begin(); it != values.end(); ++it) {
 				serialize(*it, io);
 			}
 		}
