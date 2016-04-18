@@ -2,30 +2,29 @@
 
 #include <defines.hpp>
 #include "block.hpp"
+#include "storage_defines.hpp"
+#include "filestream.hpp"
 
-class Storage;
-
-template <typename Value>
+template <typename Storage>
 class BlockWriter
 {
 public:
-	BlockWriter(Storage<Value>& storage) : storage(storage) { }
+    using Value = typename Storage::value_type;
+	BlockWriter(Storage& storage) : storage(storage) { }
 	
-	using offset_t = typename Storage<Value>::offset_t;
-
 	void write(Value value, Block block)
 	{
-		std::fstream io(storage.filename, std::ios::binary);
+        ReadWriteFileStream io(storage.filename); // opens in binary mode
 
-		io.seekg(block.header_offset, io.beg);
-		auto block_size = deserialize<std::uint32_t>(io, sizeof(block_size));
+		io.seekg(block.headerOffset());
+        std::size_t block_size = deserialize<std::size_t>(io, sizeof(block_size));
 
 		// Get values in block
-		std::vector<char> buf(block.value_size * block_size);
-		io.seekg(block.data_offset, io.beg);
+		std::vector<char> buf(storage.value_size * block_size);
+		io.seekg(block.dataOffset());
 		io.read(buf.data(), buf.size());
 		
-		std::vector<Value> values = deserialize<Value>(buf, block_size, block.values_size);
+		std::vector<Value> values = deserialize<Value>(buf.data(), block_size, storage.value_size);
 		values.emplace_back(value);
 		std::sort(values.begin(), values.end(), std::greater<Value>());
 
@@ -41,42 +40,43 @@ public:
 			auto first_min = values[first_block_size - 1];
 			auto second_max = values[first_block_size];
 
-			io.seekp(block.header_offset, io.beg);
+			io.seekp(block.headerOffset());
 			serialize(first_block_size, io);
 			serialize(max_val, io);
 			serialize(first_min, io);
 
-			io.seekp(block.data_offset, io.beg);
+			io.seekp(block.dataOffset());
 			for (auto it = values.begin(); it != values.begin() + first_block_size; ++it) {
 				serialize(*it, io);
 			}
 
-			io.seekg(block.end_offset, io.beg);	
+			io.seekg(block.endOffset());
 			offset_t next_block_offset = deserialize<offset_t>(io, sizeof(next_block_offset));
 
-			io.seekp(block.end_offset, io.beg);
-			serialize(new_block.header_offset, io);
+			io.seekp(block.endOffset());
+			serialize(new_block.headerOffset(), io);
 
-			io.seekp(new_block.header_offset, io.beg);
+			io.seekp(new_block.headerOffset());
 			serialize(second_block_size, io);
 			serialize(second_max, io);
 			serialize(min_val, io);
 
-			io.seekp(new_block.data_offset, io.beg);
+			io.seekp(new_block.dataOffset());
 			for (auto it = values.begin() + first_block_size; it != values.end(); ++it) {
 				serialize(*it, io);
 			}
 
-			io.seekp(new_block.end_offset, io.beg);
+			io.seekp(new_block.endOffset());
 			serialize(next_block_offset, io);
 			
 		} else {
-			io.seekp(block.header_offset, io.beg);
+			io.seekp(block.headerOffset());
 			serialize(block_size + 1, io);
 			serialize(max_val, io);
 			serialize(min_val, io);
+//            io.flush();
 
-			io.seekp(block.data_offset, io.beg);
+			io.seekp(block.dataOffset());
 			for (auto it = values.begin(); it != values.end(); ++it) {
 				serialize(*it, io);
 			}
@@ -84,5 +84,5 @@ public:
 	}
 
 private:
-	Storage<Value>& storage;
+	Storage& storage;
 };

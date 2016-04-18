@@ -13,8 +13,8 @@ std::vector<char> serialize(T t)
 	return buf;
 }
 
-template <typename T>
-void serialize(T t, std::ostream& out)
+template <typename T, typename Stream = std::ostream>
+void serialize(T t, Stream& out)
 {
 	auto buf = serialize(t);
 	out.write(buf.data(), buf.size());
@@ -23,8 +23,8 @@ void serialize(T t, std::ostream& out)
 template <typename T>
 T deserialize(const char* buf);
 
-template <typename T>
-T deserialize(std::istream& in, std::size_t value_size)
+template <typename T, typename Stream = std::istream>
+T deserialize(Stream& in, std::size_t value_size)
 {
 	std::vector<char> buf(value_size);
 	in.read(buf.data(), value_size);
