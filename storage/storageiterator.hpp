@@ -18,8 +18,13 @@ public:
         stream.seekg(start_block.headerOffset());
         stream.read(reinterpret_cast<char*>(&block_size), sizeof(block_size));
 
+        if (block_size == 0) {
+            is_end = true;
+            return;
+        }
+
         stream.seekg(start_block.dataOffset());
-        next();
+        last_value = deserialize<Value>(stream, storage.value_size);
     }
     
     Value peek() { return last_value; }
@@ -29,8 +34,6 @@ public:
         if (is_end) {
             throw std::range_error("Storage iterator has finished");
         }
-
-        last_value = deserialize<Value>(stream, storage.value_size);
 
         ++pos_in_block;
         if (pos_in_block == block_size) {
@@ -51,6 +54,7 @@ public:
             stream.seekg(start_block.dataOffset());
             pos_in_block = 0;
         } 
+        last_value = deserialize<Value>(stream, storage.value_size);
     }
 
     bool hasNext() const { return !is_end; }
@@ -63,7 +67,7 @@ private:
     Block start_block;
 
     int pos_in_block;
-    int block_size;
+    std::size_t block_size;
 
     Value last_value;
 

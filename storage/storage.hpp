@@ -16,7 +16,7 @@ class Storage
     friend class StorageIterator<Storage>;
 	friend class BlockWriter<Storage>;
 
-	static const int default_block_capacity = 100;
+	static const int default_block_capacity = 3;
 public:
     using value_type = Value;
 
@@ -31,12 +31,17 @@ public:
 		std::ifstream in(filename, std::ios::binary);
 		if (!in)
 		{
-			number_of_blocks = 1;
+			number_of_blocks = 0;
 			block_capacity = default_block_capacity;
+            
+            Block block = newBlock();
 
 			std::ofstream out(filename, std::ios::binary);
 			serialize(number_of_blocks, out);
 			serialize(block_capacity, out);
+
+            out.seekp(block.endOffset());
+            serialize((offset_t)0, out);
 //			serialize(value_size, io);
 		} 
 		else 
@@ -73,6 +78,9 @@ public:
 
 	StorageIterator<Storage> getIterator() const
 	{
+        if (number_of_blocks <= 0) {
+            throw std::logic_error("empty storage");
+        }
 		return StorageIterator<Storage>(*this, getBlockInfo(0));
 	}
 
@@ -96,7 +104,7 @@ private:
 		return true;
 	}
 
-	offset_t getOffset(std::size_t block) const { return file_header_size + block * (header_size + value_size + end_size); } 
+	offset_t getOffset(std::size_t block) const { return file_header_size + block * (header_size + value_size * block_capacity + end_size); } 
 	Block newBlock() { return getBlockInfo(number_of_blocks++); }
 
 	Block getBlockInfo(std::size_t block) const
