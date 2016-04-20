@@ -14,6 +14,8 @@ public:
 	
 	void write(Value value, Block block)
 	{
+        auto& serializer = storage.serializer;
+
         ReadWriteFileStream io(storage.filename); // opens in binary mode
 
 		io.seekg(block.headerOffset());
@@ -24,7 +26,7 @@ public:
 		io.seekg(block.dataOffset());
 		io.read(buf.data(), buf.size());
 		
-		std::vector<Value> values = deserialize<Value>(buf.data(), block_size, storage.value_size);
+		std::vector<Value> values = serializer.deserialize(buf.data(), block_size);
 		values.emplace_back(value);
 		std::sort(values.begin(), values.end(), std::greater<Value>());
 
@@ -42,12 +44,12 @@ public:
 
 			io.seekp(block.headerOffset());
 			serialize(first_block_size, io);
-			serialize(max_val, io);
-			serialize(first_min, io);
+			serializer.serialize(max_val, io);
+			serializer.serialize(first_min, io);
 
 			io.seekp(block.dataOffset());
 			for (auto it = values.begin(); it != values.begin() + first_block_size; ++it) {
-				serialize(*it, io);
+				serializer.serialize(*it, io);
 			}
 
 			io.seekg(block.endOffset());
@@ -58,12 +60,12 @@ public:
 
 			io.seekp(new_block.headerOffset());
 			serialize(second_block_size, io);
-			serialize(second_max, io);
-			serialize(min_val, io);
+			serializer.serialize(second_max, io);
+			serializer.serialize(min_val, io);
 
 			io.seekp(new_block.dataOffset());
 			for (auto it = values.begin() + first_block_size; it != values.end(); ++it) {
-				serialize(*it, io);
+				serializer.serialize(*it, io);
 			}
 
 			io.seekp(new_block.endOffset());
@@ -72,13 +74,13 @@ public:
 		} else {
 			io.seekp(block.headerOffset());
 			serialize(block_size + 1, io);
-			serialize(max_val, io);
-			serialize(min_val, io);
+			serializer.serialize(max_val, io);
+			serializer.serialize(min_val, io);
 //            io.flush();
 
 			io.seekp(block.dataOffset());
 			for (auto it = values.begin(); it != values.end(); ++it) {
-				serialize(*it, io);
+				serializer.serialize(*it, io);
 			}
 		}
 	}

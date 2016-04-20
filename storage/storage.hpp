@@ -10,7 +10,7 @@
 #include "storageiterator.hpp"
 #include "blockwriter.hpp"
 
-template <typename Value>
+template <typename Value, typename Serializer>
 class Storage
 {
     friend class StorageIterator<Storage>;
@@ -20,13 +20,16 @@ class Storage
 public:
     using value_type = Value;
 
-	Storage(const std::string& filename, std::size_t header_size, std::size_t value_size, std::size_t end_size) 
+	Storage(const std::string& filename, Serializer serializer, std::size_t header_size = 0)
 		: filename(filename)
 		, header_size(header_size)
-		, value_size(value_size)
-		, end_size(end_size)
+		, value_size(serializer.getValueSize())
+        , serializer(serializer)
 	{
         file_header_size = sizeof(std::size_t) * 2;
+
+        header_size += sizeof(std::size_t); // Number of filled cells in block
+        end_size = sizeof(offset_t);
 
 		std::ifstream in(filename, std::ios::binary);
 		if (!in)
@@ -65,7 +68,7 @@ public:
 		std::ifstream in(filename);
 		in.seekg(getBlockInfo(block).getOffset(pos_in_block));
 
-		return deserialize<Value>(in, value_size);
+		return serializer.deserialize(in);
 	}
 
 	void add(std::size_t block, Value value)
@@ -121,4 +124,12 @@ private:
 	std::size_t header_size;
 	std::size_t value_size;
 	std::size_t end_size;
+
+    Serializer serializer;
 };
+
+template <typename Value, typename Serializer>
+auto make_storage(const std::string& filename, Serializer serializer, std::size_t header_size = 0)
+{
+    return Storage<Value, Serializer>(filename, serializer, header_size);
+}
