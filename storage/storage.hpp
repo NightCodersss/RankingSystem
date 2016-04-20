@@ -20,15 +20,14 @@ class Storage
 public:
     using value_type = Value;
 
-	Storage(const std::string& filename, Serializer serializer, std::size_t header_size = 0)
+	Storage(const std::string& filename, Serializer serializer)
 		: filename(filename)
-		, header_size(header_size)
 		, value_size(serializer.getValueSize())
         , serializer(serializer)
 	{
         file_header_size = sizeof(std::size_t) * 2;
 
-        header_size += sizeof(std::size_t); // Number of filled cells in block
+        header_size = sizeof(std::size_t) + 2 * value_size; // Number of filled cells in block and max/min
         end_size = sizeof(offset_t);
 
 		std::ifstream in(filename, std::ios::binary);
@@ -129,7 +128,7 @@ private:
 };
 
 template <typename Value, typename Serializer>
-auto make_storage(const std::string& filename, Serializer serializer, std::size_t header_size = 0)
+auto make_storage(const std::string& filename, Serializer serializer)
 {
-    return Storage<Value, Serializer>(filename, serializer, header_size);
+    return Storage<Value, Serializer>(filename, serializer);
 }
