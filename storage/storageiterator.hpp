@@ -47,7 +47,7 @@ public:
                 return;
             }
 
-            start_block = Block(next_offset, storage.header_size, storage.block_capacity, storage.value_size);
+            start_block = Block(start_block.blockNumber(), next_offset, storage.header_size, storage.block_capacity, storage.value_size);
             
             stream.seekg(start_block.headerOffset());
             stream.read(reinterpret_cast<char*>(&block_size), sizeof(block_size));

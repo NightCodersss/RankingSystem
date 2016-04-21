@@ -70,7 +70,16 @@ public:
 
 			io.seekp(new_block.endOffset());
 			serialize(next_block_offset, io);
-			
+
+            ReadWriteFileStream table_io(storage.table_filename);
+            table_io.seekp(storage.value_size * 2 * block.blockNumber());
+            serializer.serialize(max_val, table_io);
+            serializer.serialize(first_min, table_io);
+            
+            table_io.seekp(storage.value_size * 2 * new_block.blockNumber());
+            serializer.serialize(second_max, table_io);
+            serializer.serialize(min_val, table_io);
+
 		} else {
 			io.seekp(block.headerOffset());
 			serialize(block_size + 1, io);
@@ -82,6 +91,11 @@ public:
 			for (auto it = values.begin(); it != values.end(); ++it) {
 				serializer.serialize(*it, io);
 			}
+
+            ReadWriteFileStream table_io(storage.table_filename);
+            table_io.seekp(storage.value_size * 2 * block.blockNumber());
+            serializer.serialize(max_val, table_io);
+            serializer.serialize(min_val, table_io);
 		}
 	}
 

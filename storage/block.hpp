@@ -5,7 +5,7 @@
 class Block
 {
 public:
-	Block(offset_t header_offset, std::size_t header_size, std::size_t block_capacity, std::size_t value_size);
+	Block(std::size_t block_number, offset_t header_offset, std::size_t header_size, std::size_t block_capacity, std::size_t value_size);
 
 	offset_t getOffset(std::size_t pos_in_block) const;
 
@@ -13,9 +13,12 @@ public:
     offset_t dataOffset() const;
     offset_t endOffset() const;
 
+    std::size_t blockNumber() const;
+
 private:
+    std::size_t block_number;
 	offset_t header_offset;
-    
+
     std::size_t header_size;
     std::size_t block_capacity;
     std::size_t value_size;

@@ -16,7 +16,7 @@ class Storage
     friend class StorageIterator<Storage>;
 	friend class BlockWriter<Storage>;
 
-	static const int default_block_capacity = 3;
+	static const int default_block_capacity = 10;
 public:
     using value_type = Value;
 
@@ -25,6 +25,7 @@ public:
 		, value_size(serializer.getValueSize())
         , serializer(serializer)
 	{
+        table_filename = filename + "_table";
         file_header_size = sizeof(std::size_t) * 2;
 
         header_size = sizeof(std::size_t) + 2 * value_size; // Number of filled cells in block and max/min
@@ -44,7 +45,9 @@ public:
 
             out.seekp(block.endOffset());
             serialize((offset_t)0, out);
-//			serialize(value_size, io);
+
+            std::ofstream table_out(table_filename, std::ios::binary);
+            table_out.write("", 0);
 		} 
 		else 
 		{
@@ -90,8 +93,6 @@ public:
 	int blockCapacity() const { return block_capacity; }
 
 private:
-	std::string filename;
-
 	bool checkNoThrow(std::size_t block, std::size_t pos_in_block) 
 	{
 		return 0 <= block && block < number_of_blocks 
@@ -107,13 +108,20 @@ private:
 	}
 
 	offset_t getOffset(std::size_t block) const { return file_header_size + block * (header_size + value_size * block_capacity + end_size); } 
-	Block newBlock() { return getBlockInfo(number_of_blocks++); }
+
+    Block newBlock() 
+    {
+        return getBlockInfo(number_of_blocks++); 
+    }
 
 	Block getBlockInfo(std::size_t block) const
 	{
 		auto off = getOffset(block);
-		return Block(off, header_size, block_capacity, value_size);
+		return Block(block - 1, off, header_size, block_capacity, value_size);
 	}
+
+	std::string filename;
+    std::string table_filename;
 
 	std::size_t number_of_blocks;
 	std::size_t block_capacity;
