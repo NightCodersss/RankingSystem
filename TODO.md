@@ -30,3 +30,6 @@
 
  * Make consistent folders for files in common
  * Fix compiling all (!) common in one lib
+
+ * Backup in storage
+
