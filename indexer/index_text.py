@@ -21,7 +21,6 @@ fdict = nltk.probability.FreqDist(stemmer.stem(token.lower()).encode('utf-8')
 		if not token in nltk.corpus.stopwords.words("russian") 
 			and len(token) >= 2)
 for word in fdict:
-	print "Word to commit: ", word
 	commit.write("{word} {text_id} {doc_id} {freq}\n".format(
 		word = word, 
 		text_id = text_id,
