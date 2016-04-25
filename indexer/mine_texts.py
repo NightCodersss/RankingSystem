@@ -3,7 +3,7 @@ import sys
 # creates files for text of document in current folder
 # output: files: <text_id>.text
 
-if sys.argc < 2:
+if len(sys.argv) < 2:
 	raise StandartError("usage: script.py <doc to parse>")
 
 # TODO: make text separation

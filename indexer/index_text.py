@@ -1,15 +1,21 @@
 import sys
 import nltk
+import nltk.probability
 
-if sys.argc < 3:
-	raise StandartError("usage: script.py <text_file> <commit_file>")
+if len(sys.argv) < 4:
+	raise StandartError("usage: script.py <text_file> <doc_id> <commit_file>")
 
 text_file = open(sys.argv[1])
-commit = open(sys.argv[2], "a")
+doc_id = sys.argv[2]
+commit = open(sys.argv[3], "a")
 
-text = "" # TODO read all text from file
+text = text_file.read().decode('utf-8') 
 
-freq = dict()
-
-for token in nltk.word_tokenize(text):
-
+fdict = nltk.probability.FreqDist(token.lower().encode('utf-8') for token in nltk.word_tokenize(text))
+for word in fdict:
+	print "Word to commit: ", word
+	commit.write("{word} {doc_id} {freq}\n".format(
+		word = word, 
+		doc_id = doc_id, 
+		freq = fdict.freq(word)))
+		
