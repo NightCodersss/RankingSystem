@@ -9,6 +9,5 @@ if len(sys.argv) < 2:
 # TODO: make text separation
 doc_name = sys.argv[1]
 with open(doc_name) as doc, open("full.text", "w") as text:
-	for line in doc:
-		text.write(line)
+	text.write(doc.read())
 

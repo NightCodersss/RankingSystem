@@ -14,7 +14,8 @@ cd $WORK_DIR
 python "$SCRIPT_DIR/mine_texts.py" "$DOC"
 for TEXT_FILE in `ls *.text`
 do
-	python "$SCRIPT_DIR/index_text.py" $TEXT_FILE $DOC_ID $COMMIT_FILE
+	TEXT_ID=${TEXT_FILE%.text}
+	python "$SCRIPT_DIR/index_text.py" $TEXT_ID $DOC_ID $COMMIT_FILE
 done
 
 rm -rf $WORK_DIR
