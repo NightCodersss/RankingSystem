@@ -79,6 +79,8 @@ public:
 
 		BlockWriter<Storage> writer(*this);
 		writer.write(value, getBlockInfo(block));
+
+		resortTable();
 	}
 
 	StorageIterator<Storage> getIterator() const
@@ -111,13 +113,36 @@ private:
 
     Block newBlock() 
     {
-        return getBlockInfo(number_of_blocks++); 
+        return getBlockInfo(++number_of_blocks); 
     }
 
 	Block getBlockInfo(std::size_t block) const
 	{
 		auto off = getOffset(block);
 		return Block(block - 1, off, header_size, block_capacity, value_size);
+	}
+
+	void resortTable()
+	{
+		ReadWriteFileStream io(table_filename);
+
+		std::vector<char> buf(value_size * 2 * number_of_blocks);
+		io.read(buf.data(), buf.size());
+
+		std::vector<std::pair<Value, Value>> values;
+		for (int i = 0; i < number_of_blocks; ++i) {
+			auto max = serializer.deserialize(buf.data() + i * 2 * value_size);
+			auto min = serializer.deserialize(buf.data() + (i * 2 + 1) * value_size);
+
+			values.emplace_back(max, min);
+		}
+
+		std::sort(values.begin(), values.end(), std::greater<std::pair<Value, Value>>());
+		io.seekp(0);
+		for (auto it = values.begin(); it != values.end(); ++it) { 
+			serializer.serialize(it->first, io);
+			serializer.serialize(it->second, io);
+		}
 	}
 
 	std::string filename;

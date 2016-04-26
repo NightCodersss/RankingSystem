@@ -41,62 +41,39 @@ public:
 
 			auto first_min = values[first_block_size - 1];
 			auto second_max = values[first_block_size];
-
-			io.seekp(block.headerOffset());
-			serialize(first_block_size, io);
-			serializer.serialize(max_val, io);
-			serializer.serialize(first_min, io);
-
-			io.seekp(block.dataOffset());
-			for (auto it = values.begin(); it != values.begin() + first_block_size; ++it) {
-				serializer.serialize(*it, io);
-			}
+			fillBlock(io, block, first_block_size, max_val, first_min, values.begin(), values.begin() + first_block_size);
 
 			io.seekg(block.endOffset());
 			offset_t next_block_offset = deserialize<offset_t>(io, sizeof(next_block_offset));
 
 			io.seekp(block.endOffset());
 			serialize(new_block.headerOffset(), io);
-
-			io.seekp(new_block.headerOffset());
-			serialize(second_block_size, io);
-			serializer.serialize(second_max, io);
-			serializer.serialize(min_val, io);
-
-			io.seekp(new_block.dataOffset());
-			for (auto it = values.begin() + first_block_size; it != values.end(); ++it) {
-				serializer.serialize(*it, io);
-			}
+			fillBlock(io, new_block, second_block_size, second_max, min_val, values.begin() + first_block_size, values.end());
 
 			io.seekp(new_block.endOffset());
 			serialize(next_block_offset, io);
-
-            ReadWriteFileStream table_io(storage.table_filename);
-            table_io.seekp(storage.value_size * 2 * block.blockNumber());
-            serializer.serialize(max_val, table_io);
-            serializer.serialize(first_min, table_io);
-            
-            table_io.seekp(storage.value_size * 2 * new_block.blockNumber());
-            serializer.serialize(second_max, table_io);
-            serializer.serialize(min_val, table_io);
-
 		} else {
-			io.seekp(block.headerOffset());
-			serialize(block_size + 1, io);
-			serializer.serialize(max_val, io);
-			serializer.serialize(min_val, io);
-//            io.flush();
-
-			io.seekp(block.dataOffset());
-			for (auto it = values.begin(); it != values.end(); ++it) {
-				serializer.serialize(*it, io);
-			}
-
-            ReadWriteFileStream table_io(storage.table_filename);
-            table_io.seekp(storage.value_size * 2 * block.blockNumber());
-            serializer.serialize(max_val, table_io);
-            serializer.serialize(min_val, table_io);
+			fillBlock(io, block, block_size + 1, max_val, min_val, values.begin(), values.end());
 		}
+	}
+	
+	template <typename Stream, typename Iter>
+	void fillBlock(Stream& io, Block block, std::size_t new_block_size, Value max_val, Value min_val, Iter values_begin, Iter values_end)
+	{
+		auto& serializer = storage.serializer;
+
+		io.seekp(block.headerOffset());
+		serialize(new_block_size, io);
+		serializer.serialize(max_val, io);
+		serializer.serialize(min_val, io);
+
+		io.seekp(block.dataOffset());
+		for (auto it = values_begin; it < values_end; ++it) { serializer.serialize(*it, io); }
+
+		ReadWriteFileStream table_io(storage.table_filename);
+		table_io.seekp(storage.value_size * 2 * block.blockNumber());
+		serializer.serialize(max_val, table_io);
+		serializer.serialize(min_val, table_io);
 	}
 
 private:
