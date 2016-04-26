@@ -70,10 +70,14 @@ public:
 		io.seekp(block.dataOffset());
 		for (auto it = values_begin; it < values_end; ++it) { serializer.serialize(*it, io); }
 
+		/*
 		ReadWriteFileStream table_io(storage.table_filename);
 		table_io.seekp(storage.value_size * 2 * block.blockNumber());
 		serializer.serialize(max_val, table_io);
 		serializer.serialize(min_val, table_io);
+		*/
+
+		storage.tableUpdate(block.blockNumber(), max_val, min_val);
 	}
 
 private:
