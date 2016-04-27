@@ -3,6 +3,7 @@ import nltk
 import nltk.probability
 import nltk.stem
 import nltk.corpus
+import chardet
 
 if len(sys.argv) < 4:
 	raise StandartError("usage: script.py <text_id> <doc_id> <commit_file>")
@@ -12,7 +13,15 @@ text_file = open(text_id + ".text")
 doc_id = sys.argv[2]
 commit = open(sys.argv[3], "a")
 
-text = text_file.read().decode('utf-8') 
+raw = text_file.read();
+encoding = chardet.detect(raw)["encoding"]
+
+## It was problems with screen
+#if encoding not in ["utf-8", "ascii"]:
+#	print "Unsupprted encoding: ", encoding
+#	sys.exit(1)
+
+text = raw.decode(encoding) 
 
 stemmer = nltk.stem.SnowballStemmer("russian")
 

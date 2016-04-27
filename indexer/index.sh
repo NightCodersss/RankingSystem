@@ -4,6 +4,8 @@ DOC_ID=`echo $DOC | md5sum | sed "s/ *- *//"`
 echo "Indexing " $DOC
 echo "Doc_id: " $DOC_ID
 
+echo $DOC_ID " " $DOC >> hashes
+
 WORK_DIR=`mktemp -d`
 echo "Work dir: " $WORK_DIR
 
