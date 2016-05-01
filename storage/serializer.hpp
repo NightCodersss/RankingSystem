@@ -5,6 +5,8 @@ template <typename T>
 class Serializer
 {
 public:
+	using ValueType = T;
+
     virtual void serialize(T t, std::vector<char>& buf) = 0;
     virtual T deserialize(const char* buf) = 0;
 
@@ -41,5 +43,3 @@ public:
         return std::move(values);
     }
 };
-
-

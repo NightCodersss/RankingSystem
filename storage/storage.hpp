@@ -2,6 +2,7 @@
 
 #include <map>
 #include <string>
+#include <set>
 #include <fstream>
 #include <boost/optional.hpp>
 #include <defines.hpp>
@@ -17,7 +18,7 @@ class Storage
     friend class StorageIterator<Storage>;
 	friend class BlockWriter<Storage>;
 
-	static const int default_block_capacity = 10;
+	static const int default_block_capacity = 3;
 public:
     using value_type = Value;
 
@@ -64,12 +65,12 @@ public:
         serialize(block_capacity, out);
     }
 
-	Value get(std::size_t block, std::size_t pos_in_block)
+	Value get(std::size_t block_number, std::size_t pos_in_block)
 	{
-		check(block, pos_in_block);
+		check(block_number, pos_in_block);
 
 		std::ifstream in(filename);
-		in.seekg(getBlockInfo(block).getOffset(pos_in_block));
+		in.seekg(getBlockInfo(block_number).getOffset(pos_in_block));
 
 		return serializer.deserialize(in);
 	}
@@ -84,16 +85,17 @@ public:
 		resortTable();
 	}
 
-	StorageIterator<Storage> getIterator() const
+	StorageIterator<Storage> getIterator(std::size_t block_number = 0) 
 	{
         if (number_of_blocks <= 0) {
             throw std::logic_error("empty storage");
         }
-		return StorageIterator<Storage>(*this, getBlockInfo(0));
+		return StorageIterator<Storage>(*this, getBlockInfo(block_number));
 	}
 
 	std::string getFileName() const { return filename; }
 	int blockCapacity() const { return block_capacity; }
+	auto numberOfBlocks() const { return number_of_blocks; }
 
 	boost::optional<std::size_t> findBlockContaining(Value value)
 	{
@@ -130,6 +132,73 @@ public:
 		return boost::none;
 	}
 
+	void removeFromBlock(std::size_t block_number, std::size_t pos_in_block)
+	{
+        ReadWriteFileStream io(filename); 
+		
+		auto block = getBlockInfo(block_number);
+
+		io.seekg(block.headerOffset());
+        std::size_t block_size = deserialize<std::size_t>(io, sizeof(block_size));
+
+		// Get values in block
+		std::vector<char> buf(value_size * block_size);
+		io.seekg(block.dataOffset());
+		io.read(buf.data(), buf.size());
+		
+		std::vector<Value> values = serializer.deserialize(buf.data(), block_size);
+		values.erase(values.begin() + pos_in_block);
+		std::sort(values.begin(), values.end(), std::greater<Value>());
+
+		auto max_val = values.front();
+		auto min_val = values.back();
+
+		io.seekp(block.headerOffset());
+		serialize(block_size - 1, io);
+		serializer.serialize(max_val, io);
+		serializer.serialize(min_val, io);
+
+		io.seekp(block.dataOffset());
+		for (auto it: values) { serializer.serialize(it, io); }
+		
+		tableUpdate(block.blockNumber(), max_val, min_val);
+		resortTable();
+	}
+
+	Block getBlockInfo(std::size_t block) const
+	{
+		auto off = getOffset(block);
+		return Block(block, off, header_size, block_capacity, value_size);
+	}
+
+	void dumpStorage()
+	{
+		std::cout << "Storage:\n";
+		for (auto it = getIterator(); it.hasNext(); ++it) {
+			std::cout << "Block: " << it.start_block.blockNumber() << "; ";
+			std::cout << "size: " << it.block_size << "; ";
+			std::cout << "value: " << "(" << it->first << ' ' << it->second << ")" << "; ";
+			std::cout << "\n";
+		}
+		
+		ReadWriteFileStream io(table_filename);
+
+		std::vector<char> buf((value_size * 2 + sizeof(std::size_t)) * (number_of_blocks));
+		io.read(buf.data(), buf.size());
+
+		std::cout << "\n\nTable:\n";
+		for (int i = 0; i < number_of_blocks; ++i) {
+			auto max = serializer.deserialize(buf.data() + i * (2 * value_size + sizeof(std::size_t)));
+			auto min = serializer.deserialize(buf.data() + i * (2 * value_size + sizeof(std::size_t)) + value_size);
+			auto block_num = deserialize<std::size_t>(buf.data() + i * (2 * value_size + sizeof(std::size_t)) + value_size * 2);
+			
+			std::cout << "max: " << "(" << max.first << ' ' << max.second << ")" << "; ";
+			std::cout << "min: " << "(" << min.first << ' ' << min.second << ")" << "; ";
+			std::cout << "block_number: " << block_num << "; ";
+			std::cout << "\n";
+		}
+	}
+
 private:
 	bool checkNoThrow(std::size_t block, std::size_t pos_in_block) 
 	{
@@ -149,14 +218,11 @@ private:
 
     Block newBlock() 
     {
-        return getBlockInfo(++number_of_blocks); 
-    }
+		auto block_number = number_of_blocks++;
 
-	Block getBlockInfo(std::size_t block) const
-	{
-		auto off = getOffset(block);
-		return Block(block - 1, off, header_size, block_capacity, value_size);
-	}
+		new_blocks.insert(block_number);
+        return getBlockInfo(block_number);
+    }
 
 	void tableUpdate(std::size_t block, Value max, Value min)
 	{
@@ -167,11 +233,11 @@ private:
 	{
 		ReadWriteFileStream io(table_filename);
 
-		std::vector<char> buf(value_size * 2 * number_of_blocks);
+		std::vector<char> buf((value_size * 2 + sizeof(std::size_t)) * (number_of_blocks - new_blocks.size()));
 		io.read(buf.data(), buf.size());
 
 		std::vector<std::tuple<Value, Value, std::size_t>> values;
-		for (int i = 0; i < number_of_blocks; ++i) {
+		for (int i = 0; i < number_of_blocks - new_blocks.size(); ++i) {
 			auto max = serializer.deserialize(buf.data() + i * (2 * value_size + sizeof(std::size_t)));
 			auto min = serializer.deserialize(buf.data() + i * (2 * value_size + sizeof(std::size_t)) + value_size);
 			auto block_num = deserialize<std::size_t>(buf.data() + i * (2 * value_size + sizeof(std::size_t)) + value_size * 2);
@@ -185,6 +251,18 @@ private:
 				values.emplace_back(max, min, block_num);
 			}
 		}
+
+		for (auto block_number: new_blocks) {
+			auto it = table_updates.find(block_number);
+			if (it != table_updates.end()) {
+				auto max = it->second.first;
+				auto min = it->second.second;
+				values.emplace_back(max, min, block_number);
+			} else {
+				values.emplace_back(Value{}, Value{}, block_number);
+			}
+		}
+		new_blocks.clear();
 
 		std::sort(values.begin(), values.end(), std::greater<std::tuple<Value, Value, std::size_t>>());
 		io.seekp(0);
@@ -210,6 +288,7 @@ private:
 	std::size_t end_size;
 
 	std::map<std::size_t, std::pair<Value, Value>> table_updates;
+	std::set<std::size_t> new_blocks;
 
     Serializer serializer;
 };

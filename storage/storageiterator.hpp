@@ -6,9 +6,10 @@
 template <typename Storage>
 class StorageIterator
 {
+	friend Storage;
 public:
     using Value = typename Storage::value_type;
-    StorageIterator(const Storage& storage, Block start_block) 
+    StorageIterator(Storage& storage, Block start_block) 
         : storage(storage)
         , start_block(start_block)
         , pos_in_block(0)
@@ -24,7 +25,7 @@ public:
         }
 
         stream.seekg(start_block.dataOffset());
-        last_value = deserialize<Value>(stream, storage.value_size);
+        last_value = storage.serializer.deserialize(stream);
     }
     
     Value peek() { return last_value; }
@@ -47,14 +48,14 @@ public:
                 return;
             }
 
-            start_block = Block(start_block.blockNumber(), next_offset, storage.header_size, storage.block_capacity, storage.value_size);
+            start_block = Block(start_block.blockNumber() + 1, next_offset, storage.header_size, storage.block_capacity, storage.value_size);
             
             stream.seekg(start_block.headerOffset());
             stream.read(reinterpret_cast<char*>(&block_size), sizeof(block_size));
             stream.seekg(start_block.dataOffset());
             pos_in_block = 0;
         } 
-        last_value = deserialize<Value>(stream, storage.value_size);
+        last_value = storage.serializer.deserialize(stream);
     }
 
     bool hasNext() const { return !is_end; }
@@ -62,8 +63,10 @@ public:
     Value operator*() { return peek(); }
     StorageIterator& operator++() { next(); return *this; }
 
+	Value* operator->() { return &last_value; } 
+
 private:
-    const Storage& storage;
+    Storage& storage;
     Block start_block;
 
     int pos_in_block;

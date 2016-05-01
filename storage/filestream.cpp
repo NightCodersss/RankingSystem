@@ -8,6 +8,7 @@ ReadWriteFileStream::ReadWriteFileStream()
 ReadWriteFileStream::ReadWriteFileStream(const std::string& filename)
 {
     file = std::fopen(filename.data(), "r+b");
+	std::fseek(file, 0, SEEK_SET);
 }
 
 ReadWriteFileStream::~ReadWriteFileStream()

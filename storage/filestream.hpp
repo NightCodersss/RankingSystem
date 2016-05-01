@@ -21,6 +21,6 @@ public:
 private:
     std::FILE* file;
 
-    offset_t read_pos;
-    offset_t write_pos;
+    offset_t read_pos = 0;
+    offset_t write_pos = 0;
 };
