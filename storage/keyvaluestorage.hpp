@@ -77,7 +77,7 @@ public:
 			}
 		}
 
-		return l;
+		return blocks[l].block_number;
 	}
 
 	auto getIterator() 
