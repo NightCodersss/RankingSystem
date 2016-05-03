@@ -11,3 +11,5 @@ sleep $timestart
 (cd ranking_server; ./start.sh &)
 sleep $timestart
 (cd south_protocol; ./start.sh &)
+sleep $timestart
+(cd stem_server; ./start.sh &)
