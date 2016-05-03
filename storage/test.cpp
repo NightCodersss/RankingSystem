@@ -61,10 +61,14 @@ int main()
 
 	auto storage = makeKeyValueStorage<std::uint32_t, std::uint32_t>("forward_storage.bin", pairSerializer());
 
-	int x;
-	std::cin >> x;
-
-	storage.add(x, x);
+	int x, y;
+	std::cin >> y >> x;
+	
+	if (y) {
+		storage.add(x, x);
+	} else {
+		storage.remove(x);
+	}
 
 	for (auto it = storage.getIterator(); it.hasNext(); ++it) {
 		std::cout << it->first << ' ' << it->second << '\n';

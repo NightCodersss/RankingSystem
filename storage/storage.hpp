@@ -132,6 +132,26 @@ public:
 		return boost::none;
 	}
 
+	std::size_t findPosInBlockLowerBound(std::size_t block_number, Value value) 
+	{
+		auto block = getBlockInfo(block_number);
+		ReadWriteFileStream io(filename);
+
+		io.seekg(block.headerOffset());
+		auto block_size = deserialize<std::size_t>(io, sizeof(std::size_t));
+
+		io.seekg(block.dataOffset());
+		
+		std::vector<char> buf(value_size * block_size);
+		io.seekg(block.dataOffset());
+		io.read(buf.data(), buf.size());
+		
+		std::vector<Value> values = serializer.deserialize(buf.data(), block_size);
+		std::sort(values.begin(), values.end());
+
+		return values.size() - (std::lower_bound(values.begin(), values.end(), value) - values.begin()) - 1;
+	}
+
 	void removeFromBlock(std::size_t block_number, std::size_t pos_in_block)
 	{
         ReadWriteFileStream io(filename); 

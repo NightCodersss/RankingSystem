@@ -1,6 +1,6 @@
 #!/bin/bash
 
-clang++ -g -std=c++14 test.cpp block.cpp serialize.cpp filestream.cpp -o test -I../ -lboost_system
+#clang++ -g -std=c++14 test.cpp block.cpp serialize.cpp filestream.cpp -o test -I../ -lboost_system
 
 rm forward_storage.bin*
 
@@ -14,3 +14,5 @@ echo 25 | ./test
 echo 35 | ./test
 echo 45 | ./test
 #./test 23
+#./test 23
+#./test 23 # Here breaks

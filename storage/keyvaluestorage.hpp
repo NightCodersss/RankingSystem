@@ -36,20 +36,23 @@ public:
 		auto block_number = findBlock(key);
 		storage.add(block_number, {key, value});
 
-		std::ifstream io(storage.getFileName() + "_table");
-		std::vector<char> buf((valueSize() * 2 + sizeof(std::size_t)) * storage.numberOfBlocks());
-		io.read(buf.data(), buf.size());
+		updateBlocksInfo();
+	}
 
-		std::ifstream in(storage.getFileName(), std::ios::binary);
-		blocks.clear();
-		for (int i = 0; i < storage.numberOfBlocks(); ++i) {
-			auto block_num = deserialize<std::size_t>(buf.data() + i * (2 * valueSize() + sizeof(std::size_t)) + valueSize() * 2);
+	Value get(Key key)
+	{
+		auto block_number = findBlock(key);
+		auto pos_in_block = storage.findPosInBlockLowerBound(block_number, {key, Value()});
+		return storage.get(block_number, pos_in_block).second;
+	}
 
-			in.seekg(storage.getBlockInfo(block_num).headerOffset());
-			auto block_size = deserialize<std::size_t>(in, sizeof(std::size_t));
-
-			blocks.emplace_back(block_num, block_size);
-		}
+	void remove(Key key) 
+	{
+		auto block_number = findBlock(key);
+		auto pos_in_block = storage.findPosInBlockLowerBound(block_number, {key, Value()});
+		storage.removeFromBlock(block_number, pos_in_block);
+		
+		updateBlocksInfo();
 	}
 
 	std::size_t findBlock(Key key)
@@ -91,6 +94,24 @@ public:
 	}
 	
 private:
+	void updateBlocksInfo()
+	{
+		std::ifstream io(storage.getFileName() + "_table");
+		std::vector<char> buf((valueSize() * 2 + sizeof(std::size_t)) * storage.numberOfBlocks());
+		io.read(buf.data(), buf.size());
+
+		std::ifstream in(storage.getFileName(), std::ios::binary);
+		blocks.clear();
+		for (int i = 0; i < storage.numberOfBlocks(); ++i) {
+			auto block_num = deserialize<std::size_t>(buf.data() + i * (2 * valueSize() + sizeof(std::size_t)) + valueSize() * 2);
+
+			in.seekg(storage.getBlockInfo(block_num).headerOffset());
+			auto block_size = deserialize<std::size_t>(in, sizeof(std::size_t));
+
+			blocks.emplace_back(block_num, block_size);
+		}
+	}
+
 	struct BlockInfo
 	{
 		BlockInfo(std::size_t block_number, std::size_t block_size) 
