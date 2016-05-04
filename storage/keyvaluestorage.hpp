@@ -39,11 +39,25 @@ public:
 		updateBlocksInfo();
 	}
 
-	Value get(Key key)
+	boost::optional<Value> get(Key key)
 	{
 		auto block_number = findBlock(key);
+		if (block_number >= blocks.size()) {
+			return boost::none;
+		}
 		auto pos_in_block = storage.findPosInBlockLowerBound(block_number, {key, Value()});
-		return storage.get(block_number, pos_in_block).second;
+		
+		if (pos_in_block >= storage.blockCapacity()) {
+			return boost::none;
+		}
+
+		auto key_value = storage.get(block_number, pos_in_block);
+
+		if (key_value.first != key) {
+			return boost::none;
+		} else {
+			return key_value.second;
+		}
 	}
 
 	void remove(Key key) 
@@ -54,9 +68,20 @@ public:
 		
 		updateBlocksInfo();
 	}
+	
+	void remove(Key key, Value value) 
+	{
+		auto block_number = findBlock(key);
+		auto pos_in_block = storage.findPosInBlock(block_number, {key, value});
+		if (pos_in_block) {
+			storage.removeFromBlock(block_number, *pos_in_block);
+			updateBlocksInfo();
+		}
+	}
 
 	std::size_t findBlock(Key key)
 	{
+		/*
 		std::size_t current_sum = 0;
 		std::vector<std::size_t> block_sums;
 	
@@ -65,9 +90,11 @@ public:
 			current_sum += blocks[i].block_size;
 			block_sums.push_back(current_sum);
 		}
+		*/
 
 		int l = 0;
-		int r = block_sums.size();
+//		int r = block_sums.size();
+		int r = blocks.size();
 
 		while (r - l > 1) 
 		{
@@ -80,7 +107,7 @@ public:
 			}
 		}
 
-		return blocks[l].block_number;
+		return l >= blocks.size() ? l : blocks[l].block_number;
 	}
 
 	auto getIterator() 

@@ -5,7 +5,7 @@
 #include <set>
 #include <fstream>
 #include <boost/optional.hpp>
-#include <defines.hpp>
+//#include <defines.hpp>
 #include "serialize.hpp"
 #include "block.hpp"
 #include "storage_defines.hpp"
@@ -139,6 +139,10 @@ public:
 
 		io.seekg(block.headerOffset());
 		auto block_size = deserialize<std::size_t>(io, sizeof(std::size_t));
+
+		if (block_size == 0) {
+			return block_capacity;
+		}
 
 		io.seekg(block.dataOffset());
 		
