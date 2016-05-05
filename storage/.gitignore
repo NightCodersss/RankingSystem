@@ -1,2 +1,6 @@
 *.o
 *.so
+read_storage
+bigtest
+tmp
+test
