@@ -16,7 +16,7 @@ commit_file = open(sys.argv[1], "a")
 hashes_file = open(sys.argv[2], "a")
 
 def save_hash(doc_path):
-	key = hashlib.md5(doc_path).hexdigest()
+	key = hash(doc_path) % 2**64
 	hashes_file.write("{} {}\n".format(key, doc_path));
 	return key
 
