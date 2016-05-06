@@ -4,21 +4,14 @@ import socket
 import time
 import os
 import nltk
-import nltk.probability
-import nltk.stem
-import nltk.corpus
-import thread
+import stem_provider
 
 listen_point = ("localhost", int(os.environ["STEM_PORT"]))
 south_server_point = ("localhost", int(os.environ["SOUTH_PORT"]))
 
-stemmer = nltk.stem.SnowballStemmer("russian")
 
 class MyTCPHandler(SocketServer.BaseRequestHandler):
 	def handle(self):
-		thread.start_new_thread(lambda: self.routine(), ())
-
-	def routine(self):
         # self.request is the TCP socket connected to the client
 		query = ""
 		while True:
@@ -28,25 +21,30 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 				break
 		print "query: ", query
 		# do stem
-		query = ' '.join(map(stemmer.stem, nltk.word_tokenize(query)))
+		query = ' '.join(map(stem_provider.stem, nltk.word_tokenize(query))) + '\n'
 		print "stemmed query: ", query
 		
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		print "connecting to south"
 		sock.connect(south_server_point)
+		print "connected"
+		print "sending"
 		sock.sendall(query)
+		print "sent; waiting"
 		time.sleep(1) # 1 sec waiting for (may be notfinished) ubjson answer
+		print "receiving data"
 		answer = ""
 		while True:
-#			print "waiting for data (north)"
+			print "waiting for data (north)"
 			buf = sock.recv(1024)
 			answer += buf 
 			if len(buf) == 0:
 				break
-#			print "answer_data: ", answer
+			print "answer_data: ", answer
 		print "Got answer"
 		self.request.sendall(answer)
 
 if __name__ == "__main__":
-    server = SocketServer.TCPServer(listen_point, MyTCPHandler)
+    server = SocketServer.ThreadingTCPServer(listen_point, MyTCPHandler)
     server.serve_forever()
 
