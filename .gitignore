@@ -3,6 +3,10 @@
 *.datbackup
 *.log
 *.txt
+*.pyc
+*.swp
+*.bin
+*.bin_table
 idfile
 idfilecheck
 checkfile
