@@ -1,8 +1,8 @@
 export CXX=clang++
 export PROJECTPATH=$(shell pwd)
-export INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)/ -I$(PROJECTPATH)/common/
-export LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader -L$(PROJECTPATH)/common
-SUBDIRECTORIES=storage config_loader common index_connection south_protocol ranking_server forward_index_server force_ranking_server
+export INCLUDEPATH=-I$(PROJECTPATH)/config_loader/ -I$(PROJECTPATH)/UbjsonCpp/include/ -I$(PROJECTPATH)/ -I$(PROJECTPATH)/common/ -I$(PROJECTPATH)/storage/
+export LIBRARYPATH=-L$(PROJECTPATH)/UbjsonCpp/src -L$(PROJECTPATH)/config_loader -L$(PROJECTPATH)/common -L$(PROJECTPATH)/storage/
+SUBDIRECTORIES=storage config_loader common index_connection index_server south_protocol ranking_server forward_index_server force_ranking_server
 
 .PHONY: all $(SUBDIRECTORIES)
 

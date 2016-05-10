@@ -4,10 +4,11 @@
 #include <cstdint>
 #include "serializer.hpp"
 
-using Rank = double;
-using DocID = std::uint64_t;
+// using Rank = double;
+// using DocID = std::uint64_t;
+// ^ redefenition of defines.hpp. And you do not use it. FIXME
 
-struct RankDocSerializer : public Serializer<std::pair<Rank, DocID>>
+struct RankDocSerializer : public Serializer<std::pair<double, std::uint64_t>>
 {
 	using Serializer<ValueType>::serialize;
 	using Serializer<ValueType>::deserialize;

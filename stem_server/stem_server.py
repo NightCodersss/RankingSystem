@@ -19,17 +19,17 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 			query += buf
 			if buf.find('\n') != -1:
 				break
-		print "query: ", query
+		#print "query: ", query.decode('utf-8')
 		# do stem
-		query = ' '.join(map(stem_provider.stem, nltk.word_tokenize(query))) + '\n'
-		print "stemmed query: ", query
+		query = ' '.join(map(stem_provider.stem, nltk.word_tokenize(query.decode('utf-8')))) + '\n'
+	#	print "stemmed query: ", query
 		
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		print "connecting to south"
 		sock.connect(south_server_point)
 		print "connected"
 		print "sending"
-		sock.sendall(query)
+		sock.sendall(query.encode('utf-8'))
 		print "sent; waiting"
 		time.sleep(1) # 1 sec waiting for (may be notfinished) ubjson answer
 		print "receiving data"

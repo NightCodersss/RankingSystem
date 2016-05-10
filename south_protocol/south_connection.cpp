@@ -45,8 +45,8 @@ void SouthConnection::start()
 	
 		//std::cout << "From south server: \n";
 		//std::cout << "Read: " << self -> input << '\n';
-		BOOST_LOG_TRIVIAL(trace) << "From south server: \n";
-		BOOST_LOG_TRIVIAL(trace) << "Read: " << self -> input << '\n';
+		BOOST_LOG_TRIVIAL(trace) << "From south server:";
+		BOOST_LOG_TRIVIAL(trace) << "Read: " << self -> input;
 
 		self->input = self->getUBJSONFromQuery(self->input);
 		self->server_stream << self->input;
@@ -54,6 +54,9 @@ void SouthConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->server_stream);
 
 		auto v = reader.getNextValue();
+		std::stringstream ss;
+		ss << ubjson::to_ostream(v);
+		BOOST_LOG_TRIVIAL(trace) << "From ranking server:" << ss.str();
 		self->client_stream << "ANSWER: " << ubjson::to_ostream(v) << "\n";
 	}).detach();
 }

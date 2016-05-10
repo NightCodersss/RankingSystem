@@ -8,6 +8,7 @@
 
 using TextID = std::string;
 static const TextID EmptyTextID = "";
-using DocID = long long;
+using DocID = std::uint64_t;
+using UbjsonDocID = long long;
 using TextIndex = int; // enumerating for bitsets
 using SocketStream = boost::asio::ip::tcp::iostream;

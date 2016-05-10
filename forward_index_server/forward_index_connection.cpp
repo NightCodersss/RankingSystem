@@ -60,7 +60,7 @@ void ForwardIndexConnection::start()
 		for (auto const& index_info: indexes_info)
 		{
 			ubjson::Value index_info_json;
-			index_info_json["doc_id"] = doc_id;
+			index_info_json["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 			index_info_json["text_id"] = index_info.second.text_id; 
 			index_info_json["rank"] = index_info.second.correspondence; 
 			result.push_back(index_info_json);

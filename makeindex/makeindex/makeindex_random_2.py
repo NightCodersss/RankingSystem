@@ -5,7 +5,7 @@ from random import gauss, uniform
 # Generate index only for one word
 # It's useful for testing operations
 
-words = ["Fairytale", "Happiness"]
+words = ["fairytale", "happiness"]
 D = 100
 
 model = np.array([[uniform(0, 1) ** 20 for _, i in enumerate(words)] for doc_id in range(D)]) # [doc_id, word_id]

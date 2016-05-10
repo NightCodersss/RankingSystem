@@ -5,4 +5,5 @@ do
 #kill application on the port
 	fuser -k $i/tcp 
 done
+echo "Stopped"
 

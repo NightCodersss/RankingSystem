@@ -51,7 +51,7 @@ void ForceRankingConnection::start()
 		ubjson::Value result;
 
 		double rank = self->Eval(std::move(query_tree));
-		result["doc_id"] = self->doc_id;
+		result["doc_id"] = static_cast<UbjsonDocID>(self->doc_id);
 		result["rank"] = rank; 
 		BOOST_LOG_TRIVIAL(trace) << "Result: doc_id: " << self->doc_id << ", rank: " << rank <<", query: " << query.getText() << "\n";
 
@@ -140,6 +140,6 @@ ubjson::Value ForceRankingConnection::forwardQuery(std::string word)
 {
 	ubjson::Value res;
 	res["query"] = word; 
-	res["doc_id"] = doc_id;
+	res["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 	return res;
 }

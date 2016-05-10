@@ -208,7 +208,7 @@ ubjson::Value RankingStruct::forwardQuery(DocID doc_id, std::string& query)
 	ubjson::Value res;
 //	res["query"] = query.getText();
 	res["query"] = query;
-	res["doc_id"] = doc_id;
+	res["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 	return res;
 }
 

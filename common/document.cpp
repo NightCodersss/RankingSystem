@@ -10,7 +10,7 @@ Document::Document(DocID doc_id, double rank)
 ubjson::Value Document::packToUbjson()
 {
 	ubjson::Value doc_ubjson;
-	doc_ubjson["doc_id"] = doc_id;
+	doc_ubjson["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 	doc_ubjson["rank"] = rank;
 	return doc_ubjson;
 }
@@ -18,7 +18,7 @@ ubjson::Value Document::packToUbjson()
 Document Document::unpackFromUbjson(const ubjson::Value& doc_ubjson)
 {
 	try {
-		return Document(static_cast<const DocID&>(doc_ubjson["doc_id"])
+		return Document(static_cast<const long long&>(doc_ubjson["doc_id"]) // WARNING cast to ll then to ull for 
 					  , static_cast<double>      (doc_ubjson["rank"]));
 	} catch (const std::exception& e) {
 		std::stringstream ss;

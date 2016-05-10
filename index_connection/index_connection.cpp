@@ -14,7 +14,6 @@
 #include "index_connection.hpp"
 
 using boost::asio::ip::tcp;
-using DocID = long long;
 
 IndexConnection::pointer IndexConnection::create(boost::asio::io_service& io_service, IndexServer* const server)
 {
@@ -72,7 +71,7 @@ void IndexConnection::start()
 			BOOST_LOG_TRIVIAL(trace) << "Correspondence " << correspondence << " read\n";
 
 			ubjson::Value doc;
-			doc["doc_id"] = doc_id;
+			doc["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 			doc["rank"] = correspondence;
 			doc["docname"] = std::to_string(doc_id);
 			doc["url"] = "google.com/" + std::to_string(doc_id);
