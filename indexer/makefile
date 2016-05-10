@@ -9,4 +9,4 @@ all:
 	./index_pressa.sh
 
 clean:
-	rm -f commit hashes
+	rm -f commit hashes *.pyc words.hash_list

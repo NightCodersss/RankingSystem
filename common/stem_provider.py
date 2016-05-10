@@ -15,9 +15,24 @@ else:
 	print "unknown stem_policity: ", stem_policity
 	sys.exit(1)
 
+def get_hash(word):
+	return hash(word) % 2**64
+
+saved_hashes = set([])
+word_hash_file = open("words.hash_list", "a")
+def reg_hash(word):
+	hash_ = get_hash(word)
+	if hash_ not in saved_hashes:
+		saved_hashes.add(hash_)
+		word_hash_file.write(str(hash_))
+		word_hash_file.write(" ")
+		word_hash_file.write(word.encode('utf-8'))
+		word_hash_file.write("\n")
+	return str(hash_)
+
 def stem(word):
 	if stem_policity == "nltk":
-		return stemmer.stem(word.lower())
+		return reg_hash(stemmer.stem(word.lower()))
 	elif stem_policity == "pymorphy":
 		common = nltk.probability.FreqDist(form.normal_form for form in morph.parse(word.lower())).most_common(1)
-		return (common[0][0])
+		return reg_hash(common[0][0])
