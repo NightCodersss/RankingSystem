@@ -8,7 +8,7 @@ class ReadWriteFileStream
 {
 public:
     ReadWriteFileStream();
-    ReadWriteFileStream(const std::string& filename);
+    ReadWriteFileStream(std::string filename);
 
     ~ReadWriteFileStream();
 

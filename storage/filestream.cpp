@@ -1,12 +1,14 @@
 #include "filestream.hpp"
+#include <iostream>
 
 ReadWriteFileStream::ReadWriteFileStream()
     : file(nullptr)
 {
 }
 
-ReadWriteFileStream::ReadWriteFileStream(const std::string& filename)
+ReadWriteFileStream::ReadWriteFileStream(std::string filename)
 {
+	std::cout << filename << ' ' << filename.length() << '\n';
     file = std::fopen(filename.data(), "r+b");
 	if (!file) {
 		file = std::fopen(filename.data(), "w+b");
