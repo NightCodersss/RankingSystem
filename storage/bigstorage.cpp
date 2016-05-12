@@ -3,8 +3,17 @@
 #include "rankdocserializer.hpp"
 #include "docrankserializer.hpp"
 #include <regex>
+#include <boost/filesystem.hpp>
 
-BigStorage::BigStorage(std::string path) : path(path) { }
+BigStorage::BigStorage(std::string path, std::size_t subdirectories_number) 
+	: path(path)
+	, subdirectories_number(subdirectories_number) 
+{
+	for (std::size_t i = 0; i < subdirectories_number; ++i) {		
+		boost::filesystem::path dir(path + "/" + path + std::to_string(i));
+		boost::filesystem::create_directory(dir);
+	}
+}
 
 void BigStorage::addCommit(Commit commit)
 {
@@ -46,5 +55,8 @@ std::string BigStorage::getFilename(std::string word, TextID text_id)
 	word = std::regex_replace(word, r, "_");
 	text_id = std::regex_replace(text_id, r, "_");
 
-	return path + "/" + word + "_" + text_id;
+	std::hash<std::string> strhash;
+	auto hash = static_cast<std::size_t>(strhash(word + text_id)) % subdirectories_number;
+
+	return path + "/" + path + std::to_string(hash) + "/" + word + "_" + text_id;
 }
