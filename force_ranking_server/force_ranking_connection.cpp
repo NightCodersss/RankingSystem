@@ -35,16 +35,17 @@ void ForceRankingConnection::start()
 		ubjson::StreamReader<SocketStream> reader(self->ranking_stream);
 		auto request = reader.getNextValue();
 
-		// BOOST_LOG_TRIVIAL(trace) << "Read json: " << ubjson::to_ostream(request) << '\n';
 		BOOST_LOG_TRIVIAL(trace) << "Read json.";
-	//	std::cout << "ForceRanking: Read json: " << ubjson::to_ostream(request) << '\n';
+		std::stringstream ss;
+		ss << ubjson::to_ostream(request);
+		BOOST_LOG_TRIVIAL(trace) << "Request: " << ss.str();
 
 		if(request["query"].isNull())
 			return;
 
 		Query query(request["query"]);
 		auto query_tree = QueryParser().parse(query);
-		self->doc_id = request["doc_id"].asInt();
+		self->doc_id = static_cast<const UbjsonDocID&>(request["doc_id"]);
 		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << self->doc_id << "\n";
 
 		ubjson::StreamWriter<SocketStream> writer(self->ranking_stream);
@@ -54,6 +55,11 @@ void ForceRankingConnection::start()
 		result["doc_id"] = static_cast<UbjsonDocID>(self->doc_id);
 		result["rank"] = rank; 
 		BOOST_LOG_TRIVIAL(trace) << "Result: doc_id: " << self->doc_id << ", rank: " << rank <<", query: " << query.getText() << "\n";
+		{
+			std::stringstream ss;
+			ss << ubjson::to_ostream(result);
+			BOOST_LOG_TRIVIAL(trace) << "Result: " << ss.str();
+		}
 
 		BOOST_LOG_TRIVIAL(trace) << "Writing output to ranking server\n";
 		writer.writeValue(result);
@@ -91,9 +97,15 @@ double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
 
 		double res = 0;
 		for (const auto& doc: answer) {
-			auto text_id = static_cast<std::string>(doc["text_id"]);
-			auto d = Document::unpackFromUbjson(doc);
-			res += d.rank * server->rank_form_by_id.at(text_id);
+			try {
+				auto text_id = static_cast<std::string>(doc["text_id"]);
+				auto d = Document::unpackFromUbjson(doc);
+				res += d.rank * server->rank_form_by_id.at(text_id);
+			}
+			catch (std::exception& e)
+			{
+				BOOST_LOG_TRIVIAL(error) << "Exception is got at evaluating rank: " << e.what();
+			}
 		}
 		return res;
 	}

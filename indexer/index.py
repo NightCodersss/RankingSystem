@@ -42,7 +42,8 @@ def get_texts(doc):
 
 n = 0;
 for doc_path in sys.stdin:
-	try:
+	if True:
+	#try:
 		print "n: ", n
 		n += 1
 		doc_path = doc_path.rstrip()
@@ -51,17 +52,22 @@ for doc_path in sys.stdin:
 		print "doc_id: ", doc_id
 		doc = load_doc(doc_path);
 		texts = get_texts(doc);
-		for text in texts:
-			fdict = nltk.probability.FreqDist(stem_provider.stem(token).encode('utf-8') 
-				for token in nltk.word_tokenize(text["text"]) 
-					if not token in nltk.corpus.stopwords.words("russian") 
-						and len(token) >= 2)
-			for word in fdict:
-				commit_file.write("{word} {text_id} {doc_id} {freq}\n".format(
-					word = word, 
-					text_id = text["text_id"],
-					doc_id = doc_id, 
-					freq = fdict.freq(word)))
+		with open("{}.forward".format(doc_id), "w") as forward_file:
+			for text in texts:
+				fdict = nltk.probability.FreqDist(stem_provider.stem(token).encode('utf-8') 
+					for token in nltk.word_tokenize(text["text"]) 
+						if not token in nltk.corpus.stopwords.words("russian") 
+							and len(token) >= 2)
+				for word in fdict:
+					commit_file.write("{word} {text_id} {doc_id} {freq}\n".format(
+						word = word, 
+						text_id = text["text_id"],
+						doc_id = doc_id, 
+						freq = fdict.freq(word)))
+					forward_file.write("{word} {text_id} {freq}\n".format(
+						word = word, 
+						text_id = text["text_id"],
+						freq = fdict.freq(word)))
 			
-	except Exception, e:
-		print "Error: ", e
+	#except Exception, e:
+	#	print "Error: ", e

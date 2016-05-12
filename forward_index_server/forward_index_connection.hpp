@@ -32,6 +32,7 @@ private:
     SocketStream ranking_stream;
 
 	ForwardIndexServer* const server;
+	std::string forward_index_path;
 };
 
 #endif
