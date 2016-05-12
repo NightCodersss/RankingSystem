@@ -2,6 +2,7 @@
 #include "keyvaluestorage.hpp"
 #include "rankdocserializer.hpp"
 #include "docrankserializer.hpp"
+#include <regex>
 
 BigStorage::BigStorage(std::string path) : path(path) { }
 
@@ -41,5 +42,9 @@ void BigStorage::addCommit(Commit commit)
 
 std::string BigStorage::getFilename(std::string word, TextID text_id)
 {
+	std::regex r(R"([/\\])");
+	word = std::regex_replace(word, r, "_");
+	text_id = std::regex_replace(text_id, r, "_");
+
 	return path + "/" + word + "_" + text_id;
 }
