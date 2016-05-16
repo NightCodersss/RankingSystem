@@ -16,7 +16,7 @@ else:
 	sys.exit(1)
 
 def get_hash(word):
-	return hash(word) % 2**64
+	return hash(word) % 2**62
 
 saved_hashes = set([])
 word_hash_file = open("words.hash_list", "a")
