@@ -203,7 +203,8 @@ void RankingConnection::start()
 				const double eps = 1e-3;
 				BOOST_LOG_TRIVIAL(info) << "Sender->sent: " << sender->sent;
 				BOOST_LOG_TRIVIAL(trace) << "Mdr_copy: " << Mdr_copy;
-				if ( is_root && (sender->sent >= south_request.amount || std::abs(Mdr_copy) < eps)) // won't swap we have got all documents we want and we can
+				if (( is_root && (sender->sent >= south_request.amount || std::abs(Mdr_copy) < eps)) || // won't swap we have got all documents we want and we can
+					(!is_root && (std::abs(Mdr_copy) < eps)))
 				{
 					BOOST_LOG_TRIVIAL(info) << "Set is_end = true by logic of root-server ending";
 					self->data.is_end = true;
@@ -229,6 +230,13 @@ void RankingConnection::start()
 							BOOST_LOG_TRIVIAL(trace) << "Error while writing (to south stream), so thread is going down.";
 							self->data.is_end = true;
 						}
+					}
+					if (!is_root)
+					{
+						BOOST_LOG_TRIVIAL(info) << "Non-root server. Sending terminating document";
+						ubjson::Value doc;
+						doc["is_end"] = 1;
+						sender->send(doc);
 					}
 				}
 
