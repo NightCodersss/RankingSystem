@@ -14,14 +14,16 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	std::cout << "Forward storage: \n\n";
+	if (std::string(argv[1]) == "forward") {
+		std::cout << "Forward storage: \n\n";
 
-	auto forward_storage = makeKeyValueStorage<double, std::uint64_t>(argv[1], RankDocSerializer());
-	forward_storage.dumpStorage();
-	
-	std::cout << "Inverted storage: \n\n";
+		auto forward_storage = makeKeyValueStorage<double, std::uint64_t>(argv[2], RankDocSerializer());
+		forward_storage.dumpStorage();
+	} else { 
+		std::cout << "Inverted storage: \n\n";
 
-	auto inverted_storage = makeKeyValueStorage<std::uint64_t, double>(argv[2], DocRankSerializer());
-	inverted_storage.dumpStorage();
+		auto inverted_storage = makeKeyValueStorage<std::uint64_t, double>(argv[2], DocRankSerializer());
+		inverted_storage.dumpStorage();
+	}
 }
 

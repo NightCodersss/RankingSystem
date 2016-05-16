@@ -3,6 +3,9 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include "keyvaluestorage.hpp"
+#include "rankdocserializer.hpp"
+#include "docrankserializer.hpp"
 	
 using TextID = std::string;
 using Rank = double;
@@ -24,8 +27,11 @@ public:
 	BigStorage(std::string path = ".", std::size_t subdirectories_number=1000);
 	void addCommit(Commit commit);
 
-private:
+	std::unique_ptr<KeyValueStorage<Rank, DocID, RankDocSerializer>> getForwardStorage(std::string word, TextID text_id);
+	std::unique_ptr<KeyValueStorage<DocID, Rank, DocRankSerializer>> getInvertedStorage(std::string word, TextID text_id);
+
 	std::string getFilename(std::string word, TextID text_id);
+private:
 
 	std::string path;
 	std::size_t subdirectories_number = 1000;

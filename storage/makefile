@@ -13,3 +13,6 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE)
+
+clean_index:
+	rm -rf index/*

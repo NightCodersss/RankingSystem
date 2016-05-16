@@ -10,7 +10,7 @@ BigStorage::BigStorage(std::string path, std::size_t subdirectories_number)
 	, subdirectories_number(subdirectories_number) 
 {
 	for (std::size_t i = 0; i < subdirectories_number; ++i) {		
-		boost::filesystem::path dir(path + "/" + path + std::to_string(i));
+		boost::filesystem::path dir(path + "/" + "index" + std::to_string(i));
 		boost::filesystem::create_directory(dir);
 	}
 }
@@ -39,13 +39,13 @@ void BigStorage::addCommit(Commit commit)
 			inverted_storage = makeKeyValueStorage<DocID, Rank>(filename + "_inverted.bin", inverted_serializer);
 		}
 		
-		auto doc_rank = inverted_storage.get(record.doc_id);
+		auto doc_rank = inverted_storage->get(record.doc_id);
 		if (doc_rank) {
-			forward_storage.remove(*doc_rank, record.doc_id);
-			inverted_storage.remove(record.doc_id, *doc_rank);
+			forward_storage->remove(*doc_rank, record.doc_id);
+			inverted_storage->remove(record.doc_id, *doc_rank);
 		}
-		forward_storage.add(record.rank, record.doc_id);
-		inverted_storage.add(record.doc_id, record.rank);
+		forward_storage->add(record.rank, record.doc_id);
+		inverted_storage->add(record.doc_id, record.rank);
 	}
 }
 
@@ -58,5 +58,24 @@ std::string BigStorage::getFilename(std::string word, TextID text_id)
 	std::hash<std::string> strhash;
 	auto hash = static_cast<std::size_t>(strhash(word + text_id)) % subdirectories_number;
 
-	return path + "/" + path + std::to_string(hash) + "/" + word + "_" + text_id;
+	return path + "/" + "index" + std::to_string(hash) + "/" + word + "_" + text_id;
+}
+	
+std::unique_ptr<KeyValueStorage<Rank, DocID, RankDocSerializer>> BigStorage::getForwardStorage(std::string word, TextID text_id)
+{
+	auto forward_serializer = RankDocSerializer();
+	auto filename = getFilename(word, text_id);
+	auto forward_storage = makeKeyValueStorage<Rank, DocID>(filename + "_forward.bin", forward_serializer);
+
+	return forward_storage;
+}
+
+std::unique_ptr<KeyValueStorage<DocID, Rank, DocRankSerializer>> BigStorage::getInvertedStorage(std::string word, TextID text_id)
+{
+	auto inverted_serializer = DocRankSerializer();
+
+	auto filename = getFilename(word, text_id);
+	auto inverted_storage = makeKeyValueStorage<DocID, Rank>(filename + "_inverted.bin", inverted_serializer);
+	
+	return inverted_storage;	
 }

@@ -23,6 +23,7 @@ int main()
 	{
 		std::vector<std::string> parts;
 		boost::split(parts, s, boost::is_any_of(" "));
+
 		record.word = parts.at(0);
 		record.text_id = parts.at(1);
 		record.doc_id = std::stoull(parts.at(2));

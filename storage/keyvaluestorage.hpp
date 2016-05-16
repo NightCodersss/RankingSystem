@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "storage.hpp"
 
 template <typename Key, typename Value, typename Serializer>
@@ -159,5 +160,5 @@ private:
 template <typename Key, typename Value, typename Serializer>
 auto makeKeyValueStorage(const std::string& filename, Serializer serializer)
 {
-	return KeyValueStorage<Key, Value, Serializer>(filename, serializer);
+	return std::make_unique<KeyValueStorage<Key, Value, Serializer>>(filename, serializer);
 }
