@@ -28,10 +28,19 @@ int main()
 		record.text_id = parts.at(1);
 		record.doc_id = std::stoull(parts.at(2));
 		record.rank = std::stod(parts.at(3));
+		std::cout << "Record created. Word: " << record.word << "; text_id: " << record.text_id << "; doc_id: " << record.doc_id << "; rank: " << record.rank << "\n";
 		commit.push_back(record);
-	}
 
-	storage.addCommit(commit);
+		if (commit.size() >= 1000) {
+			std::cout << "Committing…";
+			storage.addCommit(commit);
+            std::cout << "Done.";
+			commit.clear();
+		}
+	}
+//	std::cout << "Committing…";
+//	storage.addCommit(commit);
+//	std::cout << "Done.";
 
 	//storage.dumpStorage();
 }

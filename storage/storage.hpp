@@ -18,7 +18,7 @@ class Storage
     friend class StorageIterator<Storage>;
 	friend class BlockWriter<Storage>;
 
-	static const int default_block_capacity = 3;
+	static const int default_block_capacity = 1000;
 public:
     using value_type = Value;
 
