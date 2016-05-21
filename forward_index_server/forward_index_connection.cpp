@@ -44,12 +44,14 @@ void ForwardIndexConnection::start()
 		DocID doc_id = static_cast<const UbjsonDocID&>(request["doc_id"]);
 		std::string query = static_cast<std::string>(request["query"]);
 
-		BOOST_LOG_TRIVIAL(trace) << "Query-string: " << static_cast<std::string>(request["query"]) <<"\n";
-		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size() <<"\n";
+		BOOST_LOG_TRIVIAL(trace) << "Query-string: " << static_cast<std::string>(request["query"]);
+		BOOST_LOG_TRIVIAL(trace) << "Query-string size: " << static_cast<std::string>(request["query"]).size();
 
 		ubjson::Value result;
 
-		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id << "\n";
+		BOOST_LOG_TRIVIAL(trace) << "Doc id: " << doc_id;
+		double idf = self->server->idf.GetIDF(query);
+		BOOST_LOG_TRIVIAL(trace) << "IDF: " << idf;
 
 		std::map<TextID, TextForwardIndexInfo> current = { };
 		try {
@@ -84,7 +86,7 @@ void ForwardIndexConnection::start()
 			ubjson::Value index_info_json;
 			index_info_json["doc_id"] = static_cast<UbjsonDocID>(doc_id);
 			index_info_json["text_id"] = index_info.second.text_id; 
-			index_info_json["rank"] = index_info.second.correspondence; 
+			index_info_json["rank"] = index_info.second.correspondence * idf; 
 			result.push_back(index_info_json);
 		}
 

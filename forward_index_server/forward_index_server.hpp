@@ -9,6 +9,8 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 
+#include <idf.hpp>
+
 #include "forward_index_connection.hpp"
 #include "text_forward_index_info.hpp"
 
@@ -25,6 +27,8 @@ public:
 
 	void inc_connections();
 	void dec_connections();
+
+	IDFHandler idf;
 
 private:
 
