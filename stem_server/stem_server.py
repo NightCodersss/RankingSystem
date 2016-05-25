@@ -21,7 +21,7 @@ class MyTCPHandler(SocketServer.BaseRequestHandler):
 				break
 		#print "query: ", query.decode('utf-8')
 		# do stem
-		query = ' '.join(map(lambda s: stem_provider.stem(s) if s != '|' else '|', nltk.word_tokenize(query.decode('utf-8')))) + '\n'
+		query = ' '.join(map(lambda s: stem_provider.stem(s) if not s in ['|', ')', '('] else s, nltk.word_tokenize(query.decode('utf-8')))) + '\n'
 	#	print "stemmed query: ", query
 		
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
