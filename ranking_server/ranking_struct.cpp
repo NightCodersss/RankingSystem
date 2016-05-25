@@ -125,10 +125,13 @@ double RankingStruct::calculatePairSwapProbability(double x1, double dx1, double
 	// now x1 < x2
 	double p;
 	
+	/*
 	if ( x1 + dx1 <= x2 )
 		p = 0;
 	else 
 		p = 1; // TODO change hard probolilities to normal
+	*/
+	p = std::min(std::min(std::max(x1 + dx1 - x2, 0.), dx2), 1.);
 
 	BOOST_LOG_TRIVIAL(trace) << "Swap pobability of pair (" << x1 << ", " << x1 + dx1 << "; " << x2 << ", " << x2 + dx2 << "): " << p;
 		

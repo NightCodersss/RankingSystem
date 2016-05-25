@@ -20,6 +20,7 @@ int main(int argc, char** argv)
 		boost::log::keywords::auto_flush = true,
 		boost::log::keywords::format = "[%TimeStamp%] <%ThreadID%> : %Message%"
 		);
+	boost::log::core::get() -> set_logging_enabled(std::string(std::getenv("RANKING_SERVER_LOGGING")) == "NO" ? false : true);
 	BOOST_LOG_TRIVIAL(trace) << "Log begin";
 
 	runTests();

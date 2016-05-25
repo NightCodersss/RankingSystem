@@ -153,8 +153,8 @@ void RankingConnection::start()
 				}));
 			}
 
-			double max_swap_prob = 0.01;
-            int check_size = 100;
+			double max_swap_prob = 0.2;
+            int check_size = 10;
 
 			do 
 			{

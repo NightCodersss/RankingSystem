@@ -30,7 +30,7 @@
 	},
     "texts": [
         {
-            "factor": 0.9, 
+            "factor": 0.1, 
             "text_id": "first_sentence"
         },
         {
