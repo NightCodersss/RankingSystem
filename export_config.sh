@@ -1,7 +1,9 @@
-export RANKING_SYSTEM_HOME=$(pwd)
 
-#export LC_ALL=C
-export LC_ALL=en_US.UTF-8
+if [ -z "$MAIN_EXPORTS_ARE_DONE" ] 
+then
+	echo "Make common exports";
+	exit 1;
+fi
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RANKING_SYSTEM_HOME/UbjsonCpp/src/
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RANKING_SYSTEM_HOME/config_loader/
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$RANKING_SYSTEM_HOME/common/
@@ -19,5 +21,6 @@ export INDEX_PORT=14000
 export FORWARD_PORT=17000
 export FORCE_RANKING_PORT=18000
 export STEM_PORT=19000
+export RANKING_SERVER_LOGGING=NO
 
 export MAIN_EXPORTS_ARE_DONE=1
