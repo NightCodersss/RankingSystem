@@ -13,7 +13,7 @@ int main()
 //	auto storage = make_storage<std::pair<std::uint32_t, std::uint32_t>>("forward_storage.bin", pairSerializer());
 //	auto storage = makeKeyValueStorage<std::uint32_t, std::uint32_t>("forward_storage.bin", pairSerializer());
 	
-	auto storage = BigStorage("index");
+	auto storage = BigStorage(std::getenv("INDEX_PATH"));
 
 	Record record;
 	Commit commit;
@@ -38,9 +38,9 @@ int main()
 			commit.clear();
 		}
 	}
-//	std::cout << "Committing…";
-//	storage.addCommit(commit);
-//	std::cout << "Done.";
+	std::cout << "Committing…";
+	storage.addCommit(commit);
+	std::cout << "Done.";
 
 	//storage.dumpStorage();
 }

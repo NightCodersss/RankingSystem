@@ -4,7 +4,7 @@ LDFLAGS=-lboost_log -lboost_thread -lboost_system -shared -lboost_filesystem
 OBJECTS=serialize.o block.o filestream.o bigstorage.o bigtest.o
 EXECUTABLE=libstorage.so
 
-all: $(EXECUTABLE)
+all: $(EXECUTABLE) bigtest
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CXX) $(OBJECTS) -o $(EXECUTABLE) $(LDFLAGS)
