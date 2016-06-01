@@ -40,6 +40,34 @@ def get_texts(doc):
 		}
 	]
 
+def get_doc(doc_path): # return (texts, doc_id)
+		doc = load_doc(doc_path);
+		if doc.split("\n")[0] == "# doc header":
+			headers = doc.split('\n')
+			doc_real_path = headers[1]
+			print "doc_real_path: ", doc_real_path
+			doc_id = save_hash(doc_real_path)
+			texts = []
+			for text_header in headers[2:-1]:
+				print "text_header: ", text_header
+				text_id = text_header.split(' ')[0]
+				text_path = text_header.split(' ')[1]
+				print "text_id: ", text_id
+				print "text_path: ", text_path
+				text = load_doc(text_path)
+				texts.append(
+					{
+						"text_id": text_id,
+						"text": text
+					}
+				)
+			return (texts, doc_id)
+		else:
+			doc_id = save_hash(doc_path)
+			texts = get_texts(doc);
+			return (texts, doc_id)
+
+
 n = 0;
 for doc_path in sys.stdin:
 	if True:
@@ -48,10 +76,8 @@ for doc_path in sys.stdin:
 		n += 1
 		doc_path = doc_path.rstrip()
 		print "doc: ", doc_path
-		doc_id = save_hash(doc_path)
+		texts, doc_id = get_doc(doc_path)
 		print "doc_id: ", doc_id
-		doc = load_doc(doc_path);
-		texts = get_texts(doc);
 		with open("{}.forward".format(doc_id), "w") as forward_file:
 			for text in texts:
 				fdict = nltk.probability.FreqDist(stem_provider.stem(token).encode('utf-8') 
