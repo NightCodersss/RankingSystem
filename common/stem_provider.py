@@ -1,3 +1,4 @@
+import os
 stem_policity = "pymorphy" # nltk, pymorphy
 
 if stem_policity == "nltk":
