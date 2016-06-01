@@ -19,7 +19,7 @@ def get_hash(word):
 	return hash(word) % 2**62
 
 saved_hashes = set([])
-word_hash_file = open("words.hash_list", "a")
+word_hash_file = open(os.environ["RANKING_SYSTEM_HOME"]+"/indexer/words.hash_list", "a")
 def reg_hash(word):
 	hash_ = get_hash(word)
 	if hash_ not in saved_hashes:
