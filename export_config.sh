@@ -1,5 +1,5 @@
 
-if [ -z "$MAIN_EXPORTS_ARE_DONE" ] 
+if [ -z "$COMMON_EXPORTS_ARE_DONE" ] 
 then
 	echo "Make common exports";
 	exit 1;
