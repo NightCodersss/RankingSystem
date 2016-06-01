@@ -37,3 +37,6 @@
 <text_id> <path_to_text_file (plain text>
 ```
 Пример: ./indexer/header.txt
+
+## Просмотр результатов поиска
+`./show_doc.sh <doc_id>` сделает `cat` пути с которым был заиндексирован документ. Таблица хранится в ./indexer/hashes
