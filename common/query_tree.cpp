@@ -66,6 +66,7 @@ std::string QueryTree::toString() const
 		case QueryOperator::Not: operation = "not"; break;
 		case QueryOperator::And: operation = "and"; break;
 		case QueryOperator::Or: operation = "or"; break;		
+		case QueryOperator::And2: operation = "and2"; break;
 		default: break;
 	}
 
