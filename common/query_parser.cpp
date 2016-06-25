@@ -20,7 +20,7 @@ std::unique_ptr<QueryTree> QueryParser::parse(const Query& query)
 		}
 
 		switch (*it) {
-			case '!': case '(': case ')': case '|':
+			case '!': case '(': case ')': case '|': case '&':
 				tokens.push_back(std::string("") + *it);
 				++it;
 				break;
@@ -55,10 +55,10 @@ std::unique_ptr<QueryTree> QueryParser::parse_or()
 {
 	std::vector<std::unique_ptr<QueryTree>> ops;
 
-	ops.push_back(parse_and());
+	ops.push_back(parse_and2());
 	while (pos < tokens.size() && tokens[pos] == "|") {
 		++pos;
-		ops.push_back(parse_and());
+		ops.push_back(parse_and2());
 	}
 	
 	if (ops.size() == 1) {
@@ -82,6 +82,23 @@ std::unique_ptr<QueryTree> QueryParser::parse_and()
 	}
 
 	return std::make_unique<QueryTree>(QueryOperator::And, std::move(ops));
+}
+
+std::unique_ptr<QueryTree> QueryParser::parse_and2()
+{
+	std::vector<std::unique_ptr<QueryTree>> ops;
+
+	ops.push_back(parse_and());
+	while (pos < tokens.size() && tokens[pos] == "&") {
+		++pos;
+		ops.push_back(parse_and());
+	}
+
+	if (ops.size() == 1) {
+		return std::move(ops[0]);
+	}
+
+	return std::make_unique<QueryTree>(QueryOperator::And2, std::move(ops));
 }
 
 std::unique_ptr<QueryTree> QueryParser::parse_atom()

@@ -15,6 +15,7 @@ private:
 	std::unique_ptr<QueryTree> parse_or();
 	std::unique_ptr<QueryTree> parse_and();
 	std::unique_ptr<QueryTree> parse_atom();
+	std::unique_ptr<QueryTree> parse_and2();
 
 	Query query = Query("");
 	std::vector<std::string> tokens;
