@@ -10,6 +10,10 @@ DocumentAccumulator::DocumentAccumulator(DocID doc_id, const std::vector<double>
 	, rank_form_policity(rank_form_policity)
 	, rank_linear_form(rank_linear_form)
 {
+	number_of_positive_texts = std::accumulate(rank_linear_form->begin(), rank_linear_form->end(), 0, [](double a, int count) 
+		{
+			return a >= 0 ? count + 1: count;
+		});
 }
 
 double DocumentAccumulator::mdr(const std::vector<double>& min_for_text)
@@ -33,6 +37,12 @@ double DocumentAccumulator::rank_lower_bound(const std::vector<double>& min_for_
 	else if (rank_form_policity == RankFormPolicity::Max)
 	{
 		return rank;
+	}
+	else if (rank_form_policity == RankFormPolicity::MultipliedSum)
+	{
+		// is the same as Sum, but multiplied on normalized number of received positive texts
+		// we assume that rank_linear_form is positive 
+		return get_rank();
 	}
 	else
 		throw std::logic_error(std::string("Not implemented ") + __FUNCTION__ + "with policity");
@@ -60,6 +70,17 @@ double DocumentAccumulator::rank_upper_bound(const std::vector<double>& min_for_
 		}
 		// highest is now higest possible rank of the aggregated document
 		mdr = std::max (highest - rank, 0.);
+	}
+	else if (rank_form_policity == RankFormPolicity::MultipliedSum)
+	{
+		// is the same as Sum, but multiplied on normalized number of received positive texts
+		// we assume that rank_linear_form is positive 
+		double addition = 0;
+		for ( TextIndex i = 0; i < min_for_text.size(); ++i)
+		{
+			addition += !got[i] * ((*rank_linear_form)[i] > 0) * min_for_text[i] * (*rank_linear_form)[i];
+		}
+		mdr = (rank + addition) /* multiplied sum */ - get_rank();
 	}
 	else
 		throw std::logic_error("Not implemented mdr with policity");
@@ -91,6 +112,13 @@ void DocumentAccumulator::addDocument(const Document& doc, TextIndex text_index)
 			rank += part_rank;
 		else if (rank_form_policity == RankFormPolicity::Max)
 			rank = std::max(rank, part_rank);
+		else if (rank_form_policity == RankFormPolicity::MultipliedSum)
+		{
+			double ranking_threshold = 0.00001;
+			if (part_rank >= ranking_threshold)
+				++number_of_got_positive_texts;
+			rank += part_rank; 
+		}
 		else
 			throw std::logic_error("Not implemented add doc with policity");
 	}
@@ -98,4 +126,16 @@ void DocumentAccumulator::addDocument(const Document& doc, TextIndex text_index)
 	{
 		BOOST_LOG_TRIVIAL(trace) << "Ignoring inserting doc with id: " << doc_id << " because such text is already got";
 	}
+}
+
+double DocumentAccumulator::get_rank()
+{
+	if (rank_form_policity == RankFormPolicity::Sum)
+		return rank;
+	else if (rank_form_policity == RankFormPolicity::Max)
+		return rank;
+	else if (rank_form_policity == RankFormPolicity::MultipliedSum)
+		return rank * number_of_got_positive_texts / number_of_positive_texts;
+	else
+		throw std::logic_error("Not implemented add doc with policity");
 }

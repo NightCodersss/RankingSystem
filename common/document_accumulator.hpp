@@ -9,7 +9,7 @@
 #include <document.hpp>
 #include <defines.hpp>
 
-enum class RankFormPolicity { Max, Sum, NotImplemented};
+enum class RankFormPolicity { Max, Sum, MultipliedSum, NotImplemented};
 
 struct DocumentAccumulator
 {
@@ -29,7 +29,10 @@ struct DocumentAccumulator
 	DocID doc_id;
 	const std::vector<double> * rank_linear_form;
 private:
-	double rank = 0; // hidden to avoid misunderstang of rank. It's partly calculated rank. You can get bound by upper_bound and lower_bound methods.
+	double rank = 0; // hidden to avoid misunderstang of rank. It's partly calculated rank. You can get bound by upper_bound and lower_bound methods. This is system variable, that can be not between the upper and lower bounds.
+	double get_rank(); // returns rank of document, if it's all information we got. It's correct to call this iff all the texts are done.
+	int number_of_positive_texts;
+	int number_of_got_positive_texts = 0;
 };
 
 #endif

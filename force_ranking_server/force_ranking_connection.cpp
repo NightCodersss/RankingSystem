@@ -131,6 +131,30 @@ double ForceRankingConnection::Eval(std::unique_ptr<QueryTree> tree) {
 			}
 			return res;
 		}
+		else if (tree->op == QueryOperator::And2) 
+		{
+			BOOST_LOG_TRIVIAL(trace) << "Parse and2";
+			double res = 0;
+			int number_of_positive = 0;
+			for (int i = 0; i < tree->children.size(); ++i) {
+				if (tree->children[i]->op != QueryOperator::Not) {
+					++number_of_positive;
+				}
+			}
+			double positive_factor = 1./number_of_positive;
+			double negative_factor = tree->children.size() != number_of_positive ? 
+				1./(tree->children.size() - number_of_positive) :
+				0.;
+			int number_of_got_positive_texts = 0;
+			for (int i = 0; i < tree->children.size(); ++i) {
+				double e = Eval(std::move(tree->children[i]));
+				if (e > 0)
+					++number_of_got_positive_texts;
+				res +=  e > 0 ? e * positive_factor : e * negative_factor; // minus for negative factor became from "not" case
+			}
+			res *= number_of_got_positive_texts / number_of_positive;
+			return res;
+		}
 		else if (tree->op == QueryOperator::Or) {
 			BOOST_LOG_TRIVIAL(trace) << "Parse or";
 			double res = 0;

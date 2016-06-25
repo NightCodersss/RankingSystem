@@ -73,6 +73,7 @@ void RankingConnection::start()
 			self->data.rank_form_policity = south_request.is_request_atomic ? RankFormPolicity::Sum : // text from index server 
 				south_request.query_operator == QueryOperator::And ? RankFormPolicity::Sum :
 				south_request.query_operator == QueryOperator::Or ? RankFormPolicity::Max :
+				south_request.query_operator == QueryOperator::And2 ? RankFormPolicity::MultipliedSum :
 				/* south_request.query_operator == Not */ RankFormPolicity::NotImplemented;
 
 			for (int i = 0; i < self->data.rank_linear_form.size(); ++i)
